@@ -68,17 +68,28 @@
   }
 
   .nav-cta {
-    padding: 10px 24px;
+    padding: 10px 18px;
     background: var(--terracotta);
     color: white;
     border: none;
     border-radius: 99px;
     font-family: 'Lato', sans-serif;
-    font-size: 14px;
+    font-size: 13px;
     cursor: pointer;
     text-decoration: none;
     transition: all 0.2s;
     letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 480px) {
+    .nav-cta {
+      padding: 8px 14px;
+      font-size: 12px;
+    }
+    .nav-logo {
+      font-size: 18px;
+    }
   }
 
   .nav-cta:hover { background: var(--bark); transform: translateY(-1px); }
@@ -176,31 +187,100 @@
     font-weight: 300;
   }
 
-  /* FLOATING NAME CARDS */
+  /* ANIMATED NAME CYCLE */
   .hero-names {
+    margin-top: 48px;
+    animation: fadeUp 0.8s 0.4s ease both;
+    text-align: center;
+  }
+
+  .name-cycle-label {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  .name-cycle {
+    position: relative;
+    height: 52px;
+    overflow: hidden;
+  }
+
+  .name-cycle-item {
+    position: absolute;
+    width: 100%;
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(30px, 5vw, 44px);
+    font-weight: 400;
+    color: var(--bark);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .name-cycle-item.active {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .name-cycle-item.exit {
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+
+  .name-cycle-origin {
+    margin-top: 8px;
+    height: 18px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .name-cycle-origin-item {
+    position: absolute;
+    width: 100%;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--terracotta);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+    pointer-events: none;
+  }
+
+  .name-cycle-origin-item.active {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .name-cycle-origin-item.exit {
+    opacity: 0;
+    transform: translateY(-8px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+
+  .name-cycle-dots {
     display: flex;
     justify-content: center;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin-top: 56px;
-    animation: fadeUp 0.8s 0.4s ease both;
+    gap: 6px;
+    margin-top: 16px;
   }
 
-  .name-pill {
-    padding: 8px 20px;
-    background: var(--white);
-    border: 1px solid var(--sand);
-    border-radius: 99px;
-    font-family: 'Playfair Display', serif;
-    font-size: 15px;
-    color: var(--charcoal);
-    box-shadow: 0 2px 12px rgba(122,92,68,0.08);
+  .name-cycle-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--sand);
+    transition: background 0.4s;
   }
 
-  .name-pill.accent {
-    background: var(--linen);
-    border-color: var(--clay);
-    color: var(--bark);
+  .name-cycle-dot.active {
+    background: var(--terracotta);
   }
 
   /* HOW IT WORKS */
@@ -584,13 +664,32 @@
       <span class="hero-sub">Free · Takes 2 minutes · No sign up needed</span>
     </div>
     <div class="hero-names">
-      <div class="name-pill accent">Rowan</div>
-      <div class="name-pill">Jasmine</div>
-      <div class="name-pill accent">Soren</div>
-      <div class="name-pill">Hazel</div>
-      <div class="name-pill accent">Lucian</div>
-      <div class="name-pill">Wren</div>
-      <div class="name-pill accent">Nora</div>
+      <div class="name-cycle-label">names our AI has discovered</div>
+      <div class="name-cycle" id="nameCycle">
+        <div class="name-cycle-item active">Rowan</div>
+        <div class="name-cycle-item">Jasmine</div>
+        <div class="name-cycle-item">Soren</div>
+        <div class="name-cycle-item">Hazel</div>
+        <div class="name-cycle-item">Lucian</div>
+        <div class="name-cycle-item">Wren</div>
+        <div class="name-cycle-item">Nora</div>
+        <div class="name-cycle-item">Caspian</div>
+        <div class="name-cycle-item">Isla</div>
+        <div class="name-cycle-item">Emre</div>
+      </div>
+      <div class="name-cycle-origin" id="nameCycleOrigin">
+        <div class="name-cycle-origin-item active">Celtic · little red one</div>
+        <div class="name-cycle-origin-item">Persian · jasmine flower</div>
+        <div class="name-cycle-origin-item">Scandinavian · stern, thunder</div>
+        <div class="name-cycle-origin-item">Old English · wisdom</div>
+        <div class="name-cycle-origin-item">Latin · light, illumination</div>
+        <div class="name-cycle-origin-item">English · free spirit</div>
+        <div class="name-cycle-origin-item">Hebrew · grace, favor</div>
+        <div class="name-cycle-origin-item">Latin · of the Caspian sea</div>
+        <div class="name-cycle-origin-item">Scottish · island</div>
+        <div class="name-cycle-origin-item">Turkish · friend, brother</div>
+      </div>
+      <div class="name-cycle-dots" id="nameDots"></div>
     </div>
   </div>
 </section>
@@ -730,6 +829,41 @@ const observer = new IntersectionObserver((entries) => {
   });
 }, { threshold: 0.1 });
 reveals.forEach(el => observer.observe(el));
+
+// Animated name cycling
+const nameItems = document.querySelectorAll('.name-cycle-item');
+const originItems = document.querySelectorAll('.name-cycle-origin-item');
+const dotsContainer = document.getElementById('nameDots');
+let nameIdx = 0;
+
+nameItems.forEach((_, i) => {
+  const dot = document.createElement('div');
+  dot.className = 'name-cycle-dot' + (i === 0 ? ' active' : '');
+  dotsContainer.appendChild(dot);
+});
+
+const dots = document.querySelectorAll('.name-cycle-dot');
+
+function cycleName() {
+  const current = nameIdx;
+  const next = (nameIdx + 1) % nameItems.length;
+
+  nameItems[current].classList.remove('active');
+  nameItems[current].classList.add('exit');
+  originItems[current].classList.remove('active');
+  originItems[current].classList.add('exit');
+  dots[current].classList.remove('active');
+
+  setTimeout(() => {
+    nameItems[current].classList.remove('exit');
+    nameItems[next].classList.add('active');
+    originItems[next].classList.add('active');
+    dots[next].classList.add('active');
+    nameIdx = next;
+  }, 400);
+}
+
+setInterval(cycleName, 2800);
 </script>
 
 </body>
