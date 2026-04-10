@@ -972,7 +972,10 @@ function showResults(free, premium) {
     </div>
   `).join('');
 
-  // Upsell
+  // Store premium names globally
+  window._premiumNames = premium;
+
+  // Upsell with email + multiple payment options
   document.getElementById('upsell-section').innerHTML = `
     <div class="upsell-card">
       <div class="upsell-badge">✦ Premium</div>
@@ -987,19 +990,111 @@ function showResults(free, premium) {
       </div>
       <div class="upsell-price"><span>$</span>1.99</div>
       <div class="upsell-once">one-time · instant delivery</div>
-      <button class="btn-paypal" onclick="handlePayPal()">
-        <span class="paypal-logo">Pay<span style="color:#009cde">Pal</span></span>
-        Pay $1.99 with PayPal
-      </button>
-      <div class="skip-link" onclick="document.getElementById('upsell-section').style.display='none'">No thanks, I'm happy with 5 names</div>
+
+      <div id="email-step" style="width:100%; position:relative; z-index:1;">
+        <input
+          type="email"
+          id="upsell-email"
+          placeholder="Enter your email address"
+          style="width:100%; padding:14px 18px; border-radius:12px; border:1.5px solid rgba(247,243,238,0.25); background:rgba(247,243,238,0.1); color:#FDFAF7; font-family:'Lato',sans-serif; font-size:15px; outline:none; margin-bottom:10px; box-sizing:border-box;"
+        />
+        <div id="email-error" style="color:#F09595; font-size:12px; margin-bottom:10px; display:none;">Please enter a valid email address</div>
+
+        <!-- Stripe: handles Apple Pay, Google Pay, Card -->
+        <button onclick="handleStripe()" style="display:flex; align-items:center; justify-content:center; gap:10px; width:100%; padding:16px; background:#FDFAF7; border:none; border-radius:12px; font-family:'Lato',sans-serif; font-size:15px; color:#3A3530; cursor:pointer; margin-bottom:10px; transition:all 0.2s; position:relative; z-index:1;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#635BFF"><path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.591-7.305z"/></svg>
+          Pay $1.99 · Apple Pay / Card
+        </button>
+
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px; position:relative; z-index:1;">
+          <div style="flex:1; height:1px; background:rgba(247,243,238,0.15);"></div>
+          <span style="font-size:12px; color:rgba(247,243,238,0.4); letter-spacing:0.06em;">OR</span>
+          <div style="flex:1; height:1px; background:rgba(247,243,238,0.15);"></div>
+        </div>
+
+        <!-- PayPal -->
+        <button class="btn-paypal" onclick="handlePayPalWithEmail()" style="width:100%;">
+          <span class="paypal-logo">Pay<span style="color:#009cde">Pal</span></span>
+          Pay with PayPal
+        </button>
+      </div>
+
+      <div class="skip-link" onclick="handleSkip()">No thanks, I'm happy with 5 names</div>
     </div>
   `;
 }
 
-function handlePayPal() {
-  // Replace with your actual PayPal.me link or PayPal button integration
-  // e.g. window.open('https://www.paypal.com/paypalme/yourhandle/1.99', '_blank');
-  alert('Connect your PayPal account here.\n\nReplace this with:\nwindow.open("https://www.paypal.com/paypalme/YOURHANDLE/1.99", "_blank")');
+function handleStripe() {
+  const emailInput = document.getElementById('upsell-email');
+  const emailError = document.getElementById('email-error');
+  const email = emailInput ? emailInput.value.trim() : '';
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  if (!emailValid) {
+    if (emailError) emailError.style.display = 'block';
+    if (emailInput) emailInput.focus();
+    return;
+  }
+
+  if (emailError) emailError.style.display = 'none';
+  localStorage.setItem('nameforest_email', email);
+
+  // REPLACE with your Stripe Payment Link URL
+  // Create one at: dashboard.stripe.com -> Payment Links -> Create
+  const STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/PLACEHOLDER';
+  window.open(STRIPE_PAYMENT_LINK + '?prefilled_email=' + encodeURIComponent(email), '_blank');
+
+  showPostPaymentMessage(email);
+}
+
+function handlePayPalWithEmail() {
+  const emailInput = document.getElementById('upsell-email');
+  const emailError = document.getElementById('email-error');
+  const email = emailInput ? emailInput.value.trim() : '';
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  if (!emailValid) {
+    if (emailError) emailError.style.display = 'block';
+    if (emailInput) emailInput.focus();
+    return;
+  }
+
+  if (emailError) emailError.style.display = 'none';
+  localStorage.setItem('nameforest_email', email);
+
+  // REPLACE YOURHANDLE with your actual PayPal.me username
+  window.open('https://www.paypal.com/paypalme/YOURHANDLE/1.99', '_blank');
+
+  showPostPaymentMessage(email);
+}
+
+function showPostPaymentMessage(email) {
+  const upsellSection = document.getElementById('upsell-section');
+  if (upsellSection) {
+    upsellSection.innerHTML = `
+      <div class="upsell-card" style="text-align:center;">
+        <div class="upsell-badge">✦ Almost there!</div>
+        <div class="upsell-title" style="margin-bottom:12px;">Complete your payment</div>
+        <div class="upsell-desc" style="margin-bottom:20px;">
+          We have opened the payment page for you. Once complete, your full list of 20 names will be sent to <strong style="color:var(--cream);">${email}</strong>
+        </div>
+        <div style="position:relative; z-index:1; display:flex; flex-direction:column; gap:10px; align-items:center;">
+          <button class="btn-stripe" onclick="window.open('https://buy.stripe.com/PLACEHOLDER?prefilled_email=${encodeURIComponent(email)}', '_blank')" style="display:flex; align-items:center; justify-content:center; gap:10px; width:100%; max-width:300px; padding:16px; background:#FDFAF7; border:none; border-radius:12px; font-family:'Lato',sans-serif; font-size:15px; color:#3A3530; cursor:pointer;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="#635BFF"><path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.591-7.305z"/></svg>
+            Reopen Payment Page
+          </button>
+          <button class="btn-paypal" onclick="window.open('https://www.paypal.com/paypalme/YOURHANDLE/1.99', '_blank')" style="width:100%; max-width:300px;">
+            <span class="paypal-logo">Pay<span style="color:#009cde">Pal</span></span>
+            Reopen PayPal
+          </button>
+        </div>
+      </div>
+    `;
+  }
+}
+
+function handleSkip() {
+  document.getElementById('upsell-section').style.display = 'none';
 }
 
 // Init
