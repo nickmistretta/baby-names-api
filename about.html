@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About Us | Baby Name App</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #F7F3EE;
+    --linen: #EDE8E0;
+    --sand: #D9CFC2;
+    --clay: #B8956A;
+    --terracotta: #C4694F;
+    --bark: #7A5C44;
+    --moss: #6B7A5E;
+    --charcoal: #3A3530;
+    --muted: #8C7F75;
+    --white: #FDFAF7;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Lato', sans-serif;
+    background: var(--cream);
+    color: var(--charcoal);
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.5;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    padding: 20px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(247,243,238,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 0.5px solid var(--sand);
+  }
+
+  .nav-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--bark);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+  }
+
+  .nav-link {
+    font-size: 14px;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .nav-link:hover { color: var(--bark); }
+
+  .nav-cta {
+    padding: 10px 18px;
+    background: var(--terracotta);
+    color: white;
+    border: none;
+    border-radius: 99px;
+    font-family: 'Lato', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .nav-cta:hover { background: var(--bark); transform: translateY(-1px); }
+
+  @media (max-width: 480px) {
+    nav { padding: 16px 20px; }
+    .nav-links { gap: 16px; }
+    .nav-link { display: none; }
+    .nav-logo { font-size: 18px; }
+    .nav-cta { padding: 8px 14px; font-size: 12px; }
+  }
+
+  /* PAGE */
+  .page {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 120px 24px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* HERO */
+  .about-hero {
+    margin-bottom: 64px;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  .about-tag {
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--clay);
+    margin-bottom: 20px;
+    display: block;
+  }
+
+  .about-hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(38px, 6vw, 62px);
+    font-weight: 400;
+    color: var(--bark);
+    line-height: 1.1;
+    margin-bottom: 24px;
+  }
+
+  .about-hero h1 em {
+    font-style: italic;
+    color: var(--terracotta);
+  }
+
+  .about-hero .lead {
+    font-size: 19px;
+    color: var(--muted);
+    font-weight: 300;
+    line-height: 1.75;
+    max-width: 580px;
+  }
+
+  /* DIVIDER */
+  .ornament {
+    text-align: center;
+    color: var(--clay);
+    font-size: 18px;
+    letter-spacing: 0.3em;
+    margin: 48px 0;
+    opacity: 0.5;
+  }
+
+  /* SECTIONS */
+  .about-section {
+    margin-bottom: 56px;
+    animation: fadeUp 0.7s ease both;
+  }
+
+  .about-section h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(24px, 3vw, 32px);
+    font-weight: 400;
+    color: var(--bark);
+    margin-bottom: 20px;
+    line-height: 1.2;
+  }
+
+  .about-section h2 em {
+    font-style: italic;
+    color: var(--terracotta);
+  }
+
+  .about-section p {
+    font-size: 16px;
+    color: var(--charcoal);
+    font-weight: 300;
+    line-height: 1.85;
+    margin-bottom: 16px;
+  }
+
+  .about-section p strong {
+    color: var(--bark);
+    font-weight: 400;
+  }
+
+  /* STAT CARDS */
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin: 40px 0;
+  }
+
+  .stat-card {
+    background: var(--white);
+    border: 1px solid var(--sand);
+    border-radius: 16px;
+    padding: 24px 20px;
+    text-align: center;
+  }
+
+  .stat-card .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    font-weight: 400;
+    color: var(--bark);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .stat-card .stat-label {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 300;
+    line-height: 1.4;
+    letter-spacing: 0.04em;
+  }
+
+  /* VALUES */
+  .values {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 32px;
+  }
+
+  .value-card {
+    background: var(--white);
+    border: 1px solid var(--sand);
+    border-radius: 16px;
+    padding: 24px 22px;
+  }
+
+  .value-icon {
+    font-size: 22px;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  .value-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--charcoal);
+    margin-bottom: 8px;
+  }
+
+  .value-desc {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 300;
+    line-height: 1.6;
+  }
+
+  /* PULL QUOTE */
+  .pull-quote {
+    background: var(--charcoal);
+    border-radius: 20px;
+    padding: 40px 36px;
+    margin: 48px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .pull-quote::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    background: rgba(196,105,79,0.15);
+  }
+
+  .pull-quote blockquote {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(20px, 3vw, 26px);
+    font-style: italic;
+    font-weight: 400;
+    color: var(--cream);
+    line-height: 1.5;
+    position: relative;
+    z-index: 1;
+    margin-bottom: 16px;
+  }
+
+  .pull-quote cite {
+    font-size: 13px;
+    color: var(--clay);
+    font-style: normal;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* CTA */
+  .about-cta {
+    text-align: center;
+    padding: 48px 0 0;
+  }
+
+  .about-cta h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(26px, 4vw, 38px);
+    font-weight: 400;
+    color: var(--bark);
+    margin-bottom: 16px;
+    line-height: 1.2;
+  }
+
+  .about-cta h3 em { font-style: italic; color: var(--terracotta); }
+
+  .about-cta p {
+    font-size: 16px;
+    color: var(--muted);
+    font-weight: 300;
+    margin-bottom: 32px;
+    line-height: 1.7;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 18px 40px;
+    background: var(--terracotta);
+    color: white;
+    border: none;
+    border-radius: 99px;
+    font-family: 'Lato', sans-serif;
+    font-size: 16px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    box-shadow: 0 8px 32px rgba(196,105,79,0.3);
+  }
+
+  .btn-primary:hover { background: var(--bark); transform: translateY(-2px); }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--sand);
+    padding: 32px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    z-index: 1;
+    max-width: 100%;
+  }
+
+  .footer-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    color: var(--bark);
+  }
+
+  .footer-copy {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  @media (max-width: 768px) {
+    .stat-row { grid-template-columns: 1fr 1fr; }
+    .values { grid-template-columns: 1fr; }
+    footer { flex-direction: column; gap: 12px; text-align: center; padding: 24px; }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">🌿 Baby Name App</a>
+  <div class="nav-links">
+    <a href="about.html" class="nav-link">About</a>
+    <a href="quiz.html" class="nav-cta">Find your name →</a>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- HERO -->
+  <div class="about-hero">
+    <span class="about-tag">Our story</span>
+    <h1>Built by parents, for <em>parents</em></h1>
+    <p class="lead">We're a couple in our 30s from New Jersey, expecting our first baby girl this fall — and like most parents-to-be, we had a problem. Every name site we found felt like it was built in 2003 and hadn't been touched since.</p>
+  </div>
+
+  <div class="ornament reveal">✦ &nbsp; ✦ &nbsp; ✦</div>
+
+  <!-- OUR STORY -->
+  <div class="about-section reveal">
+    <h2>Our Story</h2>
+    <p>Between running a small business, preparing a nursery, and navigating everything that comes with pregnancy, we simply didn't have hours to scroll through endless alphabetical lists of names we'd already heard a thousand times.</p>
+    <p>We wanted something that felt like a conversation — something that understood <strong>who we are</strong>, where we come from, and what we hoped for our daughter. Something that could surface a name we'd never considered but immediately recognize as <em>right</em>.</p>
+    <p>So we built it. Baby Name App uses AI to do what those old sites never could: it listens first, then curates. Every list is generated fresh, built entirely around your answers. No two families ever see the same names.</p>
+  </div>
+
+  <!-- PULL QUOTE -->
+  <div class="pull-quote reveal">
+    <blockquote>"A name is the first gift you give your child. It should feel like it was made for them — because with us, it is."</blockquote>
+    <cite>— The founders, New Jersey</cite>
+  </div>
+
+  <!-- WHAT WE DO -->
+  <div class="about-section reveal">
+    <h2>What We <em>Actually</em> Do</h2>
+    <p>Behind every result is an AI model querying a database of over <strong>3 million names</strong> spanning more than 190 countries, cultures, and linguistic traditions — from ancient Celtic roots to modern Scandinavian minimalism to rich West African heritage.</p>
+    <p>But raw data isn't enough. The 7 questions we ask aren't arbitrary. They're designed around the psychology of naming — the way sound shapes perception, the way meaning anchors identity, the way cultural heritage connects generations. We ask about season because names carry energy. We ask about vibe because a name will be called across playgrounds and boardrooms alike.</p>
+    <p>The result is a curated list that feels <strong>considered</strong>, not computed.</p>
+  </div>
+
+  <!-- STATS -->
+  <div class="stat-row reveal">
+    <div class="stat-card">
+      <div class="stat-num">3M+</div>
+      <div class="stat-label">Names in our database across 190+ cultures</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">7</div>
+      <div class="stat-label">Carefully designed questions behind every list</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">∞</div>
+      <div class="stat-label">Unique combinations — no two lists are ever the same</div>
+    </div>
+  </div>
+
+  <!-- THE SCIENCE -->
+  <div class="about-section reveal">
+    <h2>The Science Behind the <em>Questions</em></h2>
+    <p>Naming research shows that the sounds in a name influence how a person is perceived — softer consonants and open vowels tend to evoke warmth and approachability, while hard stops and short syllables convey strength and confidence. We ask about sound preferences because parents instinctively feel this, even if they can't articulate it.</p>
+    <p>Cultural heritage matters too — not just for honoring lineage, but because names carry centuries of meaning and story. A name rooted in your grandmother's language connects your child to something larger than themselves.</p>
+    <p>And then there's the emotional dimension. We ask what <strong>feeling</strong> the name should carry because the moment you call your child's name, you want to feel it. That emotional resonance is something algorithms alone can't manufacture — but the right questions can draw it out.</p>
+  </div>
+
+  <!-- VALUES -->
+  <div class="about-section reveal">
+    <h2>What We Stand For</h2>
+    <div class="values">
+      <div class="value-card">
+        <span class="value-icon">🌱</span>
+        <div class="value-title">Rooted in meaning</div>
+        <div class="value-desc">Every name we surface comes with its full origin story, cultural roots, and the history behind it. Names deserve context.</div>
+      </div>
+      <div class="value-card">
+        <span class="value-icon">✦</span>
+        <div class="value-title">Genuinely personal</div>
+        <div class="value-desc">No generic lists. Every result is generated fresh from your answers. Your family's list belongs only to you.</div>
+      </div>
+      <div class="value-card">
+        <span class="value-icon">🌍</span>
+        <div class="value-title">Culturally expansive</div>
+        <div class="value-desc">We draw from over 190 cultures and linguistic traditions. Beautiful names exist everywhere — we help you find them.</div>
+      </div>
+      <div class="value-card">
+        <span class="value-icon">🕊️</span>
+        <div class="value-title">Built with love</div>
+        <div class="value-desc">We built this for our daughter. We built it for yours too. Every decision we make starts from that place.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="about-cta reveal">
+    <h3>Ready to find her <em>name?</em></h3>
+    <p>It takes 2 minutes, it's free to start, and the right name might be closer than you think.</p>
+    <a href="quiz.html" class="btn-primary">Find my baby's name 🌿</a>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">🌿 Baby Name App</div>
+  <div class="footer-copy">© 2026 Baby Name App · Made with love in New Jersey</div>
+</footer>
+
+<script>
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) {
+      setTimeout(() => entry.target.classList.add('visible'), i * 80);
+    }
+  });
+}, { threshold: 0.1 });
+reveals.forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
