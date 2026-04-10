@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Baby Name Finder</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #F7F3EE;
+    --linen: #EDE8E0;
+    --sand: #D9CFC2;
+    --clay: #B8956A;
+    --terracotta: #C4694F;
+    --bark: #7A5C44;
+    --moss: #6B7A5E;
+    --charcoal: #3A3530;
+    --muted: #8C7F75;
+    --white: #FDFAF7;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Lato', sans-serif;
+    background: var(--cream);
+    color: var(--charcoal);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Subtle grain texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.6;
+  }
+
+  .container {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 48px;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  .header-leaf {
+    font-size: 28px;
+    margin-bottom: 12px;
+    display: block;
+    filter: sepia(0.3);
+  }
+
+  .header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(28px, 5vw, 42px);
+    font-weight: 400;
+    color: var(--bark);
+    line-height: 1.15;
+    margin-bottom: 10px;
+  }
+
+  .header h1 em {
+    font-style: italic;
+    color: var(--terracotta);
+  }
+
+  .header p {
+    font-size: 15px;
+    color: var(--muted);
+    font-weight: 300;
+    line-height: 1.6;
+    max-width: 420px;
+    margin: 0 auto;
+  }
+
+  /* Progress bar */
+  .progress-wrap {
+    margin-bottom: 36px;
+    animation: fadeUp 0.8s 0.1s ease both;
+  }
+
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 8px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .progress-bar {
+    height: 3px;
+    background: var(--sand);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--clay), var(--terracotta));
+    border-radius: 99px;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Question card */
+  .question-card {
+    background: var(--white);
+    border: 1px solid var(--sand);
+    border-radius: 20px;
+    padding: 36px 32px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 24px rgba(122,92,68,0.08);
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .question-label {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--clay);
+    font-weight: 400;
+    margin-bottom: 12px;
+  }
+
+  .question-text {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(18px, 3vw, 24px);
+    font-weight: 400;
+    color: var(--charcoal);
+    line-height: 1.3;
+    margin-bottom: 8px;
+  }
+
+  .question-hint {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 300;
+    margin-bottom: 28px;
+  }
+
+  /* Options */
+  .options-grid {
+    display: grid;
+    gap: 10px;
+  }
+
+  .options-grid.cols-2 {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .option-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    background: var(--cream);
+    border: 1.5px solid var(--sand);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    font-family: 'Lato', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--charcoal);
+    line-height: 1.4;
+  }
+
+  .option-btn:hover {
+    border-color: var(--clay);
+    background: #FBF7F2;
+    transform: translateY(-1px);
+  }
+
+  .option-btn.selected {
+    border-color: var(--terracotta);
+    background: #FDF0EC;
+    color: var(--terracotta);
+  }
+
+  .option-dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 1.5px solid var(--sand);
+    flex-shrink: 0;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .option-btn.selected .option-dot {
+    background: var(--terracotta);
+    border-color: var(--terracotta);
+  }
+
+  .option-btn.selected .option-dot::after {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: white;
+  }
+
+  /* Text input */
+  .text-input {
+    width: 100%;
+    padding: 14px 18px;
+    background: var(--cream);
+    border: 1.5px solid var(--sand);
+    border-radius: 12px;
+    font-family: 'Lato', sans-serif;
+    font-size: 15px;
+    color: var(--charcoal);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .text-input:focus {
+    border-color: var(--clay);
+  }
+
+  .text-input::placeholder {
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  /* Gender toggle */
+  .gender-toggle {
+    display: flex;
+    gap: 10px;
+  }
+
+  .gender-btn {
+    flex: 1;
+    padding: 16px;
+    background: var(--cream);
+    border: 1.5px solid var(--sand);
+    border-radius: 12px;
+    cursor: pointer;
+    font-family: 'Lato', sans-serif;
+    font-size: 14px;
+    color: var(--charcoal);
+    transition: all 0.2s;
+    text-align: center;
+  }
+
+  .gender-btn:hover { border-color: var(--clay); }
+  .gender-btn.selected { border-color: var(--terracotta); background: #FDF0EC; color: var(--terracotta); }
+
+  /* Nav buttons */
+  .nav {
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+
+  .btn-back {
+    padding: 14px 24px;
+    background: transparent;
+    border: 1.5px solid var(--sand);
+    border-radius: 12px;
+    font-family: 'Lato', sans-serif;
+    font-size: 14px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-back:hover { border-color: var(--clay); color: var(--charcoal); }
+
+  .btn-next {
+    flex: 1;
+    padding: 14px 24px;
+    background: var(--terracotta);
+    border: none;
+    border-radius: 12px;
+    font-family: 'Lato', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.04em;
+  }
+
+  .btn-next:hover { background: var(--bark); transform: translateY(-1px); }
+  .btn-next:disabled { background: var(--sand); color: var(--muted); cursor: not-allowed; transform: none; }
+
+  /* Loading screen */
+  .loading-screen {
+    text-align: center;
+    padding: 60px 20px;
+  }
+
+  .loading-orb {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 28px;
+    position: relative;
+  }
+
+  .loading-orb::before, .loading-orb::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+  }
+
+  .loading-orb::before {
+    inset: 0;
+    border: 2px solid var(--sand);
+  }
+
+  .loading-orb::after {
+    inset: 4px;
+    border: 2px solid transparent;
+    border-top-color: var(--terracotta);
+    animation: spin 1s linear infinite;
+  }
+
+  .loading-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    color: var(--bark);
+    margin-bottom: 8px;
+  }
+
+  .loading-sub {
+    font-size: 14px;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  /* Results screen */
+  .results-header {
+    text-align: center;
+    margin-bottom: 32px;
+    animation: fadeUp 0.7s ease both;
+  }
+
+  .results-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(24px, 4vw, 34px);
+    font-weight: 400;
+    color: var(--bark);
+    margin-bottom: 8px;
+  }
+
+  .results-header p {
+    font-size: 14px;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  .name-card {
+    background: var(--white);
+    border: 1px solid var(--sand);
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    animation: fadeUp 0.5s ease both;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .name-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(122,92,68,0.12);
+  }
+
+  .name-rank {
+    font-size: 11px;
+    color: var(--clay);
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    min-width: 24px;
+    padding-top: 4px;
+  }
+
+  .name-info { flex: 1; }
+
+  .name-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--charcoal);
+    margin-bottom: 4px;
+  }
+
+  .name-origin {
+    font-size: 12px;
+    color: var(--clay);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .name-meaning {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 300;
+    line-height: 1.5;
+  }
+
+  .name-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .name-tag {
+    padding: 3px 10px;
+    background: var(--linen);
+    border-radius: 99px;
+    font-size: 11px;
+    color: var(--bark);
+    letter-spacing: 0.04em;
+  }
+
+  /* Upsell card */
+  .upsell-card {
+    background: linear-gradient(135deg, #3A3530 0%, #5C4A3A 100%);
+    border-radius: 20px;
+    padding: 36px 32px;
+    text-align: center;
+    margin-top: 28px;
+    position: relative;
+    overflow: hidden;
+    animation: fadeUp 0.7s 0.3s ease both;
+  }
+
+  .upsell-card::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    background: rgba(196,105,79,0.2);
+  }
+
+  .upsell-card::after {
+    content: '';
+    position: absolute;
+    bottom: -30px;
+    left: -30px;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: rgba(107,122,94,0.15);
+  }
+
+  .upsell-badge {
+    display: inline-block;
+    padding: 5px 14px;
+    background: var(--terracotta);
+    border-radius: 99px;
+    font-size: 11px;
+    color: white;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .upsell-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    color: var(--cream);
+    margin-bottom: 8px;
+    position: relative;
+    z-index: 1;
+    font-weight: 400;
+  }
+
+  .upsell-desc {
+    font-size: 14px;
+    color: rgba(247,243,238,0.65);
+    font-weight: 300;
+    line-height: 1.6;
+    margin-bottom: 8px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .upsell-includes {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 16px 0 24px;
+    position: relative;
+    z-index: 1;
+    text-align: left;
+    max-width: 280px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .upsell-item {
+    font-size: 13px;
+    color: rgba(247,243,238,0.8);
+    font-weight: 300;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .upsell-item::before {
+    content: '✦';
+    color: var(--clay);
+    font-size: 10px;
+    flex-shrink: 0;
+  }
+
+  .upsell-price {
+    font-family: 'Playfair Display', serif;
+    font-size: 36px;
+    color: var(--cream);
+    position: relative;
+    z-index: 1;
+    margin-bottom: 4px;
+  }
+
+  .upsell-price span {
+    font-size: 18px;
+    vertical-align: super;
+    font-family: 'Lato', sans-serif;
+    font-weight: 300;
+  }
+
+  .upsell-once {
+    font-size: 12px;
+    color: rgba(247,243,238,0.5);
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .btn-paypal {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 32px;
+    background: #FFC439;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Lato', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    color: #003087;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    z-index: 1;
+    letter-spacing: 0.02em;
+  }
+
+  .btn-paypal:hover { background: #f0b429; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255,196,57,0.4); }
+
+  .paypal-logo {
+    font-weight: 700;
+    font-size: 16px;
+  }
+
+  .skip-link {
+    display: block;
+    text-align: center;
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .skip-link:hover { color: var(--bark); }
+
+  /* Locked names */
+  .locked-names {
+    margin-top: 16px;
+    position: relative;
+  }
+
+  .locked-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(247,243,238,0) 0%, rgba(247,243,238,0.95) 50%);
+    z-index: 2;
+    border-radius: 16px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 16px;
+  }
+
+  .locked-hint {
+    font-size: 13px;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  .name-card.blurred {
+    filter: blur(4px);
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* Animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- QUIZ SCREEN -->
+  <div class="screen active" id="screen-quiz">
+    <div class="header">
+      <span class="header-leaf">🌿</span>
+      <h1>Find the <em>perfect</em> name for your little one</h1>
+      <p>Answer a few thoughtful questions and we'll suggest names that feel just right.</p>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-meta">
+        <span id="progress-label">Question 1 of 7</span>
+        <span id="progress-pct">14%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:14%"></div></div>
+    </div>
+
+    <div class="question-card" id="question-card">
+      <!-- Dynamic content injected here -->
+    </div>
+
+    <div class="nav">
+      <button class="btn-back" id="btn-back" onclick="prevQ()" style="display:none">← Back</button>
+      <button class="btn-next" id="btn-next" onclick="nextQ()">Continue →</button>
+    </div>
+  </div>
+
+  <!-- LOADING SCREEN -->
+  <div class="screen" id="screen-loading">
+    <div class="loading-screen">
+      <div class="loading-orb"></div>
+      <div class="loading-text">Finding your names…</div>
+      <div class="loading-sub" id="loading-msg">Weaving together your preferences</div>
+    </div>
+  </div>
+
+  <!-- RESULTS SCREEN -->
+  <div class="screen" id="screen-results">
+    <div class="results-header">
+      <h2>Your curated name list</h2>
+      <p id="results-sub">5 names chosen just for you</p>
+    </div>
+    <div id="names-list"></div>
+    <div class="locked-names" id="locked-section" style="display:none">
+      <div class="locked-overlay"><div class="locked-hint">🔒 Unlock 20 more names below</div></div>
+      <div id="locked-names-list"></div>
+    </div>
+    <div id="upsell-section"></div>
+  </div>
+
+</div>
+
+<script>
+const questions = [
+  {
+    id: 'gender',
+    label: 'Step 1',
+    text: 'What gender are you hoping to find names for?',
+    hint: 'You can always explore all options later.',
+    type: 'gender',
+    options: ['Girl', 'Boy', 'Gender-neutral', 'Surprise me']
+  },
+  {
+    id: 'style',
+    label: 'Step 2',
+    text: 'What style speaks to you?',
+    hint: 'Pick the one that feels most like your family.',
+    type: 'single',
+    options: ['Classic & timeless', 'Modern & fresh', 'Rare & unique', 'Vintage revival', 'Nature-inspired', 'Short & strong']
+  },
+  {
+    id: 'culture',
+    label: 'Step 3',
+    text: 'Any cultural or heritage roots to honor?',
+    hint: 'This helps us suggest names with meaningful lineage.',
+    type: 'single',
+    options: ['European / Western', 'Latin / Spanish', 'African / African-American', 'Asian / East Asian', 'South Asian', 'Middle Eastern', 'Indigenous', 'No preference']
+  },
+  {
+    id: 'vibe',
+    label: 'Step 4',
+    text: 'What feeling should the name carry?',
+    hint: 'Think about how it will feel to call out across a park.',
+    type: 'single',
+    options: ['Gentle & soft', 'Bold & strong', 'Playful & bright', 'Mysterious & deep', 'Warm & friendly', 'Elegant & refined']
+  },
+  {
+    id: 'sound',
+    label: 'Step 5',
+    text: 'Any letter or sound preferences?',
+    hint: 'E.g. starts with A, ends in -a, sounds like river',
+    type: 'text',
+    placeholder: 'Optional — leave blank to skip'
+  },
+  {
+    id: 'meaning',
+    label: 'Step 6',
+    text: 'What should the name mean or represent?',
+    hint: 'Pick themes that resonate with your hopes for them.',
+    type: 'single',
+    options: ['Light & radiance', 'Strength & courage', 'Nature & earth', 'Love & grace', 'Wisdom & clarity', 'Joy & laughter', 'Peace & calm', 'No preference']
+  },
+  {
+    id: 'season',
+    label: 'Step 7',
+    text: 'When is your little one expected to arrive?',
+    hint: 'Some names carry beautiful seasonal energy.',
+    type: 'single',
+    cols: 2,
+    options: ['Spring', 'Summer', 'Autumn', 'Winter', 'Already here', 'Not sure yet']
+  }
+];
+
+let current = 0;
+let answers = {};
+
+function renderQ() {
+  const q = questions[current];
+  const card = document.getElementById('question-card');
+  const pct = Math.round(((current + 1) / questions.length) * 100);
+
+  document.getElementById('progress-label').textContent = `Question ${current + 1} of ${questions.length}`;
+  document.getElementById('progress-pct').textContent = pct + '%';
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('btn-back').style.display = current > 0 ? 'block' : 'none';
+
+  let optionsHTML = '';
+
+  if (q.type === 'gender') {
+    optionsHTML = `<div class="gender-toggle">` +
+      q.options.map((o, i) => `<button class="gender-btn${answers[q.id] === o ? ' selected' : ''}" data-qid="${q.id}" data-val="${i}" data-cls="gender-btn">${o}</button>`).join('') +
+      `</div>`;
+  } else if (q.type === 'single') {
+    const grid = q.cols === 2 ? 'options-grid cols-2' : 'options-grid';
+    optionsHTML = `<div class="${grid}">` +
+      q.options.map((o, i) => `
+        <button class="option-btn${answers[q.id] === o ? ' selected' : ''}" data-qid="${q.id}" data-val="${i}" data-cls="option-btn">
+          <span class="option-dot"></span>${o}
+        </button>`).join('') +
+      `</div>`;
+  } else if (q.type === 'text') {
+    optionsHTML = `<input class="text-input" type="text" placeholder="${q.placeholder}" id="text-input-${q.id}" value="${answers[q.id] || ''}">`;
+  }
+
+  card.innerHTML = `
+    <div class="question-label">${q.label}</div>
+    <div class="question-text">${q.text}</div>
+    <div class="question-hint">${q.hint}</div>
+    ${optionsHTML}
+  `;
+
+  // Attach click listeners via JS (safe for special chars & emojis)
+  card.querySelectorAll('[data-qid]').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const qid = this.dataset.qid;
+      const idx = parseInt(this.dataset.val);
+      const cls = this.dataset.cls;
+      const q = questions[current];
+      answers[qid] = q.options[idx];
+      card.querySelectorAll('.' + cls).forEach(b => b.classList.remove('selected'));
+      this.classList.add('selected');
+    });
+  });
+
+  if (q.type === 'text') {
+    const inp = card.querySelector('.text-input');
+    if (inp) inp.addEventListener('input', function() { answers[q.id] = this.value; });
+  }
+
+  card.style.animation = 'none';
+  requestAnimationFrame(() => { card.style.animation = 'fadeUp 0.5s ease both'; });
+
+  const nextBtn = document.getElementById('btn-next');
+  nextBtn.textContent = current === questions.length - 1 ? 'Find my names ✦' : 'Continue →';
+}
+
+
+function nextQ() {
+  const q = questions[current];
+  if (q.type !== 'text' && !answers[q.id]) {
+    document.getElementById('question-card').style.animation = 'none';
+    document.getElementById('question-card').offsetHeight;
+    document.getElementById('question-card').style.animation = 'shake 0.3s ease';
+    return;
+  }
+  if (current < questions.length - 1) {
+    current++;
+    renderQ();
+  } else {
+    generateNames();
+  }
+}
+
+function prevQ() {
+  if (current > 0) { current--; renderQ(); }
+}
+
+const loadingMessages = [
+  'Weaving together your preferences…',
+  'Exploring name origins and meanings…',
+  'Matching seasonal energy…',
+  'Curating your personal collection…'
+];
+
+async function generateNames() {
+  document.getElementById('screen-quiz').classList.remove('active');
+  document.getElementById('screen-loading').classList.add('active');
+
+  let msgIdx = 0;
+  const msgEl = document.getElementById('loading-msg');
+  const msgInterval = setInterval(() => {
+    msgIdx = (msgIdx + 1) % loadingMessages.length;
+    msgEl.textContent = loadingMessages[msgIdx];
+  }, 1800);
+
+  const prompt = `You are a baby name expert. Based on these preferences, suggest exactly 5 baby names for the FREE list and 20 additional names for the PREMIUM list.
+
+Preferences:
+- Gender: ${answers.gender || 'neutral'}
+- Style: ${answers.style || 'classic'}
+- Cultural background: ${answers.culture || 'no preference'}
+- Name vibe: ${answers.vibe || 'warm'}
+- Sound preferences: ${answers.sound || 'none specified'}
+- Meaning themes: ${answers.meaning || 'no preference'}
+- Birth season: ${answers.season || 'not specified'}
+
+Respond ONLY with valid JSON in this exact format, no markdown, no explanation:
+{
+  "free": [
+    {"name": "...", "origin": "...", "meaning": "...", "tags": ["...", "..."]}
+  ],
+  "premium": [
+    {"name": "...", "origin": "...", "meaning": "...", "tags": ["...", "..."]}
+  ]
+}
+
+Make names feel warm, considered, and beautifully matched to the preferences. Vary the origins and styles. Tags should be 2-3 short descriptors like "timeless", "soft sound", "nature-rooted", etc.`;
+
+  try {
+    const res = await fetch('https://project-rz9q4.vercel.app/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const data = await res.json();
+    const text = data.content[0].text.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(text);
+
+    clearInterval(msgInterval);
+    showResults(parsed.free, parsed.premium);
+  } catch (e) {
+    clearInterval(msgInterval);
+    showResults(fallbackFree(answers), fallbackPremium());
+  }
+}
+
+function fallbackFree(a) {
+  return [
+    { name: 'Rowan', origin: 'Celtic', meaning: 'Little red one; the rowan tree', tags: ['nature-rooted', 'gender-neutral', 'timeless'] },
+    { name: 'Hazel', origin: 'Old English', meaning: 'The hazel tree; wisdom', tags: ['vintage', 'warm', 'earthy'] },
+    { name: 'Soren', origin: 'Scandinavian', meaning: 'Stern; serious; thunder', tags: ['modern', 'strong', 'unique'] },
+    { name: 'Wren', origin: 'English', meaning: 'Small bird; free spirit', tags: ['nature', 'short', 'lyrical'] },
+    { name: 'Lucian', origin: 'Latin', meaning: 'Light; illumination', tags: ['classic', 'elegant', 'radiant'] }
+  ];
+}
+
+function fallbackPremium() {
+  return Array(20).fill(null).map((_, i) => ({
+    name: '—', origin: '—', meaning: 'Unlock to reveal', tags: ['premium']
+  }));
+}
+
+function showResults(free, premium) {
+  document.getElementById('screen-loading').classList.remove('active');
+  document.getElementById('screen-results').classList.add('active');
+
+  const sub = document.getElementById('results-sub');
+  sub.textContent = `${free.length} names chosen just for you · based on your answers`;
+
+  const namesList = document.getElementById('names-list');
+  namesList.innerHTML = free.map((n, i) => `
+    <div class="name-card" style="animation-delay:${i * 0.08}s">
+      <div class="name-rank">${String(i+1).padStart(2,'0')}</div>
+      <div class="name-info">
+        <div class="name-title">${n.name}</div>
+        <div class="name-origin">${n.origin}</div>
+        <div class="name-meaning">${n.meaning}</div>
+        <div class="name-tags">${(n.tags||[]).map(t => `<span class="name-tag">${t}</span>`).join('')}</div>
+      </div>
+    </div>
+  `).join('');
+
+  // Blurred locked previews
+  const lockedSection = document.getElementById('locked-section');
+  const lockedList = document.getElementById('locked-names-list');
+  lockedSection.style.display = 'block';
+  lockedList.innerHTML = premium.slice(0, 4).map((n, i) => `
+    <div class="name-card blurred" style="animation-delay:${i * 0.06}s">
+      <div class="name-rank">${String(i+6).padStart(2,'0')}</div>
+      <div class="name-info">
+        <div class="name-title">${n.name || 'Xxxxxx'}</div>
+        <div class="name-origin">${n.origin || 'Xxxxxxx'}</div>
+        <div class="name-meaning">${n.meaning || 'Unlock to reveal this beautiful name and its story.'}</div>
+        <div class="name-tags"><span class="name-tag">locked</span></div>
+      </div>
+    </div>
+  `).join('');
+
+  // Upsell
+  document.getElementById('upsell-section').innerHTML = `
+    <div class="upsell-card">
+      <div class="upsell-badge">✦ Premium</div>
+      <div class="upsell-title">Unlock 20 more names</div>
+      <div class="upsell-desc">Your full curated list, handpicked by AI based on every detail you shared.</div>
+      <div class="upsell-includes">
+        <div class="upsell-item">20 additional AI-curated names</div>
+        <div class="upsell-item">Full meanings & origin stories</div>
+        <div class="upsell-item">Rare & hidden gem names</div>
+        <div class="upsell-item">Sibling name pairings</div>
+        <div class="upsell-item">Nickname & shortform options</div>
+      </div>
+      <div class="upsell-price"><span>$</span>1.99</div>
+      <div class="upsell-once">one-time · instant delivery</div>
+      <button class="btn-paypal" onclick="handlePayPal()">
+        <span class="paypal-logo">Pay<span style="color:#009cde">Pal</span></span>
+        Pay $1.99 with PayPal
+      </button>
+      <div class="skip-link" onclick="document.getElementById('upsell-section').style.display='none'">No thanks, I'm happy with 5 names</div>
+    </div>
+  `;
+}
+
+function handlePayPal() {
+  // Replace with your actual PayPal.me link or PayPal button integration
+  // e.g. window.open('https://www.paypal.com/paypalme/yourhandle/1.99', '_blank');
+  alert('Connect your PayPal account here.\n\nReplace this with:\nwindow.open("https://www.paypal.com/paypalme/YOURHANDLE/1.99", "_blank")');
+}
+
+// Init
+renderQ();
+</script>
+</body>
+</html>
