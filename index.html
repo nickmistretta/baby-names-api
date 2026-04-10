@@ -889,18 +889,32 @@ Make names feel warm, considered, and beautifully matched to the preferences. Va
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
+        max_tokens: 2000,
         messages: [{ role: 'user', content: prompt }]
       })
     });
 
     const data = await res.json();
-    const text = data.content[0].text.replace(/```json|```/g, '').trim();
-    const parsed = JSON.parse(text);
+    
+    let rawText = '';
+    if (data.content && data.content[0] && data.content[0].text) {
+      rawText = data.content[0].text;
+    } else {
+      throw new Error('No content in response');
+    }
+    
+    rawText = rawText.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+    const jsonStart = rawText.indexOf('{');
+    const jsonEnd = rawText.lastIndexOf('}');
+    if (jsonStart === -1 || jsonEnd === -1) throw new Error('No JSON found');
+    const jsonStr = rawText.slice(jsonStart, jsonEnd + 1);
+    const parsed = JSON.parse(jsonStr);
+    if (!parsed.free || !parsed.premium) throw new Error('Invalid structure');
 
     clearInterval(msgInterval);
     showResults(parsed.free, parsed.premium);
   } catch (e) {
+    console.error('Parse error:', e);
     clearInterval(msgInterval);
     showResults(fallbackFree(answers), fallbackPremium());
   }
