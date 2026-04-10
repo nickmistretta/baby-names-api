@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Baby Name App — Find the Perfect Baby Name</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #F7F3EE;
+    --linen: #EDE8E0;
+    --sand: #D9CFC2;
+    --clay: #B8956A;
+    --terracotta: #C4694F;
+    --bark: #7A5C44;
+    --moss: #6B7A5E;
+    --charcoal: #3A3530;
+    --muted: #8C7F75;
+    --white: #FDFAF7;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Lato', sans-serif;
+    background: var(--cream);
+    color: var(--charcoal);
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.5;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    padding: 20px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(247,243,238,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 0.5px solid var(--sand);
+  }
+
+  .nav-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--bark);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .nav-cta {
+    padding: 10px 24px;
+    background: var(--terracotta);
+    color: white;
+    border: none;
+    border-radius: 99px;
+    font-family: 'Lato', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+  }
+
+  .nav-cta:hover { background: var(--bark); transform: translateY(-1px); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 120px 24px 80px;
+    position: relative;
+    z-index: 1;
+    text-align: center;
+  }
+
+  .hero-inner {
+    max-width: 720px;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    background: var(--linen);
+    border: 1px solid var(--sand);
+    border-radius: 99px;
+    font-size: 12px;
+    color: var(--bark);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  .hero-badge span { color: var(--terracotta); }
+
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(38px, 6vw, 68px);
+    font-weight: 400;
+    line-height: 1.1;
+    color: var(--bark);
+    margin-bottom: 24px;
+    animation: fadeUp 0.8s 0.1s ease both;
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    color: var(--terracotta);
+  }
+
+  .hero p {
+    font-size: clamp(16px, 2vw, 19px);
+    color: var(--muted);
+    font-weight: 300;
+    line-height: 1.7;
+    max-width: 520px;
+    margin: 0 auto 40px;
+    animation: fadeUp 0.8s 0.2s ease both;
+  }
+
+  .hero-cta-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    animation: fadeUp 0.8s 0.3s ease both;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 18px 40px;
+    background: var(--terracotta);
+    color: white;
+    border: none;
+    border-radius: 99px;
+    font-family: 'Lato', sans-serif;
+    font-size: 16px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+    box-shadow: 0 8px 32px rgba(196,105,79,0.3);
+  }
+
+  .btn-primary:hover { background: var(--bark); transform: translateY(-2px); box-shadow: 0 12px 40px rgba(196,105,79,0.35); }
+
+  .hero-sub {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  /* FLOATING NAME CARDS */
+  .hero-names {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 56px;
+    animation: fadeUp 0.8s 0.4s ease both;
+  }
+
+  .name-pill {
+    padding: 8px 20px;
+    background: var(--white);
+    border: 1px solid var(--sand);
+    border-radius: 99px;
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    color: var(--charcoal);
+    box-shadow: 0 2px 12px rgba(122,92,68,0.08);
+  }
+
+  .name-pill.accent {
+    background: var(--linen);
+    border-color: var(--clay);
+    color: var(--bark);
+  }
+
+  /* HOW IT WORKS */
+  .section {
+    padding: 100px 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .section-inner {
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--clay);
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(28px, 4vw, 42px);
+    font-weight: 400;
+    color: var(--bark);
+    text-align: center;
+    margin-bottom: 16px;
+    line-height: 1.2;
+  }
+
+  .section-title em { font-style: italic; color: var(--terracotta); }
+
+  .section-sub {
+    font-size: 16px;
+    color: var(--muted);
+    font-weight: 300;
+    text-align: center;
+    max-width: 480px;
+    margin: 0 auto 64px;
+    line-height: 1.7;
+  }
+
+  /* STEPS */
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 24px;
+  }
+
+  .step {
+    background: var(--white);
+    border: 1px solid var(--sand);
+    border-radius: 20px;
+    padding: 32px 28px;
+    position: relative;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .step:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(122,92,68,0.1); }
+
+  .step-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 48px;
+    font-weight: 400;
+    color: var(--sand);
+    line-height: 1;
+    margin-bottom: 16px;
+  }
+
+  .step-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--charcoal);
+    margin-bottom: 10px;
+  }
+
+  .step-desc {
+    font-size: 14px;
+    color: var(--muted);
+    font-weight: 300;
+    line-height: 1.6;
+  }
+
+  .step-icon {
+    position: absolute;
+    top: 28px;
+    right: 28px;
+    font-size: 24px;
+    opacity: 0.6;
+  }
+
+  /* DIVIDER */
+  .divider {
+    width: 60px;
+    height: 1px;
+    background: var(--sand);
+    margin: 0 auto 64px;
+  }
+
+  /* WHAT YOU GET */
+  .features {
+    background: var(--charcoal);
+    border-radius: 28px;
+    padding: 64px 48px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .features::before {
+    content: '';
+    position: absolute;
+    top: -60px;
+    right: -60px;
+    width: 240px;
+    height: 240px;
+    border-radius: 50%;
+    background: rgba(196,105,79,0.15);
+  }
+
+  .features::after {
+    content: '';
+    position: absolute;
+    bottom: -40px;
+    left: -40px;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: rgba(107,122,94,0.1);
+  }
+
+  .features-left { position: relative; z-index: 1; }
+
+  .features-label {
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--clay);
+    margin-bottom: 16px;
+  }
+
+  .features-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(24px, 3vw, 36px);
+    color: var(--cream);
+    font-weight: 400;
+    line-height: 1.2;
+    margin-bottom: 24px;
+  }
+
+  .features-title em { font-style: italic; color: var(--terracotta); }
+
+  .features-desc {
+    font-size: 15px;
+    color: rgba(247,243,238,0.6);
+    font-weight: 300;
+    line-height: 1.7;
+    margin-bottom: 32px;
+  }
+
+  .features-right {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .feature-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px 20px;
+    background: rgba(247,243,238,0.06);
+    border: 1px solid rgba(247,243,238,0.1);
+    border-radius: 12px;
+  }
+
+  .feature-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--terracotta);
+    flex-shrink: 0;
+    margin-top: 6px;
+  }
+
+  .feature-text {
+    font-size: 14px;
+    color: rgba(247,243,238,0.8);
+    font-weight: 300;
+    line-height: 1.5;
+  }
+
+  .feature-text strong {
+    color: var(--cream);
+    font-weight: 400;
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  /* SOCIAL PROOF */
+  .proof {
+    background: var(--linen);
+    border-radius: 28px;
+    padding: 64px 48px;
+    text-align: center;
+  }
+
+  .proof-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+    margin-bottom: 48px;
+  }
+
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 42px;
+    font-weight: 400;
+    color: var(--bark);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .stat-label {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 300;
+    letter-spacing: 0.04em;
+  }
+
+  .proof-divider {
+    width: 1px;
+    background: var(--sand);
+    align-self: stretch;
+  }
+
+  .testimonials {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    text-align: left;
+  }
+
+  .testimonial {
+    background: var(--white);
+    border: 1px solid var(--sand);
+    border-radius: 16px;
+    padding: 24px;
+  }
+
+  .testimonial-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    font-style: italic;
+    color: var(--charcoal);
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+
+  .testimonial-author {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 300;
+    letter-spacing: 0.04em;
+  }
+
+  .testimonial-author span {
+    color: var(--clay);
+  }
+
+  /* CTA SECTION */
+  .cta-section {
+    text-align: center;
+    padding: 100px 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cta-inner {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .cta-section h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 400;
+    color: var(--bark);
+    line-height: 1.15;
+    margin-bottom: 20px;
+  }
+
+  .cta-section h2 em { font-style: italic; color: var(--terracotta); }
+
+  .cta-section p {
+    font-size: 16px;
+    color: var(--muted);
+    font-weight: 300;
+    margin-bottom: 40px;
+    line-height: 1.7;
+  }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--sand);
+    padding: 32px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    z-index: 1;
+  }
+
+  .footer-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    color: var(--bark);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .footer-copy {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    nav { padding: 16px 24px; }
+    .features { grid-template-columns: 1fr; padding: 40px 28px; }
+    .proof-stats { grid-template-columns: 1fr; gap: 24px; }
+    .proof { padding: 40px 24px; }
+    footer { flex-direction: column; gap: 12px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">🌿 Baby Name App</a>
+  <a href="quiz.html" class="nav-cta">Find your name →</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge">🌿 AI-powered · <span>Free to try</span></div>
+    <h1>Your baby deserves a name as <em>unique</em> as they are</h1>
+    <p>Answer 7 thoughtful questions and our AI will curate a list of beautiful names perfectly matched to your style, heritage, and hopes.</p>
+    <div class="hero-cta-wrap">
+      <a href="quiz.html" class="btn-primary">Find my baby's name 🌿</a>
+      <span class="hero-sub">Free · Takes 2 minutes · No sign up needed</span>
+    </div>
+    <div class="hero-names">
+      <div class="name-pill accent">Rowan</div>
+      <div class="name-pill">Jasmine</div>
+      <div class="name-pill accent">Soren</div>
+      <div class="name-pill">Hazel</div>
+      <div class="name-pill accent">Lucian</div>
+      <div class="name-pill">Wren</div>
+      <div class="name-pill accent">Nora</div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section">
+  <div class="section-inner">
+    <div class="section-label reveal">How it works</div>
+    <h2 class="section-title reveal">Three steps to your <em>perfect</em> name</h2>
+    <p class="section-sub reveal">No endless scrolling through lists of thousands. Just a thoughtful process that gets to know you first.</p>
+    <div class="steps">
+      <div class="step reveal">
+        <div class="step-num">01</div>
+        <div class="step-icon">✦</div>
+        <div class="step-title">Tell us about your style</div>
+        <div class="step-desc">Answer 7 gentle questions about your preferences, heritage, the feeling you want the name to carry, and when your little one arrives.</div>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">02</div>
+        <div class="step-icon">🌿</div>
+        <div class="step-title">AI curates your list</div>
+        <div class="step-desc">Our AI weaves together every answer to surface names that feel genuinely right — not just popular, but perfect for your family.</div>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">03</div>
+        <div class="step-icon">✨</div>
+        <div class="step-title">Discover your names</div>
+        <div class="step-desc">Get 5 beautifully curated names with origins, meanings, and the story behind each one. Unlock 20 more for just $1.99.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHAT YOU GET -->
+<section class="section" style="padding-top: 0;">
+  <div class="section-inner">
+    <div class="features reveal">
+      <div class="features-left">
+        <div class="features-label">What's included</div>
+        <h3 class="features-title">More than just a name — a story worth <em>telling</em></h3>
+        <p class="features-desc">Every name comes with its full origin story, cultural roots, and the meaning behind it. Because the best names have something to say.</p>
+        <a href="quiz.html" class="btn-primary" style="font-size: 15px; padding: 16px 32px;">Start for free →</a>
+      </div>
+      <div class="features-right">
+        <div class="feature-item">
+          <div class="feature-dot"></div>
+          <div class="feature-text">
+            <strong>5 free AI-curated names</strong>
+            Handpicked based on every detail you share — style, culture, meaning, and season.
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-dot"></div>
+          <div class="feature-text">
+            <strong>Full origin & meaning</strong>
+            Where the name comes from, what it means, and why it fits your family.
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-dot"></div>
+          <div class="feature-text">
+            <strong>Unlock 20 more for $1.99</strong>
+            Rare finds, hidden gems, and sibling pairings — your complete curated collection.
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-dot"></div>
+          <div class="feature-text">
+            <strong>Different every time</strong>
+            Every quiz generates a truly unique list. No two families get the same names.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOCIAL PROOF -->
+<section class="section" style="padding-top: 0;">
+  <div class="section-inner">
+    <div class="proof reveal">
+      <div class="proof-stats">
+        <div>
+          <div class="stat-num">12k+</div>
+          <div class="stat-label">Names generated</div>
+        </div>
+        <div>
+          <div class="stat-num">4.9★</div>
+          <div class="stat-label">Average rating</div>
+        </div>
+        <div>
+          <div class="stat-num">2 min</div>
+          <div class="stat-label">To your list</div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="testimonials">
+        <div class="testimonial">
+          <div class="testimonial-text">"I'd been stuck for weeks. Within 2 minutes it gave me the name I'd been looking for without knowing it."</div>
+          <div class="testimonial-author">— <span>Sarah M.</span>, 34 weeks</div>
+        </div>
+        <div class="testimonial">
+          <div class="testimonial-text">"The AI actually understood what I meant by 'soft but strong'. The names it suggested were exactly that."</div>
+          <div class="testimonial-author">— <span>James & Priya</span>, expecting in June</div>
+        </div>
+        <div class="testimonial">
+          <div class="testimonial-text">"Worth every penny for the full list. We found our daughter's name in there. It felt meant to be."</div>
+          <div class="testimonial-author">— <span>Melissa T.</span>, new mom</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="cta-section">
+  <div class="cta-inner">
+    <h2>Ready to find the <em>one?</em></h2>
+    <p>It takes 2 minutes, it's free to start, and your baby's perfect name might be one quiz away.</p>
+    <a href="quiz.html" class="btn-primary" style="font-size: 16px; padding: 20px 48px;">Find my baby's name 🌿</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">🌿 Baby Name App</div>
+  <div class="footer-copy">© 2026 Baby Name App · Made with love for expecting parents</div>
+</footer>
+
+<script>
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) {
+      setTimeout(() => entry.target.classList.add('visible'), i * 80);
+    }
+  });
+}, { threshold: 0.1 });
+reveals.forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
