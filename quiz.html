@@ -13,17 +13,14 @@
     --navy-deep: #152230;
     --navy-mid: #243548;
     --cream: #FDFAF7;
-    --off-white: #F8F6F3;
     --blush: #F2D9D9;
     --rose: #E8B4B8;
     --dusty-rose: #C9737A;
     --silver: #8B9EB0;
-    --slate: #4A5568;
     --white: #FFFFFF;
-    /* legacy aliases */
     --terracotta: #C9737A;
-    --bark: #1C2B3A;
-    --charcoal: #1C2B3A;
+    --bark: #FDFAF7;
+    --charcoal: #FDFAF7;
     --muted: #8B9EB0;
   }
 
@@ -31,21 +28,33 @@
 
   body {
     font-family: 'DM Sans', sans-serif;
-    background: var(--cream);
-    color: var(--navy);
+    background: var(--navy);
+    color: var(--cream);
     min-height: 100vh;
     overflow-x: hidden;
+    position: relative;
   }
 
-  /* Subtle grain texture overlay */
   body::before {
     content: '';
     position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    top: -200px; right: -200px;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: rgba(201,115,122,0.06);
     pointer-events: none;
     z-index: 0;
-    opacity: 0.6;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -150px; left: -150px;
+    width: 500px; height: 500px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.02);
+    pointer-events: none;
+    z-index: 0;
   }
 
   .container {
@@ -74,7 +83,7 @@
     font-family: 'Cormorant Garamond', serif;
     font-size: clamp(28px, 5vw, 42px);
     font-weight: 400;
-    color: var(--navy);
+    color: var(--cream);
     line-height: 1.15;
     margin-bottom: 10px;
   }
@@ -622,7 +631,7 @@
   .locked-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to bottom, rgba(253,250,247,0) 0%, rgba(253,250,247,0.95) 50%);
+    background: linear-gradient(to bottom, rgba(28,43,58,0) 0%, rgba(28,43,58,0.98) 50%);
     z-index: 2;
     border-radius: 16px;
     display: flex;
