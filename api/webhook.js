@@ -14,12 +14,19 @@ module.exports = async function handler(req, res) {
   let event;
   try {
     const rawBody = await getRawBody(req);
+    const sigHeader = sig;
+    const parts = sigHeader.split(',');
+    const timestamp = parts.find(p => p.startsWith('t=')).replace('t=', '');
+    const receivedSig = parts.find(p => p.startsWith('v1=')).replace('v1=', '');
+
+    const signedPayload = `${timestamp}.${rawBody}`;
     const expectedSig = crypto
       .createHmac('sha256', webhookSecret)
-      .update(rawBody)
+      .update(signedPayload, 'utf8')
       .digest('hex');
-    const receivedSig = sig.split(',').find(s => s.startsWith('v1=')).replace('v1=', '');
+
     if (expectedSig !== receivedSig) {
+      console.error('Signature mismatch');
       return res.status(400).json({ error: 'Invalid signature' });
     }
     event = JSON.parse(rawBody);
