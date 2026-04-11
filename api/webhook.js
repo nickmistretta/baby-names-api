@@ -188,7 +188,7 @@ async function sendEmail(brevoKey, email, names, tier, count) {
       'api-key': brevoKey
     },
     body: JSON.stringify({
-      sender: { name: 'Nomia', email: 'hello@trynomia.com' },
+      sender: { name: 'Nomia', email: 'nick@ohlsonads.com' },
       to: [{ email }],
       subject: `Your ${displayCount} Nomia names are ready ✦`,
       htmlContent
