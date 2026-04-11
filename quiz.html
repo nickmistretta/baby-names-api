@@ -328,46 +328,86 @@
 
   /* Loading screen */
   .loading-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 80vh;
     text-align: center;
-    padding: 60px 20px;
+    padding: 40px 20px;
   }
 
-  .loading-orb {
-    width: 64px;
-    height: 64px;
-    margin: 0 auto 28px;
+  .loading-pulse-wrap {
     position: relative;
+    width: 240px;
+    height: 240px;
+    margin: 0 auto 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  .loading-orb::before, .loading-orb::after {
+  .loading-pulse-wrap::before,
+  .loading-pulse-wrap::after {
     content: '';
     position: absolute;
     border-radius: 50%;
+    background: rgba(201,115,122,0.15);
+    animation: pulseRing 2.4s ease-out infinite;
   }
 
-  .loading-orb::before {
-    inset: 0;
-    border: 2px solid var(--sand);
+  .loading-pulse-wrap::before { width: 100%; height: 100%; animation-delay: 0s; }
+  .loading-pulse-wrap::after { width: 75%; height: 75%; animation-delay: 0.4s; }
+
+  .loading-pulse-inner {
+    width: 50%;
+    height: 50%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,115,122,0.6) 0%, rgba(201,115,122,0.3) 60%, transparent 100%);
+    animation: pulseCore 2.4s ease-in-out infinite;
+    position: relative;
+    z-index: 1;
   }
 
-  .loading-orb::after {
-    inset: 4px;
-    border: 2px solid transparent;
-    border-top-color: var(--terracotta);
-    animation: spin 1s linear infinite;
+  .loading-pulse-ring {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(201,115,122,0.08);
+    width: 140%;
+    height: 140%;
+    animation: pulseRing 2.4s ease-out infinite;
+    animation-delay: 0.8s;
+  }
+
+  @keyframes pulseRing {
+    0% { transform: scale(0.6); opacity: 0.8; }
+    70% { transform: scale(1.1); opacity: 0; }
+    100% { transform: scale(1.1); opacity: 0; }
+  }
+
+  @keyframes pulseCore {
+    0%, 100% { transform: scale(0.92); opacity: 0.7; }
+    50% { transform: scale(1.08); opacity: 1; }
   }
 
   .loading-text {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 22px;
-    color: var(--navy);
-    margin-bottom: 8px;
+    font-size: clamp(32px, 6vw, 48px);
+    font-weight: 300;
+    color: var(--cream);
+    margin-bottom: 16px;
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+    animation: fadeUp 0.8s ease both;
   }
 
   .loading-sub {
-    font-size: 14px;
-    color: var(--muted);
+    font-size: 16px;
+    color: var(--silver);
     font-weight: 300;
+    letter-spacing: 0.06em;
+    animation: fadeUp 0.8s 0.2s ease both;
+    min-height: 24px;
   }
 
   /* Results screen */
@@ -712,7 +752,10 @@
   <!-- LOADING SCREEN -->
   <div class="screen" id="screen-loading">
     <div class="loading-screen">
-      <div class="loading-orb"></div>
+      <div class="loading-pulse-wrap">
+        <div class="loading-pulse-ring"></div>
+        <div class="loading-pulse-inner"></div>
+      </div>
       <div class="loading-text">Finding your names…</div>
       <div class="loading-sub" id="loading-msg">Weaving together your preferences</div>
     </div>
@@ -1123,20 +1166,6 @@ function handleStripe() {
   if (emailError) emailError.style.display = 'none';
   localStorage.setItem('nameforest_email', email);
 
-  // Save answers to Supabase
-  fetch('https://project-rz9q4.vercel.app/api/save-answers', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, answers })
-  });
-
-  // Brevo email capture
-  fetch('https://project-rz9q4.vercel.app/api/generate', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: 'subscribe', email })
-  });
-
   const tier = window._selectedTier || 1;
   const cfg = TIER_CONFIG[tier];
   window.open(cfg.stripe + '?prefilled_email=' + encodeURIComponent(email), '_blank');
@@ -1157,20 +1186,6 @@ function handlePayPalWithEmail() {
 
   if (emailError) emailError.style.display = 'none';
   localStorage.setItem('nameforest_email', email);
-
-  // Save answers to Supabase
-  fetch('https://project-rz9q4.vercel.app/api/save-answers', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, answers })
-  });
-
-  // Brevo email capture
-  fetch('https://project-rz9q4.vercel.app/api/generate', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: 'subscribe', email })
-  });
 
   // REPLACE YOURHANDLE with your actual PayPal.me username
   const tier = window._selectedTier || 1;
