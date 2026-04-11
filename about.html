@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>About Us | Baby Name App</title>
-<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/nickmistretta/baby-names-api/main/stork-cream.png">
+<title>About Nomia — AI Baby Name Discovery</title>
+<link rel="icon" type="image/svg+xml" href="https://raw.githubusercontent.com/nickmistretta/baby-names-api/main/nomia-favicon.svg">
 
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Lato:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -41,64 +41,38 @@
     opacity: 0.5;
   }
 
-  /* NAV */
+  
   nav {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
+    top: 0; left: 0; right: 0;
     z-index: 100;
-    padding: 16px 48px;
+    padding: 0 48px;
+    height: 72px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: rgba(247,243,238,0.92);
-    backdrop-filter: blur(12px);
-    border-bottom: 0.5px solid var(--sand);
+    background: #1C2B3A;
+    border-bottom: 0.5px solid rgba(255,255,255,0.08);
   }
+  .nav-logo { display:flex; align-items:center; text-decoration:none; }
+  .nav-desktop { display:flex; align-items:center; gap:32px; }
+  .nav-link { font-size:13px; font-weight:300; color:rgba(255,255,255,0.6); text-decoration:none; letter-spacing:0.06em; text-transform:uppercase; transition:color 0.2s; }
+  .nav-link:hover { color:white; }
+  .nav-cta { padding:10px 24px; background:#C9737A; color:white; border:none; border-radius:99px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:300; cursor:pointer; text-decoration:none; transition:all 0.2s; white-space:nowrap; }
+  .nav-cta:hover { background:#b85f66; transform:translateY(-1px); }
+  .hamburger { display:none; flex-direction:column; gap:5px; background:none; border:none; cursor:pointer; padding:4px; z-index:101; }
+  .hamburger span { display:block; width:24px; height:1.5px; background:white; border-radius:99px; transition:all 0.3s ease; }
+  .hamburger.open span:nth-child(1) { transform:translateY(6.5px) rotate(45deg); }
+  .hamburger.open span:nth-child(2) { opacity:0; }
+  .hamburger.open span:nth-child(3) { transform:translateY(-6.5px) rotate(-45deg); }
+  .mobile-menu { display:none; position:fixed; top:72px; left:0; right:0; background:#152230; border-bottom:0.5px solid rgba(255,255,255,0.08); flex-direction:column; padding:16px 24px 24px; gap:4px; z-index:99; }
+  .mobile-menu.open { display:flex; }
+  .mobile-menu a { padding:14px 0; font-size:15px; font-weight:300; color:rgba(255,255,255,0.8); text-decoration:none; border-bottom:0.5px solid rgba(255,255,255,0.08); }
+  .mobile-menu a:last-child { border-bottom:none; }
+  .mobile-cta { margin-top:8px; padding:14px 24px !important; background:#C9737A; color:white !important; border-radius:12px; text-align:center; border-bottom:none !important; }
+  @media (max-width:640px) { nav { padding:0 20px; } .nav-desktop { display:none; } .hamburger { display:flex; } }
 
-  .nav-logo {
-    font-family: 'Playfair Display', serif;
-    font-size: 22px;
-    font-weight: 500;
-    color: var(--bark);
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .nav-desktop {
-    display: flex;
-    align-items: center;
-    gap: 24px;
-  }
-
-  .nav-link {
-    font-size: 14px;
-    color: var(--muted);
-    text-decoration: none;
-    transition: color 0.2s;
-    white-space: nowrap;
-  }
-
-  .nav-link:hover { color: var(--bark); }
-
-  .nav-cta {
-    padding: 10px 18px;
-    background: var(--terracotta);
-    color: white;
-    border: none;
-    border-radius: 99px;
-    font-family: 'Lato', sans-serif;
-    font-size: 13px;
-    cursor: pointer;
-    text-decoration: none;
-    transition: all 0.2s;
-    white-space: nowrap;
-  }
-
-  .nav-cta:hover { background: var(--bark); transform: translateY(-1px); }
+  
 
   /* Hamburger */
   .hamburger {
@@ -480,23 +454,21 @@
 
 <!-- NAV -->
 <nav>
-  <a href="index.html" class="nav-logo"><img src="https://raw.githubusercontent.com/nickmistretta/baby-names-api/main/Baby-Name-Transparent.png" alt="Baby Name App" style="height:62px; width:auto;"></a>
-  
-  <!-- Desktop nav -->
+  <a href="index.html" class="nav-logo">
+    <svg style="height:44px;width:auto;" viewBox="0 0 680 180" xmlns="http://www.w3.org/2000/svg">
+      <g transform="translate(28,42) scale(0.095)"><g fill="#FDFAF7"><path d="M237.85 518.09 c-16.35 -1.79 -35.25 -6.32 -52.04 -12.51 -9 -3.32 -26.63 -11.56 -33.39 -15.58 -46.10 -27.58 -77.39 -65.83 -95.33 -116.27 -4.28 -12.20 -7.98 -26.05 -8.05 -30.58 -0.13 -7.02 3.96 -11.75 10.22 -11.75 3.64 0 5.87 1.21 11.62 6.39 17.69 15.71 39.20 28.73 59.38 36.01 22.67 8.11 46.99 11.88 71.19 10.98 12.13 -0.38 18.20 -0.96 18.20 -1.60 -0.06 -0.19 -2.23 -1.40 -4.98 -2.62 -10.79 -4.92 -24.52 -15.58 -33.20 -25.80 -12.83 -15.13 -20.94 -31.61 -25.16 -51.27 -1.28 -6.13 -1.47 -8.56 -1.47 -21.90 0.06 -13.03 0.26 -15.84 1.47 -21.39 2.17 -9.96 4.92 -17.75 9.71 -27.46 5.94 -12 11.30 -19.28 22.03 -30.07 10.28 -10.34 13.03 -12.07 18.45 -11.62 4.02 0.32 6.32 1.85 8.05 5.36 1.60 3.26 1.60 5.81 0 11.43 -3.32 11.37 -4.09 27.07 -1.98 39.46 1.15 6.39 1.66 8.11 2.17 7.41 0.13 -0.13 1.79 -3.19 3.64 -6.77 11.94 -23.05 35.76 -42.84 61.49 -51.21 17.43 -5.62 34.35 -7.60 39.78 -4.66 2.43 1.34 4.66 4.53 5.04 7.41 0.70 4.47 -1.09 7.60 -7.22 12.71 -10.60 8.88 -17.94 18.13 -24.07 30.39 -11.37 22.79 -12.45 49.17 -3 73.49 l1.85 4.79 8.56 0.19 c9.39 0.19 17.94 -1.09 27.20 -4.02 5.56 -1.79 20.62 -9 23.31 -11.17 4.02 -3.13 13.15 -19.22 27.71 -48.78 15.58 -31.67 22.09 -47.51 26.12 -63.60 3.83 -15.20 4.53 -30.39 1.66 -36.40 -0.77 -1.60 -4.47 -6.26 -8.30 -10.34 -7.98 -8.62 -9.64 -11.43 -9.64 -16.67 0 -6.07 2.68 -10.66 7.79 -13.28 2.30 -1.15 4.41 -1.21 52.81 -1.21 34.10 0 51.53 0.26 53.83 0.70 5.04 1.02 12.07 4.66 15.96 8.11 l3.38 3.06 20.11 1.79 c33.52 2.87 68.96 5.94 101.08 8.68 18.07 1.53 31.41 2.94 32.63 3.45 2.75 1.15 5.87 4.85 6.39 7.66 0.83 4.47 -1.60 9.32 -5.87 11.49 -1.98 1.02 -5.49 1.72 -16.28 3.32 -4.15 0.64 -8.05 1.47 -8.62 1.92 -0.89 0.70 -0.32 2.23 5.62 14.37 21.77 44.89 28.73 60.08 40.55 88.37 20.11 48.02 27.78 73.94 28.86 97.05 1.21 26.31 -8.30 55.30 -24.71 75.34 -12.96 15.77 -29.82 27.01 -48.21 32.05 -8.11 2.23 -24.84 2.81 -33.97 1.15 -33.71 -6 -61.87 -31.93 -73.88 -68 -2.94 -8.75 -4.66 -17.50 -5.62 -27.97 -2.04 -23.24 4.41 -49.68 23.88 -97.82 10.85 -26.88 30.20 -69.66 43.99 -97.25 l6.39 -12.71 -3.70 0.45 c-2.04 0.26 -3.96 0.64 -4.34 0.89 -0.32 0.19 -4.09 0.83 -8.30 1.40 -14.69 2.04 -27.52 3.83 -39.91 5.68 -6.83 1.02 -15.01 2.17 -18.20 2.55 -15.32 1.92 -16.86 2.36 -21.71 6.07 -8.56 6.51 -14.37 8.62 -24.77 9.07 -11.17 0.51 -10.98 0.19 -10.02 20.30 0.83 17.94 0.83 58.42 0 69.92 -2.87 39.40 -9.39 67.43 -22.48 97.05 -14.62 33.27 -34.86 60.98 -60.85 83.52 -31.61 27.46 -74.39 46.23 -116.85 51.14 -8.05 0.96 -36.01 0.77 -45.97 -0.32z"/><path d="M482.46 166.65 c-4.02 -1.28 -6.77 -5.30 -6.77 -9.90 0 -3.64 1.21 -6.13 4.28 -8.43 3.06 -2.30 8.62 -2.55 11.49 -0.45 6.19 4.60 6.32 13.09 0.19 17.62 -1.92 1.34 -6.64 1.98 -9.19 1.15z"/></g></g>
+      <text x="108" y="108" font-family="Cormorant Garamond,Georgia,serif" font-size="88" font-weight="300" font-style="italic" fill="#FDFAF7" letter-spacing="4">nomia</text>
+      <text x="110" y="140" font-family="DM Sans,sans-serif" font-size="11" font-weight="200" fill="#8B9EB0" letter-spacing="5">CHOOSE THE PERFECT BABY NAME</text>
+    </svg>
+  </a>
   <div class="nav-desktop">
     <a href="about.html" class="nav-link">About</a>
-    <a href="quiz.html" class="nav-cta">Find your name →</a>
+    <a href="quiz.html" class="nav-cta">Find your name</a>
   </div>
-
-  <!-- Mobile hamburger -->
-  <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
-    <span></span><span></span><span></span>
-  </button>
-
-  <!-- Mobile dropdown -->
+  <button class="hamburger" id="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></button>
   <div class="mobile-menu" id="mobileMenu">
     <a href="about.html" onclick="toggleMenu()">About</a>
-    <a href="quiz.html" class="mobile-cta" onclick="toggleMenu()">Find your name →</a>
+    <a href="quiz.html" class="mobile-cta" onclick="toggleMenu()">Find your name</a>
   </div>
 </nav>
 
@@ -516,7 +488,7 @@
     <h2>Our Story</h2>
     <p>Between running a small business, preparing a nursery, and navigating everything that comes with pregnancy, we simply didn't have hours to scroll through endless alphabetical lists of names we'd already heard a thousand times.</p>
     <p>We wanted something that felt like a conversation — something that understood <strong>who we are</strong>, where we come from, and what we hoped for our daughter. Something that could surface a name we'd never considered but immediately recognize as <em>right</em>.</p>
-    <p>So we built it. Baby Name App uses AI to do what those old sites never could: it listens first, then curates. Every list is generated fresh, built entirely around your answers. No two families ever see the same names.</p>
+    <p>So we built it. Nomia uses AI to do what those old sites never could: it listens first, then curates. Every list is generated fresh, built entirely around your answers. No two families ever see the same names.</p>
   </div>
 
   <!-- PULL QUOTE -->
@@ -595,8 +567,8 @@
 
 <!-- FOOTER -->
 <footer>
-  <div class="footer-logo"><img src="https://raw.githubusercontent.com/nickmistretta/baby-names-api/main/Baby-Name-Transparent.png" alt="Baby Name App" style="height:47px; width:auto;"></div>
-  <div class="footer-copy">© 2026 Baby Name App · Made with love in New Jersey</div>
+  <div class="footer-logo"><img src="https://raw.githubusercontent.com/nickmistretta/baby-names-api/main/Baby-Name-Transparent.png" alt="Nomia" style="height:47px; width:auto;"></div>
+  <div class="footer-copy">© 2026 Nomia · Made with love in New Jersey</div>
 </footer>
 
 <script>
@@ -611,5 +583,12 @@ const observer = new IntersectionObserver((entries) => {
 reveals.forEach(el => observer.observe(el));
 </script>
 
+
+<script>
+function toggleMenu() {
+  document.getElementById('mobileMenu').classList.toggle('open');
+  document.getElementById('hamburger').classList.toggle('open');
+}
+</script>
 </body>
 </html>
