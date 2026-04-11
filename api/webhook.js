@@ -85,24 +85,46 @@ module.exports = async function handler(req, res) {
       })
     });
 
-    // For unlimited tier, save names to Supabase too
-    if (tier === 3 && nameList.length > 0) {
-      const namesToSave = nameList.map(n => ({
-        email,
-        name: n.name,
-        origin: n.origin,
-        meaning: n.meaning,
-        tags: n.tags
-      }));
-      await fetch(`${supabaseUrl}/rest/v1/saved_names`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': supabaseKey,
-          'Authorization': `Bearer ${supabaseKey}`
-        },
-        body: JSON.stringify(namesToSave)
-      });
+    // For unlimited tier: create Supabase auth account + save names
+    if (tier === 3) {
+      // Create Supabase auth user (magic link — they set password on first login)
+      try {
+        await fetch(`${supabaseUrl}/auth/v1/admin/users`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`
+          },
+          body: JSON.stringify({
+            email,
+            email_confirm: true,
+            user_metadata: { tier: 'unlimited' }
+          })
+        });
+      } catch (authErr) {
+        console.error('Supabase auth creation error (non-fatal):', authErr);
+      }
+
+      // Save initial names to their collection
+      if (nameList.length > 0) {
+        const namesToSave = nameList.map(n => ({
+          email,
+          name: n.name,
+          origin: n.origin,
+          meaning: n.meaning,
+          tags: n.tags
+        }));
+        await fetch(`${supabaseUrl}/rest/v1/saved_names`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`
+          },
+          body: JSON.stringify(namesToSave)
+        });
+      }
     }
 
     // Send email via Brevo
@@ -153,15 +175,27 @@ Make names feel warm, considered, and beautifully matched. Vary origins and styl
 
 async function sendEmail(brevoKey, email, names, tier, count) {
   const tierLabel = tier === 1 ? 'Starter' : tier === 2 ? 'Family' : 'Unlimited';
-  const displayCount = tier === 3 ? 'Unlimited' : count;
+  const displayCount = tier === 3 ? 'your first 25' : count;
 
-  const namesHtml = names.map((n, i) => `
+  const namesHtml = names.slice(0, tier === 3 ? 25 : count).map((n, i) => `
     <div style="padding:16px 0; border-bottom:1px solid rgba(28,43,58,0.08);">
       <div style="font-family:Georgia,serif; font-size:22px; color:#1C2B3A; margin-bottom:4px;">${n.name}</div>
       <div style="font-size:11px; color:#C9737A; letter-spacing:0.06em; text-transform:uppercase; margin-bottom:4px;">${n.origin}</div>
       <div style="font-size:13px; color:#8B9EB0;">${n.meaning}</div>
     </div>
   `).join('');
+
+  const ctaSection = tier === 3 ? `
+    <div style="margin-top:32px; text-align:center;">
+      <p style="font-size:15px; color:#1C2B3A; margin-bottom:16px;">Your Unlimited dashboard is ready — run unlimited quizzes, match your taste, and save your favourites.</p>
+      <a href="https://trynomia.com/dashboard.html" style="display:inline-block; padding:14px 32px; background:#C9737A; color:white; border-radius:99px; text-decoration:none; font-size:14px; margin-bottom:12px;">Go to my dashboard →</a>
+      <p style="font-size:12px; color:#8B9EB0; margin-top:8px;">Sign in with this email address: ${email}</p>
+    </div>
+  ` : `
+    <div style="margin-top:32px; text-align:center;">
+      <a href="https://trynomia.com/quiz.html" style="display:inline-block; padding:14px 32px; background:#C9737A; color:white; border-radius:99px; text-decoration:none; font-size:14px;">Generate another list</a>
+    </div>
+  `;
 
   const htmlContent = `
     <div style="max-width:560px; margin:0 auto; font-family:'DM Sans',sans-serif; background:#FDFAF7;">
@@ -173,9 +207,7 @@ async function sendEmail(brevoKey, email, names, tier, count) {
         <h1 style="font-family:Georgia,serif; font-size:28px; font-weight:300; color:#1C2B3A; margin-bottom:8px;">Your ${displayCount} names are here ✦</h1>
         <p style="font-size:15px; color:#8B9EB0; margin-bottom:32px;">Your Nomia ${tierLabel} collection, curated just for you.</p>
         ${namesHtml}
-        <div style="margin-top:32px; text-align:center;">
-          <a href="https://trynomia.com/quiz.html" style="display:inline-block; padding:14px 32px; background:#C9737A; color:white; border-radius:99px; text-decoration:none; font-size:14px;">Generate another list</a>
-        </div>
+        ${ctaSection}
       </div>
       <div style="padding:24px; text-align:center; font-size:12px; color:#8B9EB0;">© 2026 Nomia · Made with love in New Jersey</div>
     </div>
