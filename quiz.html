@@ -1123,6 +1123,13 @@ function handleStripe() {
   if (emailError) emailError.style.display = 'none';
   localStorage.setItem('nameforest_email', email);
 
+  // Save answers to Supabase
+  fetch('https://project-rz9q4.vercel.app/api/save-answers', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, answers })
+  });
+
   // Brevo email capture
   fetch('https://project-rz9q4.vercel.app/api/generate', {
     method: 'POST',
@@ -1150,6 +1157,13 @@ function handlePayPalWithEmail() {
 
   if (emailError) emailError.style.display = 'none';
   localStorage.setItem('nameforest_email', email);
+
+  // Save answers to Supabase
+  fetch('https://project-rz9q4.vercel.app/api/save-answers', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, answers })
+  });
 
   // Brevo email capture
   fetch('https://project-rz9q4.vercel.app/api/generate', {
