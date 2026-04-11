@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Baby Name Finder</title>
-<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/nickmistretta/baby-names-api/main/stork-cream.png">
+<title>Nomia — Find Your Baby's Name</title>
+<link rel="icon" type="image/svg+xml" href="https://raw.githubusercontent.com/nickmistretta/baby-names-api/main/nomia-favicon.svg">
 
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -984,23 +984,14 @@ function showResults(free, premium) {
   // Store premium names globally
   window._premiumNames = premium;
 
-  // Upsell with email + multiple payment options
+  // Upsell with 3 tiers + email capture
   document.getElementById('upsell-section').innerHTML = `
     <div class="upsell-card">
-      <div class="upsell-badge">✦ Premium</div>
-      <div class="upsell-title">Unlock 20 more names</div>
-      <div class="upsell-desc">Your full curated list, handpicked by AI based on every detail you shared.</div>
-      <div class="upsell-includes">
-        <div class="upsell-item">20 additional AI-curated names</div>
-        <div class="upsell-item">Full meanings & origin stories</div>
-        <div class="upsell-item">Rare & hidden gem names</div>
-        <div class="upsell-item">Sibling name pairings</div>
-        <div class="upsell-item">Nickname & shortform options</div>
-      </div>
-      <div class="upsell-price"><span>$</span>1.99</div>
-      <div class="upsell-once">one-time · instant delivery</div>
+      <div class="upsell-badge">✦ Unlock More Names</div>
+      <div class="upsell-title">How many names do you want?</div>
+      <div class="upsell-desc">Every name comes with full origin, meaning, and story — curated just for you.</div>
 
-      <div id="email-step" style="width:100%; position:relative; z-index:1;">
+      <div id="email-step" style="width:100%; position:relative; z-index:1; margin-top:20px;">
         <input
           type="email"
           id="upsell-email"
@@ -1009,10 +1000,36 @@ function showResults(free, premium) {
         />
         <div id="email-error" style="color:#F09595; font-size:12px; margin-bottom:10px; display:none;">Please enter a valid email address</div>
 
-        <!-- Stripe: handles Apple Pay, Google Pay, Card -->
+        <!-- Tier cards -->
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:16px; position:relative; z-index:1;">
+          
+          <!-- Tier 1 -->
+          <div onclick="selectTier(1)" id="tier-1" style="background:rgba(247,243,238,0.08); border:1.5px solid rgba(247,243,238,0.2); border-radius:14px; padding:16px 10px; text-align:center; cursor:pointer; transition:all 0.2s;">
+            <div style="font-family:'Playfair Display',serif; font-size:22px; color:#FDFAF7; font-weight:400; margin-bottom:4px;">20</div>
+            <div style="font-size:11px; color:rgba(247,243,238,0.6); margin-bottom:10px; letter-spacing:0.04em;">names</div>
+            <div style="font-family:'Playfair Display',serif; font-size:20px; color:#C4694F; font-weight:400;">$1.99</div>
+          </div>
+
+          <!-- Tier 2 - Most Popular -->
+          <div onclick="selectTier(2)" id="tier-2" style="background:rgba(196,105,79,0.2); border:2px solid #C4694F; border-radius:14px; padding:16px 10px; text-align:center; cursor:pointer; transition:all 0.2s; position:relative;">
+            <div style="position:absolute; top:-10px; left:50%; transform:translateX(-50%); background:#C4694F; color:white; font-size:9px; letter-spacing:0.08em; text-transform:uppercase; padding:3px 10px; border-radius:99px; white-space:nowrap;">Most Popular</div>
+            <div style="font-family:'Playfair Display',serif; font-size:22px; color:#FDFAF7; font-weight:400; margin-bottom:4px;">100</div>
+            <div style="font-size:11px; color:rgba(247,243,238,0.6); margin-bottom:10px; letter-spacing:0.04em;">names</div>
+            <div style="font-family:'Playfair Display',serif; font-size:20px; color:#C4694F; font-weight:400;">$4.99</div>
+          </div>
+
+          <!-- Tier 3 -->
+          <div onclick="selectTier(3)" id="tier-3" style="background:rgba(247,243,238,0.08); border:1.5px solid rgba(247,243,238,0.2); border-radius:14px; padding:16px 10px; text-align:center; cursor:pointer; transition:all 0.2s;">
+            <div style="font-family:'Playfair Display',serif; font-size:22px; color:#FDFAF7; font-weight:400; margin-bottom:4px;">∞</div>
+            <div style="font-size:11px; color:rgba(247,243,238,0.6); margin-bottom:10px; letter-spacing:0.04em;">unlimited</div>
+            <div style="font-family:'Playfair Display',serif; font-size:20px; color:#C4694F; font-weight:400;">$9.99</div>
+          </div>
+        </div>
+
+        <!-- Stripe button -->
         <button onclick="handleStripe()" style="display:flex; align-items:center; justify-content:center; gap:10px; width:100%; padding:16px; background:#FDFAF7; border:none; border-radius:12px; font-family:'Lato',sans-serif; font-size:15px; color:#3A3530; cursor:pointer; margin-bottom:10px; transition:all 0.2s; position:relative; z-index:1;">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="#635BFF"><path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.591-7.305z"/></svg>
-          Pay $1.99 · Apple Pay / Card
+          <span id="stripe-btn-text">Pay $1.99 · Apple Pay / Card</span>
         </button>
 
         <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px; position:relative; z-index:1;">
@@ -1021,16 +1038,45 @@ function showResults(free, premium) {
           <div style="flex:1; height:1px; background:rgba(247,243,238,0.15);"></div>
         </div>
 
-        <!-- PayPal -->
         <button class="btn-paypal" onclick="handlePayPalWithEmail()" style="width:100%;">
           <span class="paypal-logo">Pay<span style="color:#009cde">Pal</span></span>
-          Pay with PayPal
+          <span id="paypal-btn-text">Pay $1.99 with PayPal</span>
         </button>
       </div>
 
       <div class="skip-link" onclick="handleSkip()">No thanks, I'm happy with 5 names</div>
     </div>
   `;
+
+  // Default to tier 1 selected
+  window._selectedTier = 1;
+}
+
+// Tier selection
+const TIER_CONFIG = {
+  1: { names: 20,  price: '$1.99', stripe: 'https://buy.stripe.com/PLACEHOLDER_20',  paypal: 'https://www.paypal.com/paypalme/YOURHANDLE/1.99' },
+  2: { names: 100, price: '$4.99', stripe: 'https://buy.stripe.com/PLACEHOLDER_100', paypal: 'https://www.paypal.com/paypalme/YOURHANDLE/4.99' },
+  3: { names: 999, price: '$9.99', stripe: 'https://buy.stripe.com/PLACEHOLDER_999', paypal: 'https://www.paypal.com/paypalme/YOURHANDLE/9.99' },
+};
+
+function selectTier(tier) {
+  window._selectedTier = tier;
+  [1,2,3].forEach(t => {
+    const el = document.getElementById('tier-' + t);
+    if (!el) return;
+    if (t === tier) {
+      el.style.border = '2px solid #C4694F';
+      el.style.background = 'rgba(196,105,79,0.2)';
+    } else {
+      el.style.border = '1.5px solid rgba(247,243,238,0.2)';
+      el.style.background = 'rgba(247,243,238,0.08)';
+    }
+  });
+  const cfg = TIER_CONFIG[tier];
+  const stripeBtn = document.getElementById('stripe-btn-text');
+  const paypalBtn = document.getElementById('paypal-btn-text');
+  if (stripeBtn) stripeBtn.textContent = 'Pay ' + cfg.price + ' · Apple Pay / Card';
+  if (paypalBtn) paypalBtn.textContent = 'Pay ' + cfg.price + ' with PayPal';
 }
 
 function handleStripe() {
@@ -1048,11 +1094,9 @@ function handleStripe() {
   if (emailError) emailError.style.display = 'none';
   localStorage.setItem('nameforest_email', email);
 
-  // REPLACE with your Stripe Payment Link URL
-  // Create one at: dashboard.stripe.com -> Payment Links -> Create
-  const STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/PLACEHOLDER';
-  window.open(STRIPE_PAYMENT_LINK + '?prefilled_email=' + encodeURIComponent(email), '_blank');
-
+  const tier = window._selectedTier || 1;
+  const cfg = TIER_CONFIG[tier];
+  window.open(cfg.stripe + '?prefilled_email=' + encodeURIComponent(email), '_blank');
   showPostPaymentMessage(email);
 }
 
@@ -1072,7 +1116,9 @@ function handlePayPalWithEmail() {
   localStorage.setItem('nameforest_email', email);
 
   // REPLACE YOURHANDLE with your actual PayPal.me username
-  window.open('https://www.paypal.com/paypalme/YOURHANDLE/1.99', '_blank');
+  const tier = window._selectedTier || 1;
+  const cfg = TIER_CONFIG[tier];
+  window.open(cfg.paypal, '_blank');
 
   showPostPaymentMessage(email);
 }
@@ -1108,6 +1154,13 @@ function handleSkip() {
 
 // Init
 renderQ();
+</script>
+
+<script>
+function toggleMenu() {
+  document.getElementById('mobileMenu').classList.toggle('open');
+  document.getElementById('hamburger').classList.toggle('open');
+}
 </script>
 </body>
 </html>
