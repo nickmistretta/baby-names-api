@@ -375,4 +375,15 @@ function cycle() {
   const nxt = (idx + 1) % nameItems.length;
   nameItems[cur].classList.remove('active'); nameItems[cur].classList.add('exit');
   originItems[cur].classList.remove('active'); originItems[cur].classList.add('exit');
-  setTim
+  setTimeout(() => {
+    nameItems[cur].classList.remove('exit');
+    nameItems[nxt].classList.add('active');
+    originItems[nxt].classList.add('active');
+    idx = nxt;
+  }, 500);
+}
+
+setInterval(cycle, 2800);
+</script>
+</body>
+</html>
