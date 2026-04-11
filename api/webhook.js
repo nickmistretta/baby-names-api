@@ -207,8 +207,7 @@ async function sendEmail(brevoKey, email, names, tier, count) {
   const htmlContent = `
     <div style="max-width:560px; margin:0 auto; font-family:'DM Sans',sans-serif; background:#FDFAF7;">
       <div style="background:#1C2B3A; padding:32px; text-align:center;">
-        <div style="font-family:Georgia,serif; font-size:36px; font-style:italic; color:#FDFAF7; letter-spacing:2px;">nomia</div>
-        <div style="font-size:11px; color:#8B9EB0; letter-spacing:4px; margin-top:4px;">FIND THE PERFECT BABY NAME</div>
+        <img src="https://raw.githubusercontent.com/nickmistretta/baby-names-api/main/nomia-email-logo.png" alt="nomia" style="height:72px; width:auto; display:inline-block;" />
       </div>
       <div style="padding:40px 32px;">
         <h1 style="font-family:Georgia,serif; font-size:28px; font-weight:300; color:#1C2B3A; margin-bottom:8px;">Your ${displayCount} names are here ✦</h1>
