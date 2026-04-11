@@ -3,105 +3,92 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Baby Name App — Find the Perfect Baby Name</title>
-<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/nickmistretta/baby-names-api/main/stork-cream.png">
-
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+<title>Nomia — Choose the Perfect Baby Name</title>
+<link rel="icon" type="image/svg+xml" href="https://raw.githubusercontent.com/nickmistretta/baby-names-api/main/nomia-favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@200;300;400&display=swap" rel="stylesheet">
 <style>
   :root {
-    --cream: #F7F3EE;
-    --linen: #EDE8E0;
-    --sand: #D9CFC2;
-    --clay: #B8956A;
-    --terracotta: #C4694F;
-    --bark: #7A5C44;
-    --moss: #6B7A5E;
-    --charcoal: #3A3530;
-    --muted: #8C7F75;
-    --white: #FDFAF7;
+    --navy: #1C2B3A;
+    --navy-deep: #152230;
+    --navy-mid: #243548;
+    --cream: #FDFAF7;
+    --blush: #F2D9D9;
+    --rose: #E8B4B8;
+    --dusty-rose: #C9737A;
+    --silver: #8B9EB0;
+    --white: #FFFFFF;
+    --off-white: #F8F6F3;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
   html { scroll-behavior: smooth; }
 
   body {
-    font-family: 'Lato', sans-serif;
+    font-family: 'DM Sans', sans-serif;
     background: var(--cream);
-    color: var(--charcoal);
+    color: var(--navy);
     overflow-x: hidden;
-  }
-
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 0;
-    opacity: 0.5;
   }
 
   /* NAV */
   nav {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
+    top: 0; left: 0; right: 0;
     z-index: 100;
-    padding: 16px 48px;
+    padding: 0 48px;
+    height: 72px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: rgba(247,243,238,0.92);
-    backdrop-filter: blur(12px);
-    border-bottom: 0.5px solid var(--sand);
+    background: var(--navy);
+    border-bottom: 0.5px solid rgba(255,255,255,0.08);
   }
 
   .nav-logo {
-    font-family: 'Playfair Display', serif;
-    font-size: 22px;
-    font-weight: 500;
-    color: var(--bark);
-    text-decoration: none;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
+    text-decoration: none;
   }
+
+  .nav-logo-svg { height: 44px; width: auto; }
 
   .nav-desktop {
     display: flex;
     align-items: center;
-    gap: 24px;
+    gap: 32px;
   }
 
   .nav-link {
-    font-size: 14px;
-    color: var(--muted);
+    font-size: 13px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.6);
     text-decoration: none;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
     transition: color 0.2s;
-    white-space: nowrap;
   }
 
-  .nav-link:hover { color: var(--bark); }
+  .nav-link:hover { color: white; }
 
   .nav-cta {
-    padding: 10px 18px;
-    background: var(--terracotta);
+    padding: 10px 24px;
+    background: var(--dusty-rose);
     color: white;
     border: none;
     border-radius: 99px;
-    font-family: 'Lato', sans-serif;
+    font-family: 'DM Sans', sans-serif;
     font-size: 13px;
+    font-weight: 300;
     cursor: pointer;
     text-decoration: none;
     transition: all 0.2s;
     white-space: nowrap;
+    letter-spacing: 0.04em;
   }
 
-  .nav-cta:hover { background: var(--bark); transform: translateY(-1px); }
+  .nav-cta:hover { background: #b85f66; transform: translateY(-1px); }
 
-  /* Hamburger */
   .hamburger {
     display: none;
     flex-direction: column;
@@ -116,42 +103,38 @@
   .hamburger span {
     display: block;
     width: 24px;
-    height: 2px;
-    background: var(--bark);
+    height: 1.5px;
+    background: white;
     border-radius: 99px;
     transition: all 0.3s ease;
   }
 
-  .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .hamburger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
   .hamburger.open span:nth-child(2) { opacity: 0; }
-  .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+  .hamburger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
 
-  /* Mobile menu */
   .mobile-menu {
     display: none;
     position: fixed;
-    top: 72px;
-    left: 0;
-    right: 0;
-    background: rgba(247,243,238,0.98);
-    backdrop-filter: blur(12px);
-    border-bottom: 0.5px solid var(--sand);
+    top: 72px; left: 0; right: 0;
+    background: var(--navy-deep);
+    border-bottom: 0.5px solid rgba(255,255,255,0.08);
     flex-direction: column;
-    padding: 16px 24px 20px;
+    padding: 16px 24px 24px;
     gap: 4px;
     z-index: 99;
-    animation: fadeDown 0.2s ease;
   }
 
   .mobile-menu.open { display: flex; }
 
   .mobile-menu a {
     padding: 14px 0;
-    font-size: 16px;
-    color: var(--charcoal);
-    text-decoration: none;
-    border-bottom: 0.5px solid var(--sand);
+    font-size: 15px;
     font-weight: 300;
+    color: rgba(255,255,255,0.8);
+    text-decoration: none;
+    border-bottom: 0.5px solid rgba(255,255,255,0.08);
+    letter-spacing: 0.04em;
   }
 
   .mobile-menu a:last-child { border-bottom: none; }
@@ -159,88 +142,105 @@
   .mobile-cta {
     margin-top: 8px;
     padding: 14px 24px !important;
-    background: var(--terracotta);
+    background: var(--dusty-rose);
     color: white !important;
     border-radius: 12px;
     text-align: center;
     border-bottom: none !important;
   }
 
-  @keyframes fadeDown {
-    from { opacity: 0; transform: translateY(-8px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
   @media (max-width: 640px) {
-    nav { padding: 12px 20px; }
+    nav { padding: 0 20px; }
     .nav-desktop { display: none; }
     .hamburger { display: flex; }
   }
 
-  /* HERO */
+  /* HERO - NAVY */
   .hero {
+    background: var(--navy);
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 110px 24px 40px;
-    position: relative;
-    z-index: 1;
+    padding: 120px 24px 80px;
     text-align: center;
+    position: relative;
+    overflow: hidden;
   }
 
-  .hero-inner {
-    max-width: 720px;
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -150px; right: -150px;
+    width: 500px; height: 500px;
+    border-radius: 50%;
+    background: rgba(201,115,122,0.08);
+    pointer-events: none;
   }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -100px; left: -100px;
+    width: 400px; height: 400px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.03);
+    pointer-events: none;
+  }
+
+  .hero-inner { max-width: 720px; position: relative; z-index: 1; }
 
   .hero-badge {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 6px 16px;
-    background: var(--linen);
-    border: 1px solid var(--sand);
+    padding: 6px 18px;
+    background: rgba(255,255,255,0.08);
+    border: 0.5px solid rgba(255,255,255,0.15);
     border-radius: 99px;
-    font-size: 12px;
-    color: var(--bark);
-    letter-spacing: 0.08em;
+    font-size: 11px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.65);
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    margin-bottom: 28px;
+    margin-bottom: 36px;
     animation: fadeUp 0.8s ease both;
   }
 
-  .hero-badge span { color: var(--terracotta); }
+  .badge-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--dusty-rose);
+  }
 
   .hero h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(38px, 6vw, 68px);
-    font-weight: 400;
-    line-height: 1.1;
-    color: var(--bark);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(44px, 6vw, 80px);
+    font-weight: 300;
+    line-height: 1.05;
+    color: var(--cream);
     margin-bottom: 24px;
     animation: fadeUp 0.8s 0.1s ease both;
   }
 
-  .hero h1 em {
-    font-style: italic;
-    color: var(--terracotta);
-  }
+  .hero h1 em { font-style: italic; color: var(--rose); }
 
-  .hero p {
-    font-size: clamp(16px, 2vw, 19px);
-    color: var(--muted);
+  .hero-sub {
+    font-size: 18px;
     font-weight: 300;
-    line-height: 1.7;
+    color: rgba(255,255,255,0.55);
+    line-height: 1.75;
     max-width: 520px;
-    margin: 0 auto 40px;
+    margin: 0 auto 44px;
     animation: fadeUp 0.8s 0.2s ease both;
   }
 
-  .hero-cta-wrap {
+  .hero-actions {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 12px;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
     animation: fadeUp 0.8s 0.3s ease both;
   }
 
@@ -248,458 +248,351 @@
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    padding: 18px 40px;
-    background: var(--terracotta);
+    padding: 16px 40px;
+    background: var(--dusty-rose);
     color: white;
     border: none;
     border-radius: 99px;
-    font-family: 'Lato', sans-serif;
-    font-size: 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 300;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.25s;
+    letter-spacing: 0.04em;
+  }
+
+  .btn-primary:hover { background: #b85f66; transform: translateY(-2px); box-shadow: 0 12px 32px rgba(201,115,122,0.4); }
+
+  .btn-ghost {
+    padding: 16px 28px;
+    background: transparent;
+    border: 0.5px solid rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.65);
+    border-radius: 99px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 300;
     cursor: pointer;
     text-decoration: none;
     transition: all 0.2s;
-    letter-spacing: 0.02em;
-    box-shadow: 0 8px 32px rgba(196,105,79,0.3);
+    letter-spacing: 0.04em;
   }
 
-  .btn-primary:hover { background: var(--bark); transform: translateY(-2px); box-shadow: 0 12px 40px rgba(196,105,79,0.35); }
+  .btn-ghost:hover { border-color: rgba(255,255,255,0.4); color: white; }
 
-  .hero-sub {
-    font-size: 13px;
-    color: var(--muted);
-    font-weight: 300;
-  }
-
-  /* ANIMATED NAME CYCLE */
-  .hero-names {
-    margin-top: 48px;
+  /* NAME CYCLE */
+  .name-cycle-wrap {
+    margin-top: 64px;
     animation: fadeUp 0.8s 0.4s ease both;
-    text-align: center;
   }
 
-  .name-cycle-label {
-    font-size: 11px;
-    letter-spacing: 0.12em;
+  .cycle-label {
+    font-size: 10px;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 14px;
+    color: rgba(255,255,255,0.3);
+    margin-bottom: 20px;
   }
 
-  .name-cycle {
+  .cycle-name-display {
     position: relative;
-    height: 52px;
+    height: 90px;
     overflow: hidden;
   }
 
-  .name-cycle-item {
+  .cycle-item {
     position: absolute;
     width: 100%;
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(30px, 5vw, 44px);
-    font-weight: 400;
-    color: var(--bark);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(56px, 8vw, 80px);
+    font-weight: 300;
+    color: var(--cream);
     opacity: 0;
     transform: translateY(20px);
-    transition: opacity 0.6s ease, transform 0.6s ease;
-    pointer-events: none;
-    user-select: none;
+    transition: opacity 0.7s ease, transform 0.7s ease;
   }
 
-  .name-cycle-item.active {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  .cycle-item.active { opacity: 1; transform: translateY(0); }
+  .cycle-item.exit { opacity: 0; transform: translateY(-20px); transition: opacity 0.5s ease, transform 0.5s ease; }
 
-  .name-cycle-item.exit {
-    opacity: 0;
-    transform: translateY(-20px);
-    transition: opacity 0.4s ease, transform 0.4s ease;
-  }
-
-  .name-cycle-origin {
-    margin-top: 8px;
-    height: 18px;
+  .cycle-origin-display {
+    height: 20px;
     position: relative;
     overflow: hidden;
+    margin-top: 10px;
   }
 
-  .name-cycle-origin-item {
+  .cycle-origin-item {
     position: absolute;
     width: 100%;
     font-size: 12px;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--terracotta);
+    color: var(--dusty-rose);
     opacity: 0;
     transform: translateY(8px);
-    transition: opacity 0.6s ease, transform 0.6s ease;
-    pointer-events: none;
+    transition: opacity 0.7s ease, transform 0.7s ease;
   }
 
-  .name-cycle-origin-item.active {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  .cycle-origin-item.active { opacity: 1; transform: translateY(0); }
+  .cycle-origin-item.exit { opacity: 0; transform: translateY(-8px); }
 
-  .name-cycle-origin-item.exit {
-    opacity: 0;
-    transform: translateY(-8px);
-    transition: opacity 0.4s ease, transform 0.4s ease;
-  }
-
-  .name-cycle-dots {
+  .cycle-dots {
     display: flex;
     justify-content: center;
     gap: 6px;
-    margin-top: 16px;
+    margin-top: 20px;
   }
 
-  .name-cycle-dot {
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: var(--sand);
-    transition: background 0.4s;
+  .cycle-dot {
+    height: 4px;
+    width: 4px;
+    border-radius: 99px;
+    background: rgba(255,255,255,0.2);
+    transition: all 0.4s;
   }
 
-  .name-cycle-dot.active {
-    background: var(--terracotta);
+  .cycle-dot.active { background: var(--dusty-rose); width: 16px; }
+
+  /* STATS BAR */
+  .stats-bar {
+    background: var(--navy-deep);
+    border-top: 0.5px solid rgba(255,255,255,0.06);
+    display: flex;
   }
 
-  /* HOW IT WORKS */
-  .section {
-    padding: 32px 24px 60px;
-    position: relative;
-    z-index: 1;
-  }
-
-  .section-inner {
-    max-width: 960px;
-    margin: 0 auto;
-  }
-
-  .section-label {
-    font-size: 16px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--clay);
+  .stat-item {
+    flex: 1;
+    padding: 28px 24px;
     text-align: center;
-    margin-bottom: 20px;
-    font-weight: 400;
+    border-right: 0.5px solid rgba(255,255,255,0.06);
   }
+
+  .stat-item:last-child { border-right: none; }
+
+  .stat-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 36px;
+    font-weight: 300;
+    color: var(--cream);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* HOW IT WORKS - WHITE */
+  .section-white {
+    background: var(--white);
+    padding: 100px 48px;
+  }
+
+  .section-navy {
+    background: var(--navy);
+    padding: 100px 48px;
+  }
+
+  .section-cream {
+    background: var(--cream);
+    padding: 100px 48px;
+  }
+
+  .section-inner { max-width: 1100px; margin: 0 auto; }
+
+  .eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 300;
+    margin-bottom: 16px;
+  }
+
+  .eyebrow-rose { color: var(--dusty-rose); }
+  .eyebrow-silver { color: var(--silver); }
 
   .section-title {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(36px, 5vw, 58px);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(36px, 4vw, 54px);
     font-weight: 400;
-    color: var(--bark);
-    text-align: center;
-    margin-bottom: 20px;
-    line-height: 1.15;
+    line-height: 1.1;
+    margin-bottom: 16px;
   }
 
-  .section-title em { font-style: italic; color: var(--terracotta); }
+  .title-navy { color: var(--navy); }
+  .title-cream { color: var(--cream); }
+  .title-em { font-style: italic; color: var(--dusty-rose); }
 
   .section-sub {
-    font-size: 18px;
-    color: var(--muted);
+    font-size: 17px;
     font-weight: 300;
-    text-align: center;
+    line-height: 1.75;
     max-width: 520px;
-    margin: 0 auto 56px;
-    line-height: 1.7;
+    margin-bottom: 64px;
   }
+
+  .sub-slate { color: #4A5568; }
+  .sub-muted { color: rgba(255,255,255,0.5); }
 
   /* STEPS */
   .steps {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 24px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
   }
 
   .step {
-    background: var(--white);
-    border: 1px solid var(--sand);
+    padding: 36px 28px;
+    background: var(--off-white);
+    border: 0.5px solid rgba(28,43,58,0.08);
     border-radius: 20px;
-    padding: 32px 28px;
-    position: relative;
     transition: transform 0.2s, box-shadow 0.2s;
   }
 
-  .step:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(122,92,68,0.1); }
+  .step:hover { transform: translateY(-4px); box-shadow: 0 20px 48px rgba(28,43,58,0.08); }
 
   .step-num {
-    font-family: 'Playfair Display', serif;
-    font-size: 48px;
-    font-weight: 400;
-    color: var(--sand);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 52px;
+    font-weight: 300;
+    color: var(--blush);
     line-height: 1;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
   }
 
   .step-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 20px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
     font-weight: 500;
-    color: var(--charcoal);
+    color: var(--navy);
     margin-bottom: 10px;
   }
 
   .step-desc {
     font-size: 14px;
-    color: var(--muted);
     font-weight: 300;
-    line-height: 1.6;
+    color: #4A5568;
+    line-height: 1.7;
   }
 
-  .step-icon {
-    position: absolute;
-    top: 28px;
-    right: 28px;
-    font-size: 24px;
-    opacity: 0.6;
-  }
-
-  /* DIVIDER */
-  .divider {
-    width: 60px;
-    height: 1px;
-    background: var(--sand);
-    margin: 0 auto 64px;
-  }
-
-  /* WHAT YOU GET */
-  .features {
-    background: var(--charcoal);
-    border-radius: 28px;
-    padding: 64px 48px;
+  /* FEATURES - NAVY */
+  .features-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 48px;
+    gap: 80px;
     align-items: center;
-    position: relative;
-    overflow: hidden;
   }
 
-  .features::before {
-    content: '';
-    position: absolute;
-    top: -60px;
-    right: -60px;
-    width: 240px;
-    height: 240px;
-    border-radius: 50%;
-    background: rgba(196,105,79,0.15);
-  }
+  .feature-cards { display: flex; flex-direction: column; gap: 16px; }
 
-  .features::after {
-    content: '';
-    position: absolute;
-    bottom: -40px;
-    left: -40px;
-    width: 180px;
-    height: 180px;
-    border-radius: 50%;
-    background: rgba(107,122,94,0.1);
-  }
-
-  .features-left { position: relative; z-index: 1; }
-
-  .features-label {
-    font-size: 11px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--clay);
-    margin-bottom: 16px;
-  }
-
-  .features-title {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(24px, 3vw, 36px);
-    color: var(--cream);
-    font-weight: 400;
-    line-height: 1.2;
-    margin-bottom: 24px;
-  }
-
-  .features-title em { font-style: italic; color: var(--terracotta); }
-
-  .features-desc {
-    font-size: 15px;
-    color: rgba(247,243,238,0.6);
-    font-weight: 300;
-    line-height: 1.7;
-    margin-bottom: 32px;
-  }
-
-  .features-right {
-    position: relative;
-    z-index: 1;
+  .feature-card {
+    padding: 22px 24px;
+    background: rgba(255,255,255,0.05);
+    border: 0.5px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
     display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .feature-item {
-    display: flex;
+    gap: 18px;
     align-items: flex-start;
-    gap: 14px;
-    padding: 16px 20px;
-    background: rgba(247,243,238,0.06);
-    border: 1px solid rgba(247,243,238,0.1);
-    border-radius: 12px;
   }
 
   .feature-dot {
-    width: 8px;
-    height: 8px;
+    width: 8px; height: 8px;
     border-radius: 50%;
-    background: var(--terracotta);
+    background: var(--dusty-rose);
     flex-shrink: 0;
     margin-top: 6px;
   }
 
-  .feature-text {
-    font-size: 14px;
-    color: rgba(247,243,238,0.8);
-    font-weight: 300;
-    line-height: 1.5;
-  }
-
-  .feature-text strong {
+  .feature-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    font-weight: 500;
     color: var(--cream);
-    font-weight: 400;
-    display: block;
-    margin-bottom: 2px;
+    margin-bottom: 4px;
   }
 
-  /* SOCIAL PROOF */
-  .proof {
-    background: var(--linen);
-    border-radius: 28px;
-    padding: 64px 48px;
-    text-align: center;
+  .feature-desc {
+    font-size: 13px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.6;
   }
 
-  .proof-stats {
+  /* TESTIMONIALS - CREAM */
+  .testimonials-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 32px;
-    margin-bottom: 48px;
-  }
-
-  .stat-num {
-    font-family: 'Playfair Display', serif;
-    font-size: 42px;
-    font-weight: 400;
-    color: var(--bark);
-    line-height: 1;
-    margin-bottom: 8px;
-  }
-
-  .stat-label {
-    font-size: 13px;
-    color: var(--muted);
-    font-weight: 300;
-    letter-spacing: 0.04em;
-  }
-
-  .proof-divider {
-    width: 1px;
-    background: var(--sand);
-    align-self: stretch;
-  }
-
-  .testimonials {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 20px;
-    text-align: left;
+    gap: 24px;
+    margin-top: 56px;
   }
 
   .testimonial {
-    background: var(--white);
-    border: 1px solid var(--sand);
-    border-radius: 16px;
-    padding: 24px;
+    background: white;
+    border: 0.5px solid rgba(28,43,58,0.08);
+    border-radius: 20px;
+    padding: 32px 28px;
   }
 
-  .testimonial-text {
-    font-family: 'Playfair Display', serif;
-    font-size: 15px;
+  .testimonial-quote {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
     font-style: italic;
-    color: var(--charcoal);
+    color: var(--navy);
     line-height: 1.6;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
   }
 
   .testimonial-author {
     font-size: 12px;
-    color: var(--muted);
     font-weight: 300;
-    letter-spacing: 0.04em;
+    color: var(--silver);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
   }
 
-  .testimonial-author span {
-    color: var(--clay);
-  }
+  .testimonial-author span { color: var(--dusty-rose); }
 
-  /* CTA SECTION */
-  .cta-section {
-    text-align: center;
-    padding: 100px 24px;
-    position: relative;
-    z-index: 1;
-  }
-
+  /* FINAL CTA - NAVY */
   .cta-inner {
-    max-width: 600px;
+    max-width: 640px;
     margin: 0 auto;
-  }
-
-  .cta-section h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(32px, 5vw, 52px);
-    font-weight: 400;
-    color: var(--bark);
-    line-height: 1.15;
-    margin-bottom: 20px;
-  }
-
-  .cta-section h2 em { font-style: italic; color: var(--terracotta); }
-
-  .cta-section p {
-    font-size: 16px;
-    color: var(--muted);
-    font-weight: 300;
-    margin-bottom: 40px;
-    line-height: 1.7;
+    text-align: center;
   }
 
   /* FOOTER */
   footer {
-    border-top: 1px solid var(--sand);
+    background: var(--navy-deep);
     padding: 32px 48px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    position: relative;
-    z-index: 1;
+    border-top: 0.5px solid rgba(255,255,255,0.06);
   }
 
-  .footer-logo {
-    font-family: 'Playfair Display', serif;
-    font-size: 18px;
-    color: var(--bark);
-    display: flex;
-    align-items: center;
-    gap: 6px;
+  .footer-links { display: flex; gap: 28px; }
+
+  .footer-link {
+    font-size: 12px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.4);
+    text-decoration: none;
+    letter-spacing: 0.06em;
+    transition: color 0.2s;
   }
+
+  .footer-link:hover { color: rgba(255,255,255,0.7); }
 
   .footer-copy {
     font-size: 12px;
-    color: var(--muted);
     font-weight: 300;
+    color: rgba(255,255,255,0.25);
+    letter-spacing: 0.04em;
   }
 
   /* ANIMATIONS */
@@ -714,18 +607,18 @@
     transition: opacity 0.7s ease, transform 0.7s ease;
   }
 
-  .reveal.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
 
   /* RESPONSIVE */
   @media (max-width: 768px) {
-    nav { padding: 16px 24px; }
-    .features { grid-template-columns: 1fr; padding: 40px 28px; }
-    .proof-stats { grid-template-columns: 1fr; gap: 24px; }
-    .proof { padding: 40px 24px; }
-    footer { flex-direction: column; gap: 12px; text-align: center; }
+    .steps { grid-template-columns: 1fr; }
+    .features-grid { grid-template-columns: 1fr; gap: 40px; }
+    .testimonials-grid { grid-template-columns: 1fr; }
+    .stats-bar { flex-wrap: wrap; }
+    .stat-item { min-width: 50%; border-right: none; border-bottom: 0.5px solid rgba(255,255,255,0.06); }
+    footer { flex-direction: column; gap: 16px; text-align: center; padding: 24px; }
+    .footer-links { flex-wrap: wrap; justify-content: center; gap: 16px; }
+    .section-white, .section-navy, .section-cream { padding: 72px 24px; }
   }
 </style>
 </head>
@@ -733,133 +626,137 @@
 
 <!-- NAV -->
 <nav>
-  <a href="index.html" class="nav-logo"><img src="https://raw.githubusercontent.com/nickmistretta/baby-names-api/main/Baby-Name-Transparent.png" alt="Baby Name App" style="height:62px; width:auto;"></a>
-  
-  <!-- Desktop nav -->
+  <a href="index.html" class="nav-logo">
+    <svg class="nav-logo-svg" viewBox="0 0 680 180" xmlns="http://www.w3.org/2000/svg">
+      <defs><style>@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,300&amp;display=swap');</style></defs>
+      <g transform="translate(28,42) scale(0.095)"><g fill="#FDFAF7"><path d="M237.85 518.09 c-16.35 -1.79 -35.25 -6.32 -52.04 -12.51 -9 -3.32 -26.63 -11.56 -33.39 -15.58 -46.10 -27.58 -77.39 -65.83 -95.33 -116.27 -4.28 -12.20 -7.98 -26.05 -8.05 -30.58 -0.13 -7.02 3.96 -11.75 10.22 -11.75 3.64 0 5.87 1.21 11.62 6.39 17.69 15.71 39.20 28.73 59.38 36.01 22.67 8.11 46.99 11.88 71.19 10.98 12.13 -0.38 18.20 -0.96 18.20 -1.60 -0.06 -0.19 -2.23 -1.40 -4.98 -2.62 -10.79 -4.92 -24.52 -15.58 -33.20 -25.80 -12.83 -15.13 -20.94 -31.61 -25.16 -51.27 -1.28 -6.13 -1.47 -8.56 -1.47 -21.90 0.06 -13.03 0.26 -15.84 1.47 -21.39 2.17 -9.96 4.92 -17.75 9.71 -27.46 5.94 -12 11.30 -19.28 22.03 -30.07 10.28 -10.34 13.03 -12.07 18.45 -11.62 4.02 0.32 6.32 1.85 8.05 5.36 1.60 3.26 1.60 5.81 0 11.43 -3.32 11.37 -4.09 27.07 -1.98 39.46 1.15 6.39 1.66 8.11 2.17 7.41 0.13 -0.13 1.79 -3.19 3.64 -6.77 11.94 -23.05 35.76 -42.84 61.49 -51.21 17.43 -5.62 34.35 -7.60 39.78 -4.66 2.43 1.34 4.66 4.53 5.04 7.41 0.70 4.47 -1.09 7.60 -7.22 12.71 -10.60 8.88 -17.94 18.13 -24.07 30.39 -11.37 22.79 -12.45 49.17 -3 73.49 l1.85 4.79 8.56 0.19 c9.39 0.19 17.94 -1.09 27.20 -4.02 5.56 -1.79 20.62 -9 23.31 -11.17 4.02 -3.13 13.15 -19.22 27.71 -48.78 15.58 -31.67 22.09 -47.51 26.12 -63.60 3.83 -15.20 4.53 -30.39 1.66 -36.40 -0.77 -1.60 -4.47 -6.26 -8.30 -10.34 -7.98 -8.62 -9.64 -11.43 -9.64 -16.67 0 -6.07 2.68 -10.66 7.79 -13.28 2.30 -1.15 4.41 -1.21 52.81 -1.21 34.10 0 51.53 0.26 53.83 0.70 5.04 1.02 12.07 4.66 15.96 8.11 l3.38 3.06 20.11 1.79 c33.52 2.87 68.96 5.94 101.08 8.68 18.07 1.53 31.41 2.94 32.63 3.45 2.75 1.15 5.87 4.85 6.39 7.66 0.83 4.47 -1.60 9.32 -5.87 11.49 -1.98 1.02 -5.49 1.72 -16.28 3.32 -4.15 0.64 -8.05 1.47 -8.62 1.92 -0.89 0.70 -0.32 2.23 5.62 14.37 21.77 44.89 28.73 60.08 40.55 88.37 20.11 48.02 27.78 73.94 28.86 97.05 1.21 26.31 -8.30 55.30 -24.71 75.34 -12.96 15.77 -29.82 27.01 -48.21 32.05 -8.11 2.23 -24.84 2.81 -33.97 1.15 -33.71 -6 -61.87 -31.93 -73.88 -68 -2.94 -8.75 -4.66 -17.50 -5.62 -27.97 -2.04 -23.24 4.41 -49.68 23.88 -97.82 10.85 -26.88 30.20 -69.66 43.99 -97.25 l6.39 -12.71 -3.70 0.45 c-2.04 0.26 -3.96 0.64 -4.34 0.89 -0.32 0.19 -4.09 0.83 -8.30 1.40 -14.69 2.04 -27.52 3.83 -39.91 5.68 -6.83 1.02 -15.01 2.17 -18.20 2.55 -15.32 1.92 -16.86 2.36 -21.71 6.07 -8.56 6.51 -14.37 8.62 -24.77 9.07 -11.17 0.51 -10.98 0.19 -10.02 20.30 0.83 17.94 0.83 58.42 0 69.92 -2.87 39.40 -9.39 67.43 -22.48 97.05 -14.62 33.27 -34.86 60.98 -60.85 83.52 -31.61 27.46 -74.39 46.23 -116.85 51.14 -8.05 0.96 -36.01 0.77 -45.97 -0.32z"/><path d="M482.46 166.65 c-4.02 -1.28 -6.77 -5.30 -6.77 -9.90 0 -3.64 1.21 -6.13 4.28 -8.43 3.06 -2.30 8.62 -2.55 11.49 -0.45 6.19 4.60 6.32 13.09 0.19 17.62 -1.92 1.34 -6.64 1.98 -9.19 1.15z"/></g></g>
+      <text x="108" y="108" font-family="Cormorant Garamond,Georgia,serif" font-size="88" font-weight="300" font-style="italic" fill="#FDFAF7" letter-spacing="4">nomia</text>
+      <text x="110" y="140" font-family="DM Sans,sans-serif" font-size="11" font-weight="200" fill="#8B9EB0" letter-spacing="5">CHOOSE THE PERFECT BABY NAME</text>
+    </svg>
+  </a>
   <div class="nav-desktop">
     <a href="about.html" class="nav-link">About</a>
-    <a href="quiz.html" class="nav-cta">Find your name →</a>
+    <a href="quiz.html" class="nav-cta">Find your name</a>
   </div>
-
-  <!-- Mobile hamburger -->
-  <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
-    <span></span><span></span><span></span>
-  </button>
-
-  <!-- Mobile dropdown -->
+  <button class="hamburger" id="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></button>
   <div class="mobile-menu" id="mobileMenu">
     <a href="about.html" onclick="toggleMenu()">About</a>
-    <a href="quiz.html" class="mobile-cta" onclick="toggleMenu()">Find your name →</a>
+    <a href="quiz.html" class="mobile-cta" onclick="toggleMenu()">Find your name</a>
   </div>
 </nav>
 
 <!-- HERO -->
 <section class="hero">
   <div class="hero-inner">
-    <div class="hero-badge">✦ AI-powered · <span>Free to try</span></div>
-    <h1>Your baby deserves a name as <em>unique</em> as they are</h1>
-    <p>Answer 7 thoughtful questions and our AI will curate a list of beautiful names perfectly matched to your style, heritage, and hopes.</p>
-    <div class="hero-cta-wrap">
-      <a href="quiz.html" class="btn-primary">Find my baby's name <img src="https://raw.githubusercontent.com/nickmistretta/baby-names-api/main/stork-cream.png" style="height:22px; width:auto; vertical-align:middle; margin-left:8px;"></a>
-      <span class="hero-sub">Free · Takes 2 minutes · No sign up needed</span>
+    <div class="hero-badge"><span class="badge-dot"></span> AI-powered · free to start</div>
+    <h1>The name she'll carry<br><em>forever</em> starts here</h1>
+    <p class="hero-sub">Answer 7 thoughtful questions. Our AI searches 3 million names across 190 cultures to find the one that's truly yours.</p>
+    <div class="hero-actions">
+      <a href="quiz.html" class="btn-primary">Find my baby's name</a>
+      <a href="about.html" class="btn-ghost">How it works</a>
     </div>
-    <div class="hero-names">
-      <div class="name-cycle-label">names our AI has discovered</div>
-      <div class="name-cycle" id="nameCycle">
-        <div class="name-cycle-item active">Rowan</div>
-        <div class="name-cycle-item">Jasmine</div>
-        <div class="name-cycle-item">Soren</div>
-        <div class="name-cycle-item">Hazel</div>
-        <div class="name-cycle-item">Lucian</div>
-        <div class="name-cycle-item">Wren</div>
-        <div class="name-cycle-item">Nora</div>
-        <div class="name-cycle-item">Caspian</div>
-        <div class="name-cycle-item">Isla</div>
-        <div class="name-cycle-item">Emre</div>
+    <div class="name-cycle-wrap">
+      <div class="cycle-label">names our AI has discovered</div>
+      <div class="cycle-name-display" id="cycleNames">
+        <div class="cycle-item active">Isolde</div>
+        <div class="cycle-item">Caspian</div>
+        <div class="cycle-item">Seraphine</div>
+        <div class="cycle-item">Emre</div>
+        <div class="cycle-item">Wren</div>
+        <div class="cycle-item">Oleander</div>
+        <div class="cycle-item">Noor</div>
+        <div class="cycle-item">Stellan</div>
+        <div class="cycle-item">Zara</div>
+        <div class="cycle-item">Callum</div>
       </div>
-      <div class="name-cycle-origin" id="nameCycleOrigin">
-        <div class="name-cycle-origin-item active">Celtic · little red one</div>
-        <div class="name-cycle-origin-item">Persian · jasmine flower</div>
-        <div class="name-cycle-origin-item">Scandinavian · stern, thunder</div>
-        <div class="name-cycle-origin-item">Old English · wisdom</div>
-        <div class="name-cycle-origin-item">Latin · light, illumination</div>
-        <div class="name-cycle-origin-item">English · free spirit</div>
-        <div class="name-cycle-origin-item">Hebrew · grace, favor</div>
-        <div class="name-cycle-origin-item">Latin · of the Caspian sea</div>
-        <div class="name-cycle-origin-item">Scottish · island</div>
-        <div class="name-cycle-origin-item">Turkish · friend, brother</div>
+      <div class="cycle-origin-display" id="cycleOrigins">
+        <div class="cycle-origin-item active">Celtic · ice ruler</div>
+        <div class="cycle-origin-item">Latin · of the Caspian sea</div>
+        <div class="cycle-origin-item">French · heavenly</div>
+        <div class="cycle-origin-item">Turkish · friend, brother</div>
+        <div class="cycle-origin-item">English · small bird</div>
+        <div class="cycle-origin-item">Greek · flowering tree</div>
+        <div class="cycle-origin-item">Arabic · light</div>
+        <div class="cycle-origin-item">Scandinavian · calm</div>
+        <div class="cycle-origin-item">Arabic · princess</div>
+        <div class="cycle-origin-item">Scottish · dove</div>
       </div>
-      <div class="name-cycle-dots" id="nameDots"></div>
+      <div class="cycle-dots" id="cycleDots"></div>
     </div>
   </div>
 </section>
 
-<!-- HOW IT WORKS -->
-<section class="section">
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="stat-item"><div class="stat-num">3M+</div><div class="stat-label">Names in database</div></div>
+  <div class="stat-item"><div class="stat-num">190+</div><div class="stat-label">Cultures & origins</div></div>
+  <div class="stat-item"><div class="stat-num">7</div><div class="stat-label">Curated questions</div></div>
+  <div class="stat-item"><div class="stat-num">∞</div><div class="stat-label">Unique results</div></div>
+</div>
+
+<!-- HOW IT WORKS - WHITE -->
+<section class="section-white">
   <div class="section-inner">
-    <div class="section-label reveal">How it works</div>
-    <h2 class="section-title reveal">Three steps to your <em>perfect</em> name</h2>
-    <p class="section-sub reveal">No endless scrolling through lists of thousands. Just a thoughtful process that gets to know you first.</p>
+    <div class="eyebrow eyebrow-rose reveal">How it works</div>
+    <h2 class="section-title title-navy reveal">Three steps to your <em class="title-em">perfect</em> name</h2>
+    <p class="section-sub sub-slate reveal">No endless scrolling through lists of thousands. Just a thoughtful process that gets to know you first.</p>
     <div class="steps">
       <div class="step reveal">
         <div class="step-num">01</div>
-        <div class="step-icon">✦</div>
         <div class="step-title">Tell us about your style</div>
         <div class="step-desc">Answer 7 gentle questions about your preferences, heritage, the feeling you want the name to carry, and when your little one arrives.</div>
       </div>
       <div class="step reveal">
         <div class="step-num">02</div>
-        <div class="step-icon">🌿</div>
         <div class="step-title">AI curates your list</div>
         <div class="step-desc">Our AI weaves together every answer to surface names that feel genuinely right — not just popular, but perfect for your family.</div>
       </div>
       <div class="step reveal">
         <div class="step-num">03</div>
-        <div class="step-icon">✨</div>
         <div class="step-title">Discover your names</div>
-        <div class="step-desc">Get 5 beautifully curated names with origins, meanings, and the story behind each one. Unlock 20 more for just $1.99.</div>
+        <div class="step-desc">Get 5 beautifully curated names with origins, meanings, and the story behind each one. Unlock 20, 100, or unlimited for just a few dollars.</div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- WHAT YOU GET -->
-<section class="section" style="padding-top: 0;">
+<!-- FEATURES - NAVY -->
+<section class="section-navy">
   <div class="section-inner">
-    <div class="features reveal">
-      <div class="features-left">
-        <div class="features-label">What's included</div>
-        <h3 class="features-title">More than just a name — a story worth <em>telling</em></h3>
-        <p class="features-desc">Every name comes with its full origin story, cultural roots, and the meaning behind it. Because the best names have something to say.</p>
-        <a href="quiz.html" class="btn-primary" style="font-size: 15px; padding: 16px 32px;">Start for free →</a>
+    <div class="features-grid">
+      <div>
+        <div class="eyebrow eyebrow-silver reveal">What's included</div>
+        <h2 class="section-title title-cream reveal">More than just a name — a story worth <em class="title-em">telling</em></h2>
+        <p class="section-sub sub-muted reveal">Every name comes with its full origin story, cultural roots, and the meaning behind it. Because the best names have something to say.</p>
+        <a href="quiz.html" class="btn-primary reveal">Start for free</a>
       </div>
-      <div class="features-right">
-        <div class="feature-item">
+      <div class="feature-cards">
+        <div class="feature-card reveal">
           <div class="feature-dot"></div>
-          <div class="feature-text">
-            <strong>5 free AI-curated names</strong>
-            Handpicked based on every detail you share — style, culture, meaning, and season.
+          <div>
+            <div class="feature-title">5 free AI-curated names</div>
+            <div class="feature-desc">Handpicked based on every detail you share — style, culture, meaning, and season.</div>
           </div>
         </div>
-        <div class="feature-item">
+        <div class="feature-card reveal">
           <div class="feature-dot"></div>
-          <div class="feature-text">
-            <strong>Full origin & meaning</strong>
-            Where the name comes from, what it means, and why it fits your family.
+          <div>
+            <div class="feature-title">Full origin & meaning</div>
+            <div class="feature-desc">Where the name comes from, what it means, and why it fits your family.</div>
           </div>
         </div>
-        <div class="feature-item">
+        <div class="feature-card reveal">
           <div class="feature-dot"></div>
-          <div class="feature-text">
-            <strong>Unlock 20 more for $1.99</strong>
-            Rare finds, hidden gems, and sibling pairings — your complete curated collection.
+          <div>
+            <div class="feature-title">Unlock 20, 100 or unlimited</div>
+            <div class="feature-desc">From $1.99 — rare finds, hidden gems, sibling pairings, and your complete curated collection.</div>
           </div>
         </div>
-        <div class="feature-item">
+        <div class="feature-card reveal">
           <div class="feature-dot"></div>
-          <div class="feature-text">
-            <strong>Different every time</strong>
-            Every quiz generates a truly unique list. No two families get the same names.
+          <div>
+            <div class="feature-title">Different every time</div>
+            <div class="feature-desc">Every quiz generates a truly unique list. No two families ever see the same names.</div>
           </div>
         </div>
       </div>
@@ -867,108 +764,96 @@
   </div>
 </section>
 
-<!-- SOCIAL PROOF -->
-<section class="section" style="padding-top: 0;">
+<!-- TESTIMONIALS - CREAM -->
+<section class="section-cream">
   <div class="section-inner">
-    <div class="proof reveal">
-      <div class="proof-stats">
-        <div>
-          <div class="stat-num">12k+</div>
-          <div class="stat-label">Names generated</div>
-        </div>
-        <div>
-          <div class="stat-num">4.9★</div>
-          <div class="stat-label">Average rating</div>
-        </div>
-        <div>
-          <div class="stat-num">2 min</div>
-          <div class="stat-label">To your list</div>
-        </div>
+    <div class="eyebrow eyebrow-rose reveal">What parents are saying</div>
+    <h2 class="section-title title-navy reveal">Names that feel like they were <em class="title-em">meant to be</em></h2>
+    <div class="testimonials-grid">
+      <div class="testimonial reveal">
+        <div class="testimonial-quote">"I'd been stuck for weeks. Within 2 minutes it gave me the name I'd been looking for without knowing it."</div>
+        <div class="testimonial-author">— <span>Sarah M.</span>, 34 weeks</div>
       </div>
-      <div class="divider"></div>
-      <div class="testimonials">
-        <div class="testimonial">
-          <div class="testimonial-text">"I'd been stuck for weeks. Within 2 minutes it gave me the name I'd been looking for without knowing it."</div>
-          <div class="testimonial-author">— <span>Sarah M.</span>, 34 weeks</div>
-        </div>
-        <div class="testimonial">
-          <div class="testimonial-text">"The AI actually understood what I meant by 'soft but strong'. The names it suggested were exactly that."</div>
-          <div class="testimonial-author">— <span>James & Priya</span>, expecting in June</div>
-        </div>
-        <div class="testimonial">
-          <div class="testimonial-text">"Worth every penny for the full list. We found our daughter's name in there. It felt meant to be."</div>
-          <div class="testimonial-author">— <span>Melissa T.</span>, new mom</div>
-        </div>
+      <div class="testimonial reveal">
+        <div class="testimonial-quote">"The AI actually understood what I meant by 'soft but strong'. The names it suggested were exactly that."</div>
+        <div class="testimonial-author">— <span>James & Priya</span>, expecting in June</div>
+      </div>
+      <div class="testimonial reveal">
+        <div class="testimonial-quote">"Worth every penny for the full list. We found our daughter's name in there. It felt meant to be."</div>
+        <div class="testimonial-author">— <span>Melissa T.</span>, new mom</div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- FINAL CTA -->
-<section class="cta-section">
+<!-- FINAL CTA - NAVY -->
+<section class="section-navy">
   <div class="cta-inner">
-    <h2>Ready to find the <em>one?</em></h2>
-    <p>It takes 2 minutes, it's free to start, and your baby's perfect name might be one quiz away.</p>
-    <a href="quiz.html" class="btn-primary" style="font-size: 16px; padding: 20px 48px;">Find my baby's name <img src="https://raw.githubusercontent.com/nickmistretta/baby-names-api/main/stork-cream.png" style="height:22px; width:auto; vertical-align:middle; margin-left:8px;"></a>
+    <div class="eyebrow eyebrow-silver reveal" style="text-align:center;">Ready to begin</div>
+    <h2 class="section-title title-cream reveal" style="text-align:center;">Find the name she'll carry <em class="title-em">forever</em></h2>
+    <p class="section-sub sub-muted reveal" style="text-align:center; margin:0 auto 40px;">It takes 2 minutes, it's free to start, and your baby's perfect name might be one quiz away.</p>
+    <div style="text-align:center;" class="reveal">
+      <a href="quiz.html" class="btn-primary" style="font-size:16px; padding:18px 48px;">Find my baby's name</a>
+    </div>
   </div>
 </section>
 
 <!-- FOOTER -->
 <footer>
-  <div class="footer-logo"><img src="https://raw.githubusercontent.com/nickmistretta/baby-names-api/main/Baby-Name-Transparent.png" alt="Baby Name App" style="height:47px; width:auto;"></div>
-  <div style="display:flex; align-items:center; gap:24px;">
-    <a href="about.html" style="font-size:12px; color:var(--muted); text-decoration:none; font-weight:300; transition:color 0.2s;" onmouseover="this.style.color='var(--bark)'" onmouseout="this.style.color='var(--muted)'">About</a>
-    <a href="quiz.html" style="font-size:12px; color:var(--muted); text-decoration:none; font-weight:300; transition:color 0.2s;" onmouseover="this.style.color='var(--bark)'" onmouseout="this.style.color='var(--muted)'">Take the quiz</a>
+  <svg viewBox="0 0 680 180" height="36" xmlns="http://www.w3.org/2000/svg">
+    <g transform="translate(28,42) scale(0.095)"><g fill="#FDFAF7" opacity="0.6"><path d="M237.85 518.09 c-16.35 -1.79 -35.25 -6.32 -52.04 -12.51 -9 -3.32 -26.63 -11.56 -33.39 -15.58 -46.10 -27.58 -77.39 -65.83 -95.33 -116.27 -4.28 -12.20 -7.98 -26.05 -8.05 -30.58 -0.13 -7.02 3.96 -11.75 10.22 -11.75 3.64 0 5.87 1.21 11.62 6.39 17.69 15.71 39.20 28.73 59.38 36.01 22.67 8.11 46.99 11.88 71.19 10.98 12.13 -0.38 18.20 -0.96 18.20 -1.60 -0.06 -0.19 -2.23 -1.40 -4.98 -2.62 -10.79 -4.92 -24.52 -15.58 -33.20 -25.80 -12.83 -15.13 -20.94 -31.61 -25.16 -51.27 -1.28 -6.13 -1.47 -8.56 -1.47 -21.90 0.06 -13.03 0.26 -15.84 1.47 -21.39 2.17 -9.96 4.92 -17.75 9.71 -27.46 5.94 -12 11.30 -19.28 22.03 -30.07 10.28 -10.34 13.03 -12.07 18.45 -11.62 4.02 0.32 6.32 1.85 8.05 5.36 1.60 3.26 1.60 5.81 0 11.43 -3.32 11.37 -4.09 27.07 -1.98 39.46 1.15 6.39 1.66 8.11 2.17 7.41 0.13 -0.13 1.79 -3.19 3.64 -6.77 11.94 -23.05 35.76 -42.84 61.49 -51.21 17.43 -5.62 34.35 -7.60 39.78 -4.66 2.43 1.34 4.66 4.53 5.04 7.41 0.70 4.47 -1.09 7.60 -7.22 12.71 -10.60 8.88 -17.94 18.13 -24.07 30.39 -11.37 22.79 -12.45 49.17 -3 73.49 l1.85 4.79 8.56 0.19 c9.39 0.19 17.94 -1.09 27.20 -4.02 5.56 -1.79 20.62 -9 23.31 -11.17 4.02 -3.13 13.15 -19.22 27.71 -48.78 15.58 -31.67 22.09 -47.51 26.12 -63.60 3.83 -15.20 4.53 -30.39 1.66 -36.40 -0.77 -1.60 -4.47 -6.26 -8.30 -10.34 -7.98 -8.62 -9.64 -11.43 -9.64 -16.67 0 -6.07 2.68 -10.66 7.79 -13.28 2.30 -1.15 4.41 -1.21 52.81 -1.21 34.10 0 51.53 0.26 53.83 0.70 5.04 1.02 12.07 4.66 15.96 8.11 l3.38 3.06 20.11 1.79 c33.52 2.87 68.96 5.94 101.08 8.68 18.07 1.53 31.41 2.94 32.63 3.45 2.75 1.15 5.87 4.85 6.39 7.66 0.83 4.47 -1.60 9.32 -5.87 11.49 -1.98 1.02 -5.49 1.72 -16.28 3.32 -4.15 0.64 -8.05 1.47 -8.62 1.92 -0.89 0.70 -0.32 2.23 5.62 14.37 21.77 44.89 28.73 60.08 40.55 88.37 20.11 48.02 27.78 73.94 28.86 97.05 1.21 26.31 -8.30 55.30 -24.71 75.34 -12.96 15.77 -29.82 27.01 -48.21 32.05 -8.11 2.23 -24.84 2.81 -33.97 1.15 -33.71 -6 -61.87 -31.93 -73.88 -68 -2.94 -8.75 -4.66 -17.50 -5.62 -27.97 -2.04 -23.24 4.41 -49.68 23.88 -97.82 10.85 -26.88 30.20 -69.66 43.99 -97.25 l6.39 -12.71 -3.70 0.45 c-2.04 0.26 -3.96 0.64 -4.34 0.89 -0.32 0.19 -4.09 0.83 -8.30 1.40 -14.69 2.04 -27.52 3.83 -39.91 5.68 -6.83 1.02 -15.01 2.17 -18.20 2.55 -15.32 1.92 -16.86 2.36 -21.71 6.07 -8.56 6.51 -14.37 8.62 -24.77 9.07 -11.17 0.51 -10.98 0.19 -10.02 20.30 0.83 17.94 0.83 58.42 0 69.92 -2.87 39.40 -9.39 67.43 -22.48 97.05 -14.62 33.27 -34.86 60.98 -60.85 83.52 -31.61 27.46 -74.39 46.23 -116.85 51.14 -8.05 0.96 -36.01 0.77 -45.97 -0.32z"/><path d="M482.46 166.65 c-4.02 -1.28 -6.77 -5.30 -6.77 -9.90 0 -3.64 1.21 -6.13 4.28 -8.43 3.06 -2.30 8.62 -2.55 11.49 -0.45 6.19 4.60 6.32 13.09 0.19 17.62 -1.92 1.34 -6.64 1.98 -9.19 1.15z"/></g></g>
+    <text x="108" y="108" font-family="Cormorant Garamond,Georgia,serif" font-size="88" font-weight="300" font-style="italic" fill="rgba(253,250,247,0.6)" letter-spacing="4">nomia</text>
+  </svg>
+  <div class="footer-links">
+    <a href="about.html" class="footer-link">About</a>
+    <a href="quiz.html" class="footer-link">Take the quiz</a>
   </div>
-  <div class="footer-copy">© 2026 Baby Name App · Made with love for expecting parents</div>
+  <div class="footer-copy">© 2026 Nomia · Made with love in New Jersey</div>
 </footer>
 
 <script>
+function toggleMenu() {
+  document.getElementById('mobileMenu').classList.toggle('open');
+  document.getElementById('hamburger').classList.toggle('open');
+}
+
+const nameItems = document.querySelectorAll('.cycle-item');
+const originItems = document.querySelectorAll('.cycle-origin-item');
+const dotsEl = document.getElementById('cycleDots');
+let idx = 0;
+
+nameItems.forEach((_, i) => {
+  const d = document.createElement('div');
+  d.className = 'cycle-dot' + (i === 0 ? ' active' : '');
+  dotsEl.appendChild(d);
+});
+
+const dots = document.querySelectorAll('.cycle-dot');
+
+function cycle() {
+  const cur = idx;
+  const nxt = (idx + 1) % nameItems.length;
+  nameItems[cur].classList.remove('active'); nameItems[cur].classList.add('exit');
+  originItems[cur].classList.remove('active'); originItems[cur].classList.add('exit');
+  dots[cur].classList.remove('active');
+  setTimeout(() => {
+    nameItems[cur].classList.remove('exit');
+    nameItems[nxt].classList.add('active');
+    originItems[nxt].classList.add('active');
+    dots[nxt].classList.add('active');
+    idx = nxt;
+  }, 500);
+}
+
+setInterval(cycle, 2800);
+
 const reveals = document.querySelectorAll('.reveal');
 const observer = new IntersectionObserver((entries) => {
-  entries.forEach((entry, i) => {
-    if (entry.isIntersecting) {
-      setTimeout(() => entry.target.classList.add('visible'), i * 80);
-    }
+  entries.forEach((e, i) => {
+    if (e.isIntersecting) setTimeout(() => e.target.classList.add('visible'), i * 80);
   });
 }, { threshold: 0.1 });
 reveals.forEach(el => observer.observe(el));
-
-// Animated name cycling
-const nameItems = document.querySelectorAll('.name-cycle-item');
-const originItems = document.querySelectorAll('.name-cycle-origin-item');
-const dotsContainer = document.getElementById('nameDots');
-let nameIdx = 0;
-
-nameItems.forEach((_, i) => {
-  const dot = document.createElement('div');
-  dot.className = 'name-cycle-dot' + (i === 0 ? ' active' : '');
-  dotsContainer.appendChild(dot);
-});
-
-const dots = document.querySelectorAll('.name-cycle-dot');
-
-function cycleName() {
-  const current = nameIdx;
-  const next = (nameIdx + 1) % nameItems.length;
-
-  nameItems[current].classList.remove('active');
-  nameItems[current].classList.add('exit');
-  originItems[current].classList.remove('active');
-  originItems[current].classList.add('exit');
-  dots[current].classList.remove('active');
-
-  setTimeout(() => {
-    nameItems[current].classList.remove('exit');
-    nameItems[next].classList.add('active');
-    originItems[next].classList.add('active');
-    dots[next].classList.add('active');
-    nameIdx = next;
-  }, 400);
-}
-
-setInterval(cycleName, 2800);
 </script>
-
 </body>
 </html>
