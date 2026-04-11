@@ -3,41 +3,34 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nomia — Find Your Baby's Name</title>
+<title>About Nomia — AI Baby Name Discovery</title>
 <link rel="icon" type="image/svg+xml" href="https://raw.githubusercontent.com/nickmistretta/baby-names-api/main/nomia-favicon.svg">
 
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@200;300;400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Lato:wght@300;400&display=swap" rel="stylesheet">
 <style>
   :root {
-    --navy: #1C2B3A;
-    --navy-deep: #152230;
-    --navy-mid: #243548;
-    --cream: #FDFAF7;
-    --off-white: #F8F6F3;
-    --blush: #F2D9D9;
-    --rose: #E8B4B8;
-    --dusty-rose: #C9737A;
-    --silver: #8B9EB0;
-    --slate: #4A5568;
-    --white: #FFFFFF;
-    /* legacy aliases */
-    --terracotta: #C9737A;
-    --bark: #1C2B3A;
-    --charcoal: #1C2B3A;
-    --muted: #8B9EB0;
+    --cream: #F7F3EE;
+    --linen: #EDE8E0;
+    --sand: #D9CFC2;
+    --clay: #B8956A;
+    --terracotta: #C4694F;
+    --bark: #7A5C44;
+    --moss: #6B7A5E;
+    --charcoal: #3A3530;
+    --muted: #8C7F75;
+    --white: #FDFAF7;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
 
   body {
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Lato', sans-serif;
     background: var(--cream);
-    color: var(--navy);
-    min-height: 100vh;
+    color: var(--charcoal);
     overflow-x: hidden;
   }
 
-  /* Subtle grain texture overlay */
   body::before {
     content: '';
     position: fixed;
@@ -45,425 +38,295 @@
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
     pointer-events: none;
     z-index: 0;
-    opacity: 0.6;
+    opacity: 0.5;
   }
 
-  .container {
-    max-width: 680px;
+  
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 0 48px;
+    height: 96px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #1C2B3A;
+    border-bottom: 0.5px solid rgba(255,255,255,0.08);
+  }
+  .nav-logo { display:flex; align-items:center; text-decoration:none; }
+  .nav-desktop { display:flex; align-items:center; gap:32px; }
+  .nav-link { font-size:13px; font-weight:300; color:rgba(255,255,255,0.6); text-decoration:none; letter-spacing:0.06em; text-transform:uppercase; transition:color 0.2s; }
+  .nav-link:hover { color:white; }
+  .nav-cta { padding:10px 24px; background:#C9737A; color:white; border:none; border-radius:99px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:300; cursor:pointer; text-decoration:none; transition:all 0.2s; white-space:nowrap; }
+  .nav-cta:hover { background:#b85f66; transform:translateY(-1px); }
+  .hamburger { display:none; flex-direction:column; gap:5px; background:none; border:none; cursor:pointer; padding:4px; z-index:101; }
+  .hamburger span { display:block; width:24px; height:1.5px; background:white; border-radius:99px; transition:all 0.3s ease; }
+  .hamburger.open span:nth-child(1) { transform:translateY(6.5px) rotate(45deg); }
+  .hamburger.open span:nth-child(2) { opacity:0; }
+  .hamburger.open span:nth-child(3) { transform:translateY(-6.5px) rotate(-45deg); }
+  .mobile-menu { display:none; position:fixed; top:72px; left:0; right:0; background:#152230; border-bottom:0.5px solid rgba(255,255,255,0.08); flex-direction:column; padding:16px 24px 24px; gap:4px; z-index:99; }
+  .mobile-menu.open { display:flex; }
+  .mobile-menu a { padding:14px 0; font-size:15px; font-weight:300; color:rgba(255,255,255,0.8); text-decoration:none; border-bottom:0.5px solid rgba(255,255,255,0.08); }
+  .mobile-menu a:last-child { border-bottom:none; }
+  .mobile-cta { margin-top:8px; padding:14px 24px !important; background:#C9737A; color:white !important; border-radius:12px; text-align:center; border-bottom:none !important; }
+  @media (max-width:640px) { nav { padding:0 20px; } .nav-desktop { display:none; } .hamburger { display:flex; } }
+
+  
+
+  /* Hamburger */
+  .hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    z-index: 101;
+  }
+
+  .hamburger span {
+    display: block;
+    width: 24px;
+    height: 2px;
+    background: var(--bark);
+    border-radius: 99px;
+    transition: all 0.3s ease;
+  }
+
+  .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .hamburger.open span:nth-child(2) { opacity: 0; }
+  .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  /* Mobile menu */
+  .mobile-menu {
+    display: none;
+    position: fixed;
+    top: 96px;
+    left: 0;
+    right: 0;
+    background: rgba(247,243,238,0.98);
+    backdrop-filter: blur(12px);
+    border-bottom: 0.5px solid var(--sand);
+    flex-direction: column;
+    padding: 16px 24px 20px;
+    gap: 4px;
+    z-index: 99;
+    animation: fadeDown 0.2s ease;
+  }
+
+  .mobile-menu.open { display: flex; }
+
+  .mobile-menu a {
+    padding: 14px 0;
+    font-size: 16px;
+    color: var(--charcoal);
+    text-decoration: none;
+    border-bottom: 0.5px solid var(--sand);
+    font-weight: 300;
+  }
+
+  .mobile-menu a:last-child { border-bottom: none; }
+
+  .mobile-cta {
+    margin-top: 8px;
+    padding: 14px 24px !important;
+    background: var(--terracotta);
+    color: white !important;
+    border-radius: 12px;
+    text-align: center;
+    border-bottom: none !important;
+  }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 640px) {
+    nav { padding: 12px 20px; }
+    .nav-desktop { display: none; }
+    .hamburger { display: flex; }
+  }
+
+  @media (max-width: 480px) {
+    nav { padding: 16px 20px; }
+    .nav-links { gap: 16px; }
+    .nav-link { display: none; }
+    .nav-logo { font-size: 18px; }
+    .nav-cta { padding: 8px 14px; font-size: 12px; }
+  }
+
+  /* PAGE */
+  .page {
+    max-width: 720px;
     margin: 0 auto;
-    padding: 16px 24px 80px;
+    padding: 120px 24px 80px;
     position: relative;
     z-index: 1;
   }
 
-  /* Header */
-  .header {
-    text-align: center;
-    margin-bottom: 28px;
+  /* HERO */
+  .about-hero {
+    margin-bottom: 64px;
     animation: fadeUp 0.8s ease both;
   }
 
-  .header-leaf {
-    font-size: 28px;
-    margin-bottom: 12px;
+  .about-tag {
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--clay);
+    margin-bottom: 20px;
     display: block;
-    filter: sepia(0.3);
   }
 
-  .header h1 {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(28px, 5vw, 42px);
+  .about-hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(38px, 6vw, 62px);
     font-weight: 400;
-    color: var(--navy);
-    line-height: 1.15;
-    margin-bottom: 10px;
+    color: var(--bark);
+    line-height: 1.1;
+    margin-bottom: 24px;
   }
 
-  .header h1 em {
+  .about-hero h1 em {
     font-style: italic;
     color: var(--terracotta);
   }
 
-  .header p {
-    font-size: 15px;
+  .about-hero .lead {
+    font-size: 19px;
     color: var(--muted);
     font-weight: 300;
-    line-height: 1.6;
-    max-width: 420px;
-    margin: 0 auto;
+    line-height: 1.75;
+    max-width: 580px;
   }
 
-  /* Progress bar */
-  .progress-wrap {
-    margin-bottom: 36px;
-    animation: fadeUp 0.8s 0.1s ease both;
-  }
-
-  .progress-meta {
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    color: var(--muted);
-    margin-bottom: 8px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  .progress-bar {
-    height: 3px;
-    background: var(--sand);
-    border-radius: 99px;
-    overflow: hidden;
-  }
-
-  .progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--clay), var(--terracotta));
-    border-radius: 99px;
-    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  /* Question card */
-  .question-card {
-    background: var(--white);
-    border: 0.5px solid rgba(28,43,58,0.08);
-    border-radius: 20px;
-    padding: 36px 32px;
-    margin-bottom: 24px;
-    box-shadow: 0 4px 24px rgba(122,92,68,0.08);
-    animation: fadeUp 0.6s ease both;
-  }
-
-  .question-label {
-    font-size: 11px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
+  /* DIVIDER */
+  .ornament {
+    text-align: center;
     color: var(--clay);
-    font-weight: 400;
-    margin-bottom: 12px;
+    font-size: 18px;
+    letter-spacing: 0.3em;
+    margin: 48px 0;
+    opacity: 0.5;
   }
 
-  .question-text {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(18px, 3vw, 24px);
-    font-weight: 400;
-    color: var(--navy);
-    line-height: 1.3;
-    margin-bottom: 8px;
-  }
-
-  .question-hint {
-    font-size: 13px;
-    color: var(--muted);
-    font-weight: 300;
-    margin-bottom: 28px;
-  }
-
-  /* Options */
-  .options-grid {
-    display: grid;
-    gap: 10px;
-  }
-
-  .options-grid.cols-2 {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .option-btn {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 18px;
-    background: var(--cream);
-    border: 0.5px solid rgba(28,43,58,0.1);
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-align: left;
-    font-family: 'Lato', sans-serif;
-    font-size: 14px;
-    font-weight: 400;
-    color: var(--navy);
-    line-height: 1.4;
-  }
-
-  .option-btn:hover {
-    border-color: var(--clay);
-    background: #FBF7F2;
-    transform: translateY(-1px);
-  }
-
-  .option-btn.selected {
-    border-color: var(--terracotta);
-    background: #FDF0EC;
-    color: var(--terracotta);
-  }
-
-  .option-dot {
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    border: 0.5px solid rgba(28,43,58,0.1);
-    flex-shrink: 0;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .option-btn.selected .option-dot {
-    background: var(--dusty-rose);
-    border-color: var(--terracotta);
-  }
-
-  .option-btn.selected .option-dot::after {
-    content: '';
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: white;
-  }
-
-  /* Text input */
-  .text-input {
-    width: 100%;
-    padding: 14px 18px;
-    background: var(--cream);
-    border: 0.5px solid rgba(28,43,58,0.1);
-    border-radius: 12px;
-    font-family: 'Lato', sans-serif;
-    font-size: 15px;
-    color: var(--navy);
-    outline: none;
-    transition: border-color 0.2s;
-  }
-
-  .text-input:focus {
-    border-color: var(--clay);
-  }
-
-  .text-input::placeholder {
-    color: var(--muted);
-    font-weight: 300;
-  }
-
-  /* Gender toggle */
-  .gender-toggle {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-
-  @media (max-width: 480px) {
-    .gender-toggle {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  .gender-btn {
-    flex: 1;
-    padding: 16px;
-    background: var(--cream);
-    border: 0.5px solid rgba(28,43,58,0.1);
-    border-radius: 12px;
-    cursor: pointer;
-    font-family: 'Lato', sans-serif;
-    font-size: 14px;
-    color: var(--navy);
-    transition: all 0.2s;
-    text-align: center;
-  }
-
-  .gender-btn:hover { border-color: var(--clay); }
-  .gender-btn.selected { border-color: var(--terracotta); background: #FDF0EC; color: var(--terracotta); }
-
-  /* Nav buttons */
-  .nav {
-    display: flex;
-    gap: 12px;
-    justify-content: space-between;
-    animation: fadeUp 0.6s 0.1s ease both;
-  }
-
-  .btn-back {
-    padding: 14px 24px;
-    background: transparent;
-    border: 0.5px solid rgba(28,43,58,0.1);
-    border-radius: 12px;
-    font-family: 'Lato', sans-serif;
-    font-size: 14px;
-    color: var(--muted);
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .btn-back:hover { border-color: var(--clay); color: var(--navy); }
-
-  .btn-next {
-    flex: 1;
-    padding: 14px 24px;
-    background: var(--dusty-rose);
-    border: none;
-    border-radius: 12px;
-    font-family: 'Lato', sans-serif;
-    font-size: 14px;
-    font-weight: 400;
-    color: white;
-    cursor: pointer;
-    transition: all 0.2s;
-    letter-spacing: 0.04em;
-  }
-
-  .btn-next:hover { background: var(--navy); transform: translateY(-1px); }
-  .btn-next:disabled { background: var(--sand); color: var(--muted); cursor: not-allowed; transform: none; }
-
-  /* Loading screen */
-  .loading-screen {
-    text-align: center;
-    padding: 60px 20px;
-  }
-
-  .loading-orb {
-    width: 64px;
-    height: 64px;
-    margin: 0 auto 28px;
-    position: relative;
-  }
-
-  .loading-orb::before, .loading-orb::after {
-    content: '';
-    position: absolute;
-    border-radius: 50%;
-  }
-
-  .loading-orb::before {
-    inset: 0;
-    border: 2px solid var(--sand);
-  }
-
-  .loading-orb::after {
-    inset: 4px;
-    border: 2px solid transparent;
-    border-top-color: var(--terracotta);
-    animation: spin 1s linear infinite;
-  }
-
-  .loading-text {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 22px;
-    color: var(--navy);
-    margin-bottom: 8px;
-  }
-
-  .loading-sub {
-    font-size: 14px;
-    color: var(--muted);
-    font-weight: 300;
-  }
-
-  /* Results screen */
-  .results-header {
-    text-align: center;
-    margin-bottom: 32px;
+  /* SECTIONS */
+  .about-section {
+    margin-bottom: 56px;
     animation: fadeUp 0.7s ease both;
   }
 
-  .results-header h2 {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(24px, 4vw, 34px);
+  .about-section h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(24px, 3vw, 32px);
     font-weight: 400;
-    color: var(--navy);
+    color: var(--bark);
+    margin-bottom: 20px;
+    line-height: 1.2;
+  }
+
+  .about-section h2 em {
+    font-style: italic;
+    color: var(--terracotta);
+  }
+
+  .about-section p {
+    font-size: 16px;
+    color: var(--charcoal);
+    font-weight: 300;
+    line-height: 1.85;
+    margin-bottom: 16px;
+  }
+
+  .about-section p strong {
+    color: var(--bark);
+    font-weight: 400;
+  }
+
+  /* STAT CARDS */
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin: 40px 0;
+  }
+
+  .stat-card {
+    background: var(--white);
+    border: 1px solid var(--sand);
+    border-radius: 16px;
+    padding: 24px 20px;
+    text-align: center;
+  }
+
+  .stat-card .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    font-weight: 400;
+    color: var(--bark);
+    line-height: 1;
     margin-bottom: 8px;
   }
 
-  .results-header p {
-    font-size: 14px;
-    color: var(--muted);
-    font-weight: 300;
-  }
-
-  .name-card {
-    background: var(--white);
-    border: 0.5px solid rgba(28,43,58,0.08);
-    border-radius: 16px;
-    padding: 20px 24px;
-    margin-bottom: 12px;
-    display: flex;
-    align-items: flex-start;
-    gap: 16px;
-    animation: fadeUp 0.5s ease both;
-    transition: transform 0.2s, box-shadow 0.2s;
-  }
-
-  .name-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 28px rgba(122,92,68,0.12);
-  }
-
-  .name-rank {
-    font-size: 11px;
-    color: var(--clay);
-    font-weight: 400;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    min-width: 24px;
-    padding-top: 4px;
-  }
-
-  .name-info { flex: 1; }
-
-  .name-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 22px;
-    font-weight: 500;
-    color: var(--navy);
-    margin-bottom: 4px;
-  }
-
-  .name-origin {
+  .stat-card .stat-label {
     font-size: 12px;
-    color: var(--clay);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    margin-bottom: 6px;
-  }
-
-  .name-meaning {
-    font-size: 13px;
     color: var(--muted);
     font-weight: 300;
-    line-height: 1.5;
-  }
-
-  .name-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 8px;
-  }
-
-  .name-tag {
-    padding: 3px 10px;
-    background: var(--linen);
-    border-radius: 99px;
-    font-size: 11px;
-    color: var(--navy);
+    line-height: 1.4;
     letter-spacing: 0.04em;
   }
 
-  /* Upsell card */
-  .upsell-card {
-    background: linear-gradient(135deg, #3A3530 0%, #5C4A3A 100%);
-    border-radius: 20px;
-    padding: 36px 32px;
-    text-align: center;
-    margin-top: 28px;
-    position: relative;
-    overflow: hidden;
-    animation: fadeUp 0.7s 0.3s ease both;
+  /* VALUES */
+  .values {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 32px;
   }
 
-  .upsell-card::before {
+  .value-card {
+    background: var(--white);
+    border: 1px solid var(--sand);
+    border-radius: 16px;
+    padding: 24px 22px;
+  }
+
+  .value-icon {
+    font-size: 22px;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  .value-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--charcoal);
+    margin-bottom: 8px;
+  }
+
+  .value-desc {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 300;
+    line-height: 1.6;
+  }
+
+  /* PULL QUOTE */
+  .pull-quote {
+    background: var(--charcoal);
+    border-radius: 20px;
+    padding: 40px 36px;
+    margin: 48px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .pull-quote::before {
     content: '';
     position: absolute;
     top: -40px;
@@ -471,700 +334,255 @@
     width: 160px;
     height: 160px;
     border-radius: 50%;
-    background: rgba(196,105,79,0.2);
+    background: rgba(196,105,79,0.15);
   }
 
-  .upsell-card::after {
-    content: '';
-    position: absolute;
-    bottom: -30px;
-    left: -30px;
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    background: rgba(107,122,94,0.15);
-  }
-
-  .upsell-badge {
-    display: inline-block;
-    padding: 5px 14px;
-    background: var(--dusty-rose);
-    border-radius: 99px;
-    font-size: 11px;
-    color: white;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    margin-bottom: 16px;
-    position: relative;
-    z-index: 1;
-  }
-
-  .upsell-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 26px;
-    color: var(--cream);
-    margin-bottom: 8px;
-    position: relative;
-    z-index: 1;
+  .pull-quote blockquote {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(20px, 3vw, 26px);
+    font-style: italic;
     font-weight: 400;
-  }
-
-  .upsell-desc {
-    font-size: 14px;
-    color: rgba(247,243,238,0.65);
-    font-weight: 300;
-    line-height: 1.6;
-    margin-bottom: 8px;
-    position: relative;
-    z-index: 1;
-  }
-
-  .upsell-includes {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    margin: 16px 0 24px;
-    position: relative;
-    z-index: 1;
-    text-align: left;
-    max-width: 280px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .upsell-item {
-    font-size: 13px;
-    color: rgba(247,243,238,0.8);
-    font-weight: 300;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .upsell-item::before {
-    content: '✦';
-    color: var(--clay);
-    font-size: 10px;
-    flex-shrink: 0;
-  }
-
-  .upsell-price {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 36px;
     color: var(--cream);
+    line-height: 1.5;
     position: relative;
     z-index: 1;
-    margin-bottom: 4px;
+    margin-bottom: 16px;
   }
 
-  .upsell-price span {
-    font-size: 18px;
-    vertical-align: super;
-    font-family: 'Lato', sans-serif;
+  .pull-quote cite {
+    font-size: 13px;
+    color: var(--clay);
+    font-style: normal;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* CTA */
+  .about-cta {
+    text-align: center;
+    padding: 48px 0 0;
+  }
+
+  .about-cta h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(26px, 4vw, 38px);
+    font-weight: 400;
+    color: var(--bark);
+    margin-bottom: 16px;
+    line-height: 1.2;
+  }
+
+  .about-cta h3 em { font-style: italic; color: var(--terracotta); }
+
+  .about-cta p {
+    font-size: 16px;
+    color: var(--muted);
     font-weight: 300;
+    margin-bottom: 32px;
+    line-height: 1.7;
   }
 
-  .upsell-once {
-    font-size: 12px;
-    color: rgba(247,243,238,0.5);
-    margin-bottom: 20px;
-    position: relative;
-    z-index: 1;
-  }
-
-  .btn-paypal {
+  .btn-primary {
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    padding: 16px 32px;
-    background: #FFC439;
+    padding: 18px 40px;
+    background: var(--terracotta);
+    color: white;
     border: none;
-    border-radius: 12px;
+    border-radius: 99px;
     font-family: 'Lato', sans-serif;
-    font-size: 15px;
-    font-weight: 400;
-    color: #003087;
-    cursor: pointer;
-    transition: all 0.2s;
-    position: relative;
-    z-index: 1;
-    letter-spacing: 0.02em;
-  }
-
-  .btn-paypal:hover { background: #f0b429; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255,196,57,0.4); }
-
-  .paypal-logo {
-    font-weight: 700;
     font-size: 16px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    box-shadow: 0 8px 32px rgba(196,105,79,0.3);
   }
 
-  .skip-link {
-    display: block;
-    text-align: center;
-    margin-top: 14px;
-    font-size: 13px;
-    color: var(--muted);
-    cursor: pointer;
+  .btn-primary:hover { background: var(--bark); transform: translateY(-2px); }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--sand);
+    padding: 32px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     position: relative;
     z-index: 1;
-    text-decoration: underline;
-    text-underline-offset: 3px;
+    max-width: 100%;
   }
 
-  .skip-link:hover { color: var(--navy); }
-
-  /* Locked names */
-  .locked-names {
-    margin-top: 16px;
-    position: relative;
+  .footer-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    color: var(--bark);
   }
 
-  .locked-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to bottom, rgba(253,250,247,0) 0%, rgba(253,250,247,0.95) 50%);
-    z-index: 2;
-    border-radius: 16px;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    padding-bottom: 16px;
-  }
-
-  .locked-hint {
-    font-size: 13px;
+  .footer-copy {
+    font-size: 12px;
     color: var(--muted);
-    text-align: center;
+    font-weight: 300;
   }
 
-  .name-card.blurred {
-    filter: blur(4px);
-    pointer-events: none;
-    user-select: none;
+  @media (max-width: 768px) {
+    .stat-row { grid-template-columns: 1fr 1fr; }
+    .values { grid-template-columns: 1fr; }
+    footer { flex-direction: column; gap: 12px; text-align: center; padding: 24px; }
   }
 
-  /* Animations */
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(16px); }
     to { opacity: 1; transform: translateY(0); }
   }
 
-  @keyframes spin {
-    to { transform: rotate(360deg); }
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
   }
 
-  .screen { display: none; }
-  .screen.active { display: block; }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
 </style>
 </head>
 <body>
 
-<div class="container">
-
-  <!-- QUIZ SCREEN -->
-  <div class="screen active" id="screen-quiz">
-    <div class="header">
-      <div style="text-align:center; margin-bottom:16px;"><svg style="height:80px;width:auto;" viewBox="20 18 400 148" xmlns="http://www.w3.org/2000/svg">
-      <g transform="translate(28,42) scale(0.095)"><g fill="#1C2B3A"><path d="M237.85 518.09 c-16.35 -1.79 -35.25 -6.32 -52.04 -12.51 -9 -3.32 -26.63 -11.56 -33.39 -15.58 -46.10 -27.58 -77.39 -65.83 -95.33 -116.27 -4.28 -12.20 -7.98 -26.05 -8.05 -30.58 -0.13 -7.02 3.96 -11.75 10.22 -11.75 3.64 0 5.87 1.21 11.62 6.39 17.69 15.71 39.20 28.73 59.38 36.01 22.67 8.11 46.99 11.88 71.19 10.98 12.13 -0.38 18.20 -0.96 18.20 -1.60 -0.06 -0.19 -2.23 -1.40 -4.98 -2.62 -10.79 -4.92 -24.52 -15.58 -33.20 -25.80 -12.83 -15.13 -20.94 -31.61 -25.16 -51.27 -1.28 -6.13 -1.47 -8.56 -1.47 -21.90 0.06 -13.03 0.26 -15.84 1.47 -21.39 2.17 -9.96 4.92 -17.75 9.71 -27.46 5.94 -12 11.30 -19.28 22.03 -30.07 10.28 -10.34 13.03 -12.07 18.45 -11.62 4.02 0.32 6.32 1.85 8.05 5.36 1.60 3.26 1.60 5.81 0 11.43 -3.32 11.37 -4.09 27.07 -1.98 39.46 1.15 6.39 1.66 8.11 2.17 7.41 0.13 -0.13 1.79 -3.19 3.64 -6.77 11.94 -23.05 35.76 -42.84 61.49 -51.21 17.43 -5.62 34.35 -7.60 39.78 -4.66 2.43 1.34 4.66 4.53 5.04 7.41 0.70 4.47 -1.09 7.60 -7.22 12.71 -10.60 8.88 -17.94 18.13 -24.07 30.39 -11.37 22.79 -12.45 49.17 -3 73.49 l1.85 4.79 8.56 0.19 c9.39 0.19 17.94 -1.09 27.20 -4.02 5.56 -1.79 20.62 -9 23.31 -11.17 4.02 -3.13 13.15 -19.22 27.71 -48.78 15.58 -31.67 22.09 -47.51 26.12 -63.60 3.83 -15.20 4.53 -30.39 1.66 -36.40 -0.77 -1.60 -4.47 -6.26 -8.30 -10.34 -7.98 -8.62 -9.64 -11.43 -9.64 -16.67 0 -6.07 2.68 -10.66 7.79 -13.28 2.30 -1.15 4.41 -1.21 52.81 -1.21 34.10 0 51.53 0.26 53.83 0.70 5.04 1.02 12.07 4.66 15.96 8.11 l3.38 3.06 20.11 1.79 c33.52 2.87 68.96 5.94 101.08 8.68 18.07 1.53 31.41 2.94 32.63 3.45 2.75 1.15 5.87 4.85 6.39 7.66 0.83 4.47 -1.60 9.32 -5.87 11.49 -1.98 1.02 -5.49 1.72 -16.28 3.32 -4.15 0.64 -8.05 1.47 -8.62 1.92 -0.89 0.70 -0.32 2.23 5.62 14.37 21.77 44.89 28.73 60.08 40.55 88.37 20.11 48.02 27.78 73.94 28.86 97.05 1.21 26.31 -8.30 55.30 -24.71 75.34 -12.96 15.77 -29.82 27.01 -48.21 32.05 -8.11 2.23 -24.84 2.81 -33.97 1.15 -33.71 -6 -61.87 -31.93 -73.88 -68 -2.94 -8.75 -4.66 -17.50 -5.62 -27.97 -2.04 -23.24 4.41 -49.68 23.88 -97.82 10.85 -26.88 30.20 -69.66 43.99 -97.25 l6.39 -12.71 -3.70 0.45 c-2.04 0.26 -3.96 0.64 -4.34 0.89 -0.32 0.19 -4.09 0.83 -8.30 1.40 -14.69 2.04 -27.52 3.83 -39.91 5.68 -6.83 1.02 -15.01 2.17 -18.20 2.55 -15.32 1.92 -16.86 2.36 -21.71 6.07 -8.56 6.51 -14.37 8.62 -24.77 9.07 -11.17 0.51 -10.98 0.19 -10.02 20.30 0.83 17.94 0.83 58.42 0 69.92 -2.87 39.40 -9.39 67.43 -22.48 97.05 -14.62 33.27 -34.86 60.98 -60.85 83.52 -31.61 27.46 -74.39 46.23 -116.85 51.14 -8.05 0.96 -36.01 0.77 -45.97 -0.32z M482.46 166.65 c-4.02 -1.28 -6.77 -5.30 -6.77 -9.90 0 -3.64 1.21 -6.13 4.28 -8.43 3.06 -2.30 8.62 -2.55 11.49 -0.45 6.19 4.60 6.32 13.09 0.19 17.62 -1.92 1.34 -6.64 1.98 -9.19 1.15z"/></g></g>
-      <text x="108" y="108" font-family="Cormorant Garamond,Georgia,serif" font-size="88" font-weight="300" font-style="italic" fill="#1C2B3A" letter-spacing="4">nomia</text>
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg style="height:80px;width:auto;" viewBox="20 18 400 148" xmlns="http://www.w3.org/2000/svg">
+      <g transform="translate(28,42) scale(0.095)"><g fill="#FDFAF7"><path d="M237.85 518.09 c-16.35 -1.79 -35.25 -6.32 -52.04 -12.51 -9 -3.32 -26.63 -11.56 -33.39 -15.58 -46.10 -27.58 -77.39 -65.83 -95.33 -116.27 -4.28 -12.20 -7.98 -26.05 -8.05 -30.58 -0.13 -7.02 3.96 -11.75 10.22 -11.75 3.64 0 5.87 1.21 11.62 6.39 17.69 15.71 39.20 28.73 59.38 36.01 22.67 8.11 46.99 11.88 71.19 10.98 12.13 -0.38 18.20 -0.96 18.20 -1.60 -0.06 -0.19 -2.23 -1.40 -4.98 -2.62 -10.79 -4.92 -24.52 -15.58 -33.20 -25.80 -12.83 -15.13 -20.94 -31.61 -25.16 -51.27 -1.28 -6.13 -1.47 -8.56 -1.47 -21.90 0.06 -13.03 0.26 -15.84 1.47 -21.39 2.17 -9.96 4.92 -17.75 9.71 -27.46 5.94 -12 11.30 -19.28 22.03 -30.07 10.28 -10.34 13.03 -12.07 18.45 -11.62 4.02 0.32 6.32 1.85 8.05 5.36 1.60 3.26 1.60 5.81 0 11.43 -3.32 11.37 -4.09 27.07 -1.98 39.46 1.15 6.39 1.66 8.11 2.17 7.41 0.13 -0.13 1.79 -3.19 3.64 -6.77 11.94 -23.05 35.76 -42.84 61.49 -51.21 17.43 -5.62 34.35 -7.60 39.78 -4.66 2.43 1.34 4.66 4.53 5.04 7.41 0.70 4.47 -1.09 7.60 -7.22 12.71 -10.60 8.88 -17.94 18.13 -24.07 30.39 -11.37 22.79 -12.45 49.17 -3 73.49 l1.85 4.79 8.56 0.19 c9.39 0.19 17.94 -1.09 27.20 -4.02 5.56 -1.79 20.62 -9 23.31 -11.17 4.02 -3.13 13.15 -19.22 27.71 -48.78 15.58 -31.67 22.09 -47.51 26.12 -63.60 3.83 -15.20 4.53 -30.39 1.66 -36.40 -0.77 -1.60 -4.47 -6.26 -8.30 -10.34 -7.98 -8.62 -9.64 -11.43 -9.64 -16.67 0 -6.07 2.68 -10.66 7.79 -13.28 2.30 -1.15 4.41 -1.21 52.81 -1.21 34.10 0 51.53 0.26 53.83 0.70 5.04 1.02 12.07 4.66 15.96 8.11 l3.38 3.06 20.11 1.79 c33.52 2.87 68.96 5.94 101.08 8.68 18.07 1.53 31.41 2.94 32.63 3.45 2.75 1.15 5.87 4.85 6.39 7.66 0.83 4.47 -1.60 9.32 -5.87 11.49 -1.98 1.02 -5.49 1.72 -16.28 3.32 -4.15 0.64 -8.05 1.47 -8.62 1.92 -0.89 0.70 -0.32 2.23 5.62 14.37 21.77 44.89 28.73 60.08 40.55 88.37 20.11 48.02 27.78 73.94 28.86 97.05 1.21 26.31 -8.30 55.30 -24.71 75.34 -12.96 15.77 -29.82 27.01 -48.21 32.05 -8.11 2.23 -24.84 2.81 -33.97 1.15 -33.71 -6 -61.87 -31.93 -73.88 -68 -2.94 -8.75 -4.66 -17.50 -5.62 -27.97 -2.04 -23.24 4.41 -49.68 23.88 -97.82 10.85 -26.88 30.20 -69.66 43.99 -97.25 l6.39 -12.71 -3.70 0.45 c-2.04 0.26 -3.96 0.64 -4.34 0.89 -0.32 0.19 -4.09 0.83 -8.30 1.40 -14.69 2.04 -27.52 3.83 -39.91 5.68 -6.83 1.02 -15.01 2.17 -18.20 2.55 -15.32 1.92 -16.86 2.36 -21.71 6.07 -8.56 6.51 -14.37 8.62 -24.77 9.07 -11.17 0.51 -10.98 0.19 -10.02 20.30 0.83 17.94 0.83 58.42 0 69.92 -2.87 39.40 -9.39 67.43 -22.48 97.05 -14.62 33.27 -34.86 60.98 -60.85 83.52 -31.61 27.46 -74.39 46.23 -116.85 51.14 -8.05 0.96 -36.01 0.77 -45.97 -0.32z"/><path d="M482.46 166.65 c-4.02 -1.28 -6.77 -5.30 -6.77 -9.90 0 -3.64 1.21 -6.13 4.28 -8.43 3.06 -2.30 8.62 -2.55 11.49 -0.45 6.19 4.60 6.32 13.09 0.19 17.62 -1.92 1.34 -6.64 1.98 -9.19 1.15z"/></g></g>
+      <text x="108" y="108" font-family="Cormorant Garamond,Georgia,serif" font-size="88" font-weight="300" font-style="italic" fill="#FDFAF7" letter-spacing="4">nomia</text>
       <text x="110" y="140" font-family="DM Sans,sans-serif" font-size="14" font-weight="200" fill="#8B9EB0" letter-spacing="4">CHOOSE THE PERFECT BABY NAME</text>
-    </svg></div>
-      <h1>Find the <em>perfect</em> name for your little one</h1>
-      <p>Answer a few thoughtful questions and we'll suggest names that feel just right.</p>
-    </div>
+    </svg>
+  </a>
+  <div class="nav-desktop">
+    <a href="about.html" class="nav-link">About</a>
+    <a href="quiz.html" class="nav-cta">Find your name</a>
+  </div>
+  <button class="hamburger" id="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></button>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="about.html" onclick="toggleMenu()">About</a>
+    <a href="quiz.html" class="mobile-cta" onclick="toggleMenu()">Find your name</a>
+  </div>
+</nav>
 
-    <div class="progress-wrap">
-      <div class="progress-meta">
-        <span id="progress-label">Question 1 of 7</span>
-        <span id="progress-pct">14%</span>
+<div class="page">
+
+  <!-- HERO -->
+  <div class="about-hero">
+    <span class="about-tag">Our story</span>
+    <h1>Built by parents, for <em>parents</em></h1>
+    <p class="lead">We're a couple in our 30s from New Jersey, expecting our first baby girl this fall — and like most parents-to-be, we had a problem. Every name site we found felt like it was built in 2003 and hadn't been touched since.</p>
+  </div>
+
+  <div class="ornament reveal">✦ &nbsp; ✦ &nbsp; ✦</div>
+
+  <!-- OUR STORY -->
+  <div class="about-section reveal">
+    <h2>Our Story</h2>
+    <p>Between running a small business, preparing a nursery, and navigating everything that comes with pregnancy, we simply didn't have hours to scroll through endless alphabetical lists of names we'd already heard a thousand times.</p>
+    <p>We wanted something that felt like a conversation — something that understood <strong>who we are</strong>, where we come from, and what we hoped for our daughter. Something that could surface a name we'd never considered but immediately recognize as <em>right</em>.</p>
+    <p>So we built it. Nomia uses AI to do what those old sites never could: it listens first, then curates. Every list is generated fresh, built entirely around your answers. No two families ever see the same names.</p>
+  </div>
+
+  <!-- PULL QUOTE -->
+  <div class="pull-quote reveal">
+    <blockquote>"A name is the first gift you give your child. It should feel like it was made for them — because with us, it is."</blockquote>
+    <cite>— The founders, New Jersey</cite>
+  </div>
+
+  <!-- WHAT WE DO -->
+  <div class="about-section reveal">
+    <h2>What We <em>Actually</em> Do</h2>
+    <p>Behind every result is an AI model querying a database of over <strong>3 million names</strong> spanning more than 190 countries, cultures, and linguistic traditions — from ancient Celtic roots to modern Scandinavian minimalism to rich West African heritage.</p>
+    <p>But raw data isn't enough. The 7 questions we ask aren't arbitrary. They're designed around the psychology of naming — the way sound shapes perception, the way meaning anchors identity, the way cultural heritage connects generations. We ask about season because names carry energy. We ask about vibe because a name will be called across playgrounds and boardrooms alike.</p>
+    <p>The result is a curated list that feels <strong>considered</strong>, not computed.</p>
+  </div>
+
+  <!-- STATS -->
+  <div class="stat-row reveal">
+    <div class="stat-card">
+      <div class="stat-num">3M+</div>
+      <div class="stat-label">Names in our database across 190+ cultures</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">7</div>
+      <div class="stat-label">Carefully designed questions behind every list</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">∞</div>
+      <div class="stat-label">Unique combinations — no two lists are ever the same</div>
+    </div>
+  </div>
+
+  <!-- THE SCIENCE -->
+  <div class="about-section reveal">
+    <h2>The Science Behind the <em>Questions</em></h2>
+    <p>Naming research shows that the sounds in a name influence how a person is perceived — softer consonants and open vowels tend to evoke warmth and approachability, while hard stops and short syllables convey strength and confidence. We ask about sound preferences because parents instinctively feel this, even if they can't articulate it.</p>
+    <p>Cultural heritage matters too — not just for honoring lineage, but because names carry centuries of meaning and story. A name rooted in your grandmother's language connects your child to something larger than themselves.</p>
+    <p>And then there's the emotional dimension. We ask what <strong>feeling</strong> the name should carry because the moment you call your child's name, you want to feel it. That emotional resonance is something algorithms alone can't manufacture — but the right questions can draw it out.</p>
+  </div>
+
+  <!-- VALUES -->
+  <div class="about-section reveal">
+    <h2>What We Stand For</h2>
+    <div class="values">
+      <div class="value-card">
+        <span class="value-icon">🌱</span>
+        <div class="value-title">Rooted in meaning</div>
+        <div class="value-desc">Every name we surface comes with its full origin story, cultural roots, and the history behind it. Names deserve context.</div>
       </div>
-      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:14%"></div></div>
-    </div>
-
-    <div class="question-card" id="question-card">
-      <!-- Dynamic content injected here -->
-    </div>
-
-    <div class="nav">
-      <button class="btn-back" id="btn-back" onclick="prevQ()" style="display:none">← Back</button>
-      <button class="btn-next" id="btn-next" onclick="nextQ()">Continue →</button>
-    </div>
-  </div>
-
-  <!-- LOADING SCREEN -->
-  <div class="screen" id="screen-loading">
-    <div class="loading-screen">
-      <div class="loading-orb"></div>
-      <div class="loading-text">Finding your names…</div>
-      <div class="loading-sub" id="loading-msg">Weaving together your preferences</div>
+      <div class="value-card">
+        <span class="value-icon">✦</span>
+        <div class="value-title">Genuinely personal</div>
+        <div class="value-desc">No generic lists. Every result is generated fresh from your answers. Your family's list belongs only to you.</div>
+      </div>
+      <div class="value-card">
+        <span class="value-icon">🌍</span>
+        <div class="value-title">Culturally expansive</div>
+        <div class="value-desc">We draw from over 190 cultures and linguistic traditions. Beautiful names exist everywhere — we help you find them.</div>
+      </div>
+      <div class="value-card">
+        <span class="value-icon">🕊️</span>
+        <div class="value-title">Built with love</div>
+        <div class="value-desc">We built this for our daughter. We built it for yours too. Every decision we make starts from that place.</div>
+      </div>
     </div>
   </div>
 
-  <!-- RESULTS SCREEN -->
-  <div class="screen" id="screen-results">
-    <div class="results-header">
-      <h2>Your curated name list</h2>
-      <p id="results-sub">5 names chosen just for you</p>
-    </div>
-    <div id="names-list"></div>
-    <div class="locked-names" id="locked-section" style="display:none">
-      <div class="locked-overlay"><div class="locked-hint">🔒 Unlock 20 more names below</div></div>
-      <div id="locked-names-list"></div>
-      <div id="upsell-section" style="position:relative; z-index:10; margin-top:-520px;"></div>
-    </div>
+  <!-- CTA -->
+  <div class="about-cta reveal">
+    <h3>Ready to find her <em>name?</em></h3>
+    <p>It takes 2 minutes, it's free to start, and the right name might be closer than you think.</p>
+    <a href="quiz.html" class="btn-primary">Find my baby's name <img src="https://raw.githubusercontent.com/nickmistretta/baby-names-api/main/stork-cream.png" style="height:22px; width:auto; vertical-align:middle; margin-left:8px;"></a>
   </div>
 
 </div>
 
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo"><img src="https://raw.githubusercontent.com/nickmistretta/baby-names-api/main/Baby-Name-Transparent.png" alt="Nomia" style="height:47px; width:auto;"></div>
+  <div class="footer-copy">© 2026 Nomia · Made with love in New Jersey</div>
+</footer>
+
 <script>
-const questions = [
-  {
-    id: 'gender',
-    label: 'Step 1',
-    text: 'What gender are you hoping to find names for?',
-    hint: 'You can always explore all options later.',
-    type: 'gender',
-    options: ['Girl', 'Boy', 'Gender-neutral', 'Surprise me']
-  },
-  {
-    id: 'style',
-    label: 'Step 2',
-    text: 'What style speaks to you?',
-    hint: 'Pick the one that feels most like your family.',
-    type: 'single',
-    options: ['Classic & timeless', 'Modern & fresh', 'Rare & unique', 'Vintage revival', 'Nature-inspired', 'Short & strong']
-  },
-  {
-    id: 'culture',
-    label: 'Step 3',
-    text: 'Any cultural or heritage roots to honor?',
-    hint: 'This helps us suggest names with meaningful lineage.',
-    type: 'single',
-    options: ['European / Western', 'Latin / Spanish', 'African / African-American', 'Asian / East Asian', 'South Asian', 'Middle Eastern', 'Indigenous', 'No preference']
-  },
-  {
-    id: 'vibe',
-    label: 'Step 4',
-    text: 'What feeling should the name carry?',
-    hint: 'Think about how it will feel to call out across a park.',
-    type: 'single',
-    options: ['Gentle & soft', 'Bold & strong', 'Playful & bright', 'Mysterious & deep', 'Warm & friendly', 'Elegant & refined']
-  },
-  {
-    id: 'sound',
-    label: 'Step 5',
-    text: 'Any letter or sound preferences?',
-    hint: 'E.g. starts with A, ends in -a, sounds like river',
-    type: 'text',
-    placeholder: 'Optional — leave blank to skip'
-  },
-  {
-    id: 'meaning',
-    label: 'Step 6',
-    text: 'What should the name mean or represent?',
-    hint: 'Pick themes that resonate with your hopes for them.',
-    type: 'single',
-    options: ['Light & radiance', 'Strength & courage', 'Nature & earth', 'Love & grace', 'Wisdom & clarity', 'Joy & laughter', 'Peace & calm', 'No preference']
-  },
-  {
-    id: 'season',
-    label: 'Step 7',
-    text: 'When is your little one expected to arrive?',
-    hint: 'Some names carry beautiful seasonal energy.',
-    type: 'single',
-    cols: 2,
-    options: ['Spring', 'Summer', 'Autumn', 'Winter', 'Already here', 'Not sure yet']
-  }
-];
-
-let current = 0;
-let answers = {};
-
-function renderQ() {
-  const q = questions[current];
-  const card = document.getElementById('question-card');
-  const pct = Math.round(((current + 1) / questions.length) * 100);
-
-  document.getElementById('progress-label').textContent = `Question ${current + 1} of ${questions.length}`;
-  document.getElementById('progress-pct').textContent = pct + '%';
-  document.getElementById('progress-fill').style.width = pct + '%';
-  document.getElementById('btn-back').style.display = current > 0 ? 'block' : 'none';
-
-  let optionsHTML = '';
-
-  if (q.type === 'gender') {
-    optionsHTML = `<div class="gender-toggle">` +
-      q.options.map((o, i) => `<button class="gender-btn${answers[q.id] === o ? ' selected' : ''}" data-qid="${q.id}" data-val="${i}" data-cls="gender-btn">${o}</button>`).join('') +
-      `</div>`;
-  } else if (q.type === 'single') {
-    const grid = q.cols === 2 ? 'options-grid cols-2' : 'options-grid';
-    optionsHTML = `<div class="${grid}">` +
-      q.options.map((o, i) => `
-        <button class="option-btn${answers[q.id] === o ? ' selected' : ''}" data-qid="${q.id}" data-val="${i}" data-cls="option-btn">
-          <span class="option-dot"></span>${o}
-        </button>`).join('') +
-      `</div>`;
-  } else if (q.type === 'text') {
-    optionsHTML = `<input class="text-input" type="text" placeholder="${q.placeholder}" id="text-input-${q.id}" value="${answers[q.id] || ''}">`;
-  }
-
-  card.innerHTML = `
-    <div class="question-label">${q.label}</div>
-    <div class="question-text">${q.text}</div>
-    <div class="question-hint">${q.hint}</div>
-    ${optionsHTML}
-  `;
-
-  // Attach click listeners via JS (safe for special chars & emojis)
-  card.querySelectorAll('[data-qid]').forEach(btn => {
-    btn.addEventListener('click', function() {
-      const qid = this.dataset.qid;
-      const idx = parseInt(this.dataset.val);
-      const cls = this.dataset.cls;
-      const q = questions[current];
-      answers[qid] = q.options[idx];
-      card.querySelectorAll('.' + cls).forEach(b => b.classList.remove('selected'));
-      this.classList.add('selected');
-    });
-  });
-
-  if (q.type === 'text') {
-    const inp = card.querySelector('.text-input');
-    if (inp) inp.addEventListener('input', function() { answers[q.id] = this.value; });
-  }
-
-  card.style.animation = 'none';
-  requestAnimationFrame(() => { card.style.animation = 'fadeUp 0.5s ease both'; });
-
-  const nextBtn = document.getElementById('btn-next');
-  nextBtn.textContent = current === questions.length - 1 ? 'Find my names ✦' : 'Continue →';
-}
-
-
-function nextQ() {
-  const q = questions[current];
-  if (q.type !== 'text' && !answers[q.id]) {
-    document.getElementById('question-card').style.animation = 'none';
-    document.getElementById('question-card').offsetHeight;
-    document.getElementById('question-card').style.animation = 'shake 0.3s ease';
-    return;
-  }
-  if (current < questions.length - 1) {
-    current++;
-    renderQ();
-  } else {
-    generateNames();
-  }
-}
-
-function prevQ() {
-  if (current > 0) { current--; renderQ(); }
-}
-
-const loadingMessages = [
-  'Weaving together your preferences…',
-  'Exploring name origins and meanings…',
-  'Matching seasonal energy…',
-  'Curating your personal collection…'
-];
-
-async function generateNames() {
-  document.getElementById('screen-quiz').classList.remove('active');
-  document.getElementById('screen-loading').classList.add('active');
-
-  let msgIdx = 0;
-  const msgEl = document.getElementById('loading-msg');
-  const msgInterval = setInterval(() => {
-    msgIdx = (msgIdx + 1) % loadingMessages.length;
-    msgEl.textContent = loadingMessages[msgIdx];
-  }, 1800);
-
-  const prompt = `You are a baby name expert. Based on these preferences, suggest exactly 5 baby names for the FREE list and 20 additional names for the PREMIUM list.
-
-Preferences:
-- Gender: ${answers.gender || 'neutral'}
-- Style: ${answers.style || 'classic'}
-- Cultural background: ${answers.culture || 'no preference'}
-- Name vibe: ${answers.vibe || 'warm'}
-- Sound preferences: ${answers.sound || 'none specified'}
-- Meaning themes: ${answers.meaning || 'no preference'}
-- Birth season: ${answers.season || 'not specified'}
-
-Respond ONLY with valid JSON in this exact format, no markdown, no explanation:
-{
-  "free": [
-    {"name": "...", "origin": "...", "meaning": "...", "tags": ["...", "..."]}
-  ],
-  "premium": [
-    {"name": "...", "origin": "...", "meaning": "...", "tags": ["...", "..."]}
-  ]
-}
-
-Make names feel warm, considered, and beautifully matched to the preferences. Vary the origins and styles. Tags should be 2-3 short descriptors like "timeless", "soft sound", "nature-rooted", etc.`;
-
-  try {
-    const res = await fetch('https://project-rz9q4.vercel.app/api/generate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 2000,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-
-    const data = await res.json();
-    
-    let rawText = '';
-    if (data.content && data.content[0] && data.content[0].text) {
-      rawText = data.content[0].text;
-    } else {
-      throw new Error('No content in response');
-    }
-    
-    rawText = rawText.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
-    const jsonStart = rawText.indexOf('{');
-    const jsonEnd = rawText.lastIndexOf('}');
-    if (jsonStart === -1 || jsonEnd === -1) throw new Error('No JSON found');
-    const jsonStr = rawText.slice(jsonStart, jsonEnd + 1);
-    const parsed = JSON.parse(jsonStr);
-    if (!parsed.free || !parsed.premium) throw new Error('Invalid structure');
-
-    clearInterval(msgInterval);
-    showResults(parsed.free, parsed.premium);
-  } catch (e) {
-    console.error('Parse error:', e);
-    clearInterval(msgInterval);
-    showResults(fallbackFree(answers), fallbackPremium());
-  }
-}
-
-function fallbackFree(a) {
-  return [
-    { name: 'Rowan', origin: 'Celtic', meaning: 'Little red one; the rowan tree', tags: ['nature-rooted', 'gender-neutral', 'timeless'] },
-    { name: 'Hazel', origin: 'Old English', meaning: 'The hazel tree; wisdom', tags: ['vintage', 'warm', 'earthy'] },
-    { name: 'Soren', origin: 'Scandinavian', meaning: 'Stern; serious; thunder', tags: ['modern', 'strong', 'unique'] },
-    { name: 'Wren', origin: 'English', meaning: 'Small bird; free spirit', tags: ['nature', 'short', 'lyrical'] },
-    { name: 'Lucian', origin: 'Latin', meaning: 'Light; illumination', tags: ['classic', 'elegant', 'radiant'] }
-  ];
-}
-
-function fallbackPremium() {
-  return Array(20).fill(null).map((_, i) => ({
-    name: '—', origin: '—', meaning: 'Unlock to reveal', tags: ['premium']
-  }));
-}
-
-function showResults(free, premium) {
-  document.getElementById('screen-loading').classList.remove('active');
-  document.getElementById('screen-results').classList.add('active');
-
-  const sub = document.getElementById('results-sub');
-  sub.textContent = `${free.length} names chosen just for you · based on your answers`;
-
-  const namesList = document.getElementById('names-list');
-  namesList.innerHTML = free.map((n, i) => `
-    <div class="name-card" style="animation-delay:${i * 0.08}s">
-      <div class="name-rank">${String(i+1).padStart(2,'0')}</div>
-      <div class="name-info">
-        <div class="name-title">${n.name}</div>
-        <div class="name-origin">${n.origin}</div>
-        <div class="name-meaning">${n.meaning}</div>
-        <div class="name-tags">${(n.tags||[]).map(t => `<span class="name-tag">${t}</span>`).join('')}</div>
-      </div>
-    </div>
-  `).join('');
-
-  // Blurred locked previews
-  const lockedSection = document.getElementById('locked-section');
-  const lockedList = document.getElementById('locked-names-list');
-  lockedSection.style.display = 'block';
-  lockedList.innerHTML = premium.slice(0, 4).map((n, i) => `
-    <div class="name-card blurred" style="animation-delay:${i * 0.06}s">
-      <div class="name-rank">${String(i+6).padStart(2,'0')}</div>
-      <div class="name-info">
-        <div class="name-title">${n.name || 'Xxxxxx'}</div>
-        <div class="name-origin">${n.origin || 'Xxxxxxx'}</div>
-        <div class="name-meaning">${n.meaning || 'Unlock to reveal this beautiful name and its story.'}</div>
-        <div class="name-tags"><span class="name-tag">locked</span></div>
-      </div>
-    </div>
-  `).join('');
-
-  // Store premium names globally
-  window._premiumNames = premium;
-
-  // Upsell with 3 tiers + email capture
-  document.getElementById('upsell-section').innerHTML = `
-    <div class="upsell-card">
-      <div class="upsell-badge">✦ Unlock More Names</div>
-      <div class="upsell-title">How many names do you want?</div>
-      <div class="upsell-desc">Every name comes with full origin, meaning, and story — curated just for you.</div>
-
-      <div id="email-step" style="width:100%; position:relative; z-index:1; margin-top:20px;">
-        <input
-          type="email"
-          id="upsell-email"
-          placeholder="Enter your email address"
-          style="width:100%; padding:14px 18px; border-radius:12px; border:1.5px solid rgba(247,243,238,0.25); background:rgba(247,243,238,0.1); color:#FDFAF7; font-family:'Lato',sans-serif; font-size:15px; outline:none; margin-bottom:10px; box-sizing:border-box;"
-        />
-        <div id="email-error" style="color:#F09595; font-size:12px; margin-bottom:10px; display:none;">Please enter a valid email address</div>
-
-        <!-- Tier cards -->
-        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:16px; position:relative; z-index:1;">
-          
-          <!-- Tier 1 -->
-          <div onclick="selectTier(1)" id="tier-1" style="background:rgba(247,243,238,0.08); border:1.5px solid rgba(247,243,238,0.2); border-radius:14px; padding:16px 10px; text-align:center; cursor:pointer; transition:all 0.2s;">
-            <div style="font-family:'Cormorant Garamond',serif; font-size:22px; color:#FDFAF7; font-weight:400; margin-bottom:4px;">20</div>
-            <div style="font-size:11px; color:rgba(247,243,238,0.6); margin-bottom:10px; letter-spacing:0.04em;">names</div>
-            <div style="font-family:'Cormorant Garamond',serif; font-size:20px; color:#C4694F; font-weight:400;">$1.99</div>
-          </div>
-
-          <!-- Tier 2 - Most Popular -->
-          <div onclick="selectTier(2)" id="tier-2" style="background:rgba(196,105,79,0.2); border:2px solid #C4694F; border-radius:14px; padding:16px 10px; text-align:center; cursor:pointer; transition:all 0.2s; position:relative;">
-            <div style="position:absolute; top:-10px; left:50%; transform:translateX(-50%); background:#C4694F; color:white; font-size:9px; letter-spacing:0.08em; text-transform:uppercase; padding:3px 10px; border-radius:99px; white-space:nowrap;">Most Popular</div>
-            <div style="font-family:'Cormorant Garamond',serif; font-size:22px; color:#FDFAF7; font-weight:400; margin-bottom:4px;">100</div>
-            <div style="font-size:11px; color:rgba(247,243,238,0.6); margin-bottom:10px; letter-spacing:0.04em;">names</div>
-            <div style="font-family:'Cormorant Garamond',serif; font-size:20px; color:#C4694F; font-weight:400;">$4.99</div>
-          </div>
-
-          <!-- Tier 3 -->
-          <div onclick="selectTier(3)" id="tier-3" style="background:rgba(247,243,238,0.08); border:1.5px solid rgba(247,243,238,0.2); border-radius:14px; padding:16px 10px; text-align:center; cursor:pointer; transition:all 0.2s;">
-            <div style="font-family:'Cormorant Garamond',serif; font-size:22px; color:#FDFAF7; font-weight:400; margin-bottom:4px;">∞</div>
-            <div style="font-size:11px; color:rgba(247,243,238,0.6); margin-bottom:10px; letter-spacing:0.04em;">unlimited</div>
-            <div style="font-family:'Cormorant Garamond',serif; font-size:20px; color:#C4694F; font-weight:400;">$9.99</div>
-          </div>
-        </div>
-
-        <!-- Stripe button -->
-        <button onclick="handleStripe()" style="display:flex; align-items:center; justify-content:center; gap:10px; width:100%; padding:16px; background:#FDFAF7; border:none; border-radius:12px; font-family:'Lato',sans-serif; font-size:15px; color:#3A3530; cursor:pointer; margin-bottom:10px; transition:all 0.2s; position:relative; z-index:1;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="#635BFF"><path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.591-7.305z"/></svg>
-          <span id="stripe-btn-text">Pay $1.99 · Apple Pay / Card</span>
-        </button>
-
-        <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px; position:relative; z-index:1;">
-          <div style="flex:1; height:1px; background:rgba(247,243,238,0.15);"></div>
-          <span style="font-size:12px; color:rgba(247,243,238,0.4); letter-spacing:0.06em;">OR</span>
-          <div style="flex:1; height:1px; background:rgba(247,243,238,0.15);"></div>
-        </div>
-
-        <button class="btn-paypal" onclick="handlePayPalWithEmail()" style="width:100%;">
-          <span class="paypal-logo">Pay<span style="color:#009cde">Pal</span></span>
-          <span id="paypal-btn-text">Pay $1.99 with PayPal</span>
-        </button>
-      </div>
-
-      <div class="skip-link" onclick="handleSkip()">No thanks, I'm happy with 5 names</div>
-    </div>
-  `;
-
-  // Default to tier 1 selected
-  window._selectedTier = 1;
-}
-
-// Tier selection
-const TIER_CONFIG = {
-  1: { names: 20,  price: '$1.99', stripe: 'https://buy.stripe.com/PLACEHOLDER_20',  paypal: 'https://www.paypal.com/paypalme/YOURHANDLE/1.99' },
-  2: { names: 100, price: '$4.99', stripe: 'https://buy.stripe.com/PLACEHOLDER_100', paypal: 'https://www.paypal.com/paypalme/YOURHANDLE/4.99' },
-  3: { names: 999, price: '$9.99', stripe: 'https://buy.stripe.com/PLACEHOLDER_999', paypal: 'https://www.paypal.com/paypalme/YOURHANDLE/9.99' },
-};
-
-function selectTier(tier) {
-  window._selectedTier = tier;
-  [1,2,3].forEach(t => {
-    const el = document.getElementById('tier-' + t);
-    if (!el) return;
-    if (t === tier) {
-      el.style.border = '2px solid #C4694F';
-      el.style.background = 'rgba(196,105,79,0.2)';
-    } else {
-      el.style.border = '1.5px solid rgba(247,243,238,0.2)';
-      el.style.background = 'rgba(247,243,238,0.08)';
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) {
+      setTimeout(() => entry.target.classList.add('visible'), i * 80);
     }
   });
-  const cfg = TIER_CONFIG[tier];
-  const stripeBtn = document.getElementById('stripe-btn-text');
-  const paypalBtn = document.getElementById('paypal-btn-text');
-  if (stripeBtn) stripeBtn.textContent = 'Pay ' + cfg.price + ' · Apple Pay / Card';
-  if (paypalBtn) paypalBtn.textContent = 'Pay ' + cfg.price + ' with PayPal';
-}
-
-function handleStripe() {
-  const emailInput = document.getElementById('upsell-email');
-  const emailError = document.getElementById('email-error');
-  const email = emailInput ? emailInput.value.trim() : '';
-  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
-  if (!emailValid) {
-    if (emailError) emailError.style.display = 'block';
-    if (emailInput) emailInput.focus();
-    return;
-  }
-
-  if (emailError) emailError.style.display = 'none';
-  localStorage.setItem('nameforest_email', email);
-
-  const tier = window._selectedTier || 1;
-  const cfg = TIER_CONFIG[tier];
-  window.open(cfg.stripe + '?prefilled_email=' + encodeURIComponent(email), '_blank');
-  showPostPaymentMessage(email);
-}
-
-function handlePayPalWithEmail() {
-  const emailInput = document.getElementById('upsell-email');
-  const emailError = document.getElementById('email-error');
-  const email = emailInput ? emailInput.value.trim() : '';
-  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
-  if (!emailValid) {
-    if (emailError) emailError.style.display = 'block';
-    if (emailInput) emailInput.focus();
-    return;
-  }
-
-  if (emailError) emailError.style.display = 'none';
-  localStorage.setItem('nameforest_email', email);
-
-  // REPLACE YOURHANDLE with your actual PayPal.me username
-  const tier = window._selectedTier || 1;
-  const cfg = TIER_CONFIG[tier];
-  window.open(cfg.paypal, '_blank');
-
-  showPostPaymentMessage(email);
-}
-
-function showPostPaymentMessage(email) {
-  const upsellSection = document.getElementById('upsell-section');
-  if (upsellSection) {
-    upsellSection.innerHTML = `
-      <div class="upsell-card" style="text-align:center;">
-        <div class="upsell-badge">✦ Almost there!</div>
-        <div class="upsell-title" style="margin-bottom:12px;">Complete your payment</div>
-        <div class="upsell-desc" style="margin-bottom:20px;">
-          We have opened the payment page for you. Once complete, your full list of 20 names will be sent to <strong style="color:var(--cream);">${email}</strong>
-        </div>
-        <div style="position:relative; z-index:1; display:flex; flex-direction:column; gap:10px; align-items:center;">
-          <button class="btn-stripe" onclick="window.open('https://buy.stripe.com/PLACEHOLDER?prefilled_email=${encodeURIComponent(email)}', '_blank')" style="display:flex; align-items:center; justify-content:center; gap:10px; width:100%; max-width:300px; padding:16px; background:#FDFAF7; border:none; border-radius:12px; font-family:'Lato',sans-serif; font-size:15px; color:#3A3530; cursor:pointer;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="#635BFF"><path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.591-7.305z"/></svg>
-            Reopen Payment Page
-          </button>
-          <button class="btn-paypal" onclick="window.open('https://www.paypal.com/paypalme/YOURHANDLE/1.99', '_blank')" style="width:100%; max-width:300px;">
-            <span class="paypal-logo">Pay<span style="color:#009cde">Pal</span></span>
-            Reopen PayPal
-          </button>
-        </div>
-      </div>
-    `;
-  }
-}
-
-function handleSkip() {
-  document.getElementById('upsell-section').style.display = 'none';
-}
-
-// Init
-renderQ();
+}, { threshold: 0.1 });
+reveals.forEach(el => observer.observe(el));
 </script>
+
 
 <script>
 function toggleMenu() {
