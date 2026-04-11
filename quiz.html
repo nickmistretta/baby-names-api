@@ -1062,13 +1062,7 @@ function showResults(free, premium) {
       <div class="upsell-title">Your first 5 names are just the beginning</div>
       <div class="upsell-desc">Enter your email and choose a plan — your full list arrives in minutes.</div>
 
-      <input
-        type="email"
-        id="upsell-email"
-        placeholder="Your email address"
-        style="width:100%; padding:14px 18px; border-radius:12px; border:1.5px solid rgba(247,243,238,0.25); background:rgba(247,243,238,0.1); color:#FDFAF7; font-family:'DM Sans',sans-serif; font-size:15px; outline:none; margin:16px 0 6px; box-sizing:border-box; position:relative; z-index:1;"
-      />
-      <div id="email-error" style="color:#F09595; font-size:12px; margin-bottom:12px; display:none; position:relative; z-index:1;">Please enter a valid email address</div>
+
 
       <!-- Tier 1: Family — Most Popular -->
       <div style="background:rgba(201,115,122,0.12); border:1.5px solid #C9737A; border-radius:16px; padding:22px; margin-bottom:12px; text-align:left; position:relative; z-index:1;">
@@ -1155,50 +1149,13 @@ function selectTier(tier) {
 }
 
 function handleStripe() {
-  const emailInput = document.getElementById('upsell-email');
-  const emailError = document.getElementById('email-error');
-  const email = emailInput ? emailInput.value.trim() : '';
-  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
-  if (!emailValid) {
-    if (emailError) emailError.style.display = 'block';
-    if (emailInput) emailInput.focus();
-    return;
-  }
-
-  if (emailError) emailError.style.display = 'none';
-  localStorage.setItem('nameforest_email', email);
-
-  const tier = window._selectedTier || 1;
+  const tier = window._selectedTier || 2;
   const cfg = TIER_CONFIG[tier];
-  window.open(cfg.stripe + '?prefilled_email=' + encodeURIComponent(email), '_blank');
-  showPostPaymentMessage(email);
+  window.open(cfg.stripe, '_blank');
+  showPostPaymentMessage();
 }
 
-function handlePayPalWithEmail() {
-  const emailInput = document.getElementById('upsell-email');
-  const emailError = document.getElementById('email-error');
-  const email = emailInput ? emailInput.value.trim() : '';
-  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
-  if (!emailValid) {
-    if (emailError) emailError.style.display = 'block';
-    if (emailInput) emailInput.focus();
-    return;
-  }
-
-  if (emailError) emailError.style.display = 'none';
-  localStorage.setItem('nameforest_email', email);
-
-  // REPLACE YOURHANDLE with your actual PayPal.me username
-  const tier = window._selectedTier || 1;
-  const cfg = TIER_CONFIG[tier];
-  window.open(cfg.paypal, '_blank');
-
-  showPostPaymentMessage(email);
-}
-
-function showPostPaymentMessage(email) {
+function showPostPaymentMessage() {
   const upsellSection = document.getElementById('upsell-section');
   if (upsellSection) {
     upsellSection.innerHTML = `
@@ -1206,16 +1163,11 @@ function showPostPaymentMessage(email) {
         <div class="upsell-badge">✦ Almost there!</div>
         <div class="upsell-title" style="margin-bottom:12px;">Complete your payment</div>
         <div class="upsell-desc" style="margin-bottom:20px;">
-          We have opened the payment page for you. Once complete, your full list of 20 names will be sent to <strong style="color:var(--cream);">${email}</strong>
+          We've opened the payment page for you. Once complete, your names will be sent to the email you enter at checkout.
         </div>
         <div style="position:relative; z-index:1; display:flex; flex-direction:column; gap:10px; align-items:center;">
-          <button class="btn-stripe" onclick="window.open('https://buy.stripe.com/PLACEHOLDER?prefilled_email=${encodeURIComponent(email)}', '_blank')" style="display:flex; align-items:center; justify-content:center; gap:10px; width:100%; max-width:300px; padding:16px; background:#FDFAF7; border:none; border-radius:12px; font-family:'DM Sans',sans-serif; font-size:15px; color:#3A3530; cursor:pointer;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="#635BFF"><path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.591-7.305z"/></svg>
-            Reopen Payment Page
-          </button>
-          <button class="btn-paypal" onclick="window.open('https://www.paypal.com/paypalme/YOURHANDLE/1.99', '_blank')" style="width:100%; max-width:300px;">
-            <span class="paypal-logo">Pay<span style="color:#009cde">Pal</span></span>
-            Reopen PayPal
+          <button onclick="handleStripe()" style="display:flex; align-items:center; justify-content:center; gap:10px; width:100%; max-width:300px; padding:16px; background:#C9737A; border:none; border-radius:12px; font-family:'DM Sans',sans-serif; font-size:15px; color:white; cursor:pointer;">
+            🔒 Reopen Payment Page
           </button>
         </div>
       </div>
