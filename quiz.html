@@ -618,6 +618,32 @@
     z-index: 1;
   }
 
+  .btn-paypal {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 32px;
+    background: #FFC439;
+    border: none;
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    color: #003087;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    z-index: 1;
+    letter-spacing: 0.02em;
+  }
+
+  .btn-paypal:hover { background: #f0b429; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255,196,57,0.3); }
+
+  .paypal-logo {
+    font-weight: 700;
+    font-size: 16px;
+  }
+
   .skip-link {
     display: block;
     text-align: center;
@@ -1033,71 +1059,79 @@ function showResults(free, premium) {
   document.getElementById('upsell-section').innerHTML = `
     <div class="upsell-card">
       <div class="upsell-badge">✦ Unlock More Names</div>
-      <div class="upsell-title">How many names do you want?</div>
-      <div class="upsell-desc">Every name comes with full origin, meaning, and story — curated just for you.</div>
+      <div class="upsell-title">Your first 5 names are just the beginning</div>
+      <div class="upsell-desc">Enter your email and choose a plan — your full list arrives in minutes.</div>
 
-      <div id="email-step" style="width:100%; position:relative; z-index:1; margin-top:20px;">
-        <input
-          type="email"
-          id="upsell-email"
-          placeholder="Enter your email address"
-          style="width:100%; padding:14px 18px; border-radius:12px; border:1.5px solid rgba(247,243,238,0.25); background:rgba(247,243,238,0.1); color:#FDFAF7; font-family:'DM Sans',sans-serif; font-size:15px; outline:none; margin-bottom:10px; box-sizing:border-box;"
-        />
-        <div id="email-error" style="color:#F09595; font-size:12px; margin-bottom:10px; display:none;">Please enter a valid email address</div>
+      <input
+        type="email"
+        id="upsell-email"
+        placeholder="Your email address"
+        style="width:100%; padding:14px 18px; border-radius:12px; border:1.5px solid rgba(247,243,238,0.25); background:rgba(247,243,238,0.1); color:#FDFAF7; font-family:'DM Sans',sans-serif; font-size:15px; outline:none; margin:16px 0 6px; box-sizing:border-box; position:relative; z-index:1;"
+      />
+      <div id="email-error" style="color:#F09595; font-size:12px; margin-bottom:12px; display:none; position:relative; z-index:1;">Please enter a valid email address</div>
 
-        <!-- Tier cards -->
-        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:16px; position:relative; z-index:1;">
-          
-          <!-- Tier 1 -->
-          <div onclick="selectTier(1)" id="tier-1" style="background:rgba(247,243,238,0.08); border:1.5px solid rgba(247,243,238,0.2); border-radius:14px; padding:16px 10px; text-align:center; cursor:pointer; transition:all 0.2s;">
-            <div style="font-family:'Cormorant Garamond',serif; font-size:22px; color:#FDFAF7; font-weight:400; margin-bottom:4px;">20</div>
-            <div style="font-size:11px; color:rgba(247,243,238,0.6); margin-bottom:10px; letter-spacing:0.04em;">names</div>
-            <div style="font-family:'Cormorant Garamond',serif; font-size:20px; color:#C9737A; font-weight:400;">$1.99</div>
+      <!-- Tier 1: Family — Most Popular -->
+      <div style="background:rgba(201,115,122,0.12); border:1.5px solid #C9737A; border-radius:16px; padding:22px; margin-bottom:12px; text-align:left; position:relative; z-index:1;">
+        <div style="position:absolute; top:-11px; left:20px; background:#C9737A; color:white; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; padding:3px 12px; border-radius:99px;">Most Popular</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <div>
+            <div style="font-family:'Cormorant Garamond',serif; font-size:24px; color:#FDFAF7; font-weight:400;">Nomia Family</div>
+            <div style="font-size:13px; color:rgba(253,250,247,0.6); margin-top:3px;">100 curated names · full origins & meanings</div>
           </div>
-
-          <!-- Tier 2 - Most Popular -->
-          <div onclick="selectTier(2)" id="tier-2" style="background:rgba(196,105,79,0.2); border:2px solid #C9737A; border-radius:14px; padding:16px 10px; text-align:center; cursor:pointer; transition:all 0.2s; position:relative;">
-            <div style="position:absolute; top:-10px; left:50%; transform:translateX(-50%); background:#C9737A; color:white; font-size:9px; letter-spacing:0.08em; text-transform:uppercase; padding:3px 10px; border-radius:99px; white-space:nowrap;">Most Popular</div>
-            <div style="font-family:'Cormorant Garamond',serif; font-size:22px; color:#FDFAF7; font-weight:400; margin-bottom:4px;">100</div>
-            <div style="font-size:11px; color:rgba(247,243,238,0.6); margin-bottom:10px; letter-spacing:0.04em;">names</div>
-            <div style="font-family:'Cormorant Garamond',serif; font-size:20px; color:#C9737A; font-weight:400;">$4.99</div>
-          </div>
-
-          <!-- Tier 3 -->
-          <div onclick="selectTier(3)" id="tier-3" style="background:rgba(247,243,238,0.08); border:1.5px solid rgba(247,243,238,0.2); border-radius:14px; padding:16px 10px; text-align:center; cursor:pointer; transition:all 0.2s;">
-            <div style="font-family:'Cormorant Garamond',serif; font-size:22px; color:#FDFAF7; font-weight:400; margin-bottom:4px;">∞</div>
-            <div style="font-size:11px; color:rgba(247,243,238,0.6); margin-bottom:6px; letter-spacing:0.04em;">unlimited</div>
-            <div style="font-size:10px; color:#C9737A; margin-bottom:8px; line-height:1.4; letter-spacing:0.02em; font-style:italic;">enhanced matching, save favorites & more</div>
-            <div style="font-family:'Cormorant Garamond',serif; font-size:20px; color:#C9737A; font-weight:400;">$9.99</div>
-          </div>
+          <div style="font-family:'Cormorant Garamond',serif; font-size:30px; color:#E8B4B8; font-weight:400;">$4.99</div>
         </div>
-
-        <!-- Stripe button -->
-        <button onclick="handleStripe()" style="display:flex; align-items:center; justify-content:center; gap:10px; width:100%; padding:16px; background:#FDFAF7; border:none; border-radius:12px; font-family:'DM Sans',sans-serif; font-size:15px; color:#3A3530; cursor:pointer; margin-bottom:10px; transition:all 0.2s; position:relative; z-index:1;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="#635BFF"><path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.591-7.305z"/></svg>
-          <span id="stripe-btn-text">Pay $1.99 · Apple Pay / Card</span>
-        </button>
-
-        <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px; position:relative; z-index:1;">
-          <div style="flex:1; height:1px; background:rgba(247,243,238,0.15);"></div>
-          <span style="font-size:12px; color:rgba(247,243,238,0.4); letter-spacing:0.06em;">OR</span>
-          <div style="flex:1; height:1px; background:rgba(247,243,238,0.15);"></div>
-        </div>
+        <div style="font-size:12px; color:rgba(253,250,247,0.55); margin-bottom:14px; line-height:1.6;">The most popular choice for expecting parents. 100 hand-matched names with full stories, origins, and meanings — delivered straight to your inbox.</div>
+        <button onclick="handleStripeTier(2)" style="width:100%; padding:15px; background:#C9737A; border:none; border-radius:10px; font-family:'DM Sans',sans-serif; font-size:15px; color:white; cursor:pointer; letter-spacing:0.03em;">🔒 Pay $4.99 securely</button>
+        <div style="font-size:11px; color:rgba(253,250,247,0.3); margin-top:8px; text-align:center; letter-spacing:0.04em;">Visa · Mastercard · Amex · Apple Pay · Google Pay</div>
       </div>
 
-      <div class="skip-link" onclick="handleSkip()">No thanks, I'm happy with 5 names</div>
+      <!-- Tier 2: Unlimited -->
+      <div style="background:rgba(247,243,238,0.06); border:1px solid rgba(247,243,238,0.15); border-radius:16px; padding:22px; margin-bottom:12px; text-align:left; position:relative; z-index:1;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <div>
+            <div style="font-family:'Cormorant Garamond',serif; font-size:24px; color:#FDFAF7; font-weight:400;">Nomia Unlimited</div>
+            <div style="font-size:13px; color:rgba(253,250,247,0.6); margin-top:3px;">Unlimited names · dashboard · taste matching</div>
+          </div>
+          <div style="font-family:'Cormorant Garamond',serif; font-size:30px; color:#E8B4B8; font-weight:400;">$9.99</div>
+        </div>
+        <div style="font-size:12px; color:rgba(253,250,247,0.55); margin-bottom:14px; line-height:1.6;">Our most powerful plan. Unlimited name generation, a personal dashboard to save your favorites, and our advanced taste-matching quiz.</div>
+        <button onclick="handleStripeTier(3)" style="width:100%; padding:15px; background:rgba(247,243,238,0.12); border:1px solid rgba(247,243,238,0.3); border-radius:10px; font-family:'DM Sans',sans-serif; font-size:15px; color:#FDFAF7; cursor:pointer; letter-spacing:0.03em;">🔒 Pay $9.99 securely</button>
+        <div style="font-size:11px; color:rgba(253,250,247,0.3); margin-top:8px; text-align:center; letter-spacing:0.04em;">Visa · Mastercard · Amex · Apple Pay · Google Pay</div>
+      </div>
+
+      <!-- Tier 3: Starter -->
+      <div style="background:rgba(247,243,238,0.04); border:1px solid rgba(247,243,238,0.08); border-radius:16px; padding:22px; margin-bottom:4px; text-align:left; position:relative; z-index:1;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <div>
+            <div style="font-family:'Cormorant Garamond',serif; font-size:24px; color:#FDFAF7; font-weight:400;">Nomia Starter</div>
+            <div style="font-size:13px; color:rgba(253,250,247,0.6); margin-top:3px;">20 curated names · full origins & meanings</div>
+          </div>
+          <div style="font-family:'Cormorant Garamond',serif; font-size:30px; color:#E8B4B8; font-weight:400;">$1.99</div>
+        </div>
+        <div style="font-size:12px; color:rgba(253,250,247,0.55); margin-bottom:14px; line-height:1.6;">Just getting started? Get 20 beautifully matched names with full origins and meanings for less than a cup of coffee.</div>
+        <button onclick="handleStripeTier(1)" style="width:100%; padding:15px; background:rgba(247,243,238,0.1); border:1px solid rgba(247,243,238,0.2); border-radius:10px; font-family:'DM Sans',sans-serif; font-size:15px; color:#FDFAF7; cursor:pointer; letter-spacing:0.03em;">🔒 Pay $1.99 securely</button>
+        <div style="font-size:11px; color:rgba(253,250,247,0.3); margin-top:8px; text-align:center; letter-spacing:0.04em;">Visa · Mastercard · Amex · Apple Pay · Google Pay</div>
+      </div>
+
+      <div class="skip-link" onclick="handleSkip()">No thanks, I\'m happy with 5 names</div>
     </div>
   `;
 
-  // Default to tier 1 selected
-  window._selectedTier = 1;
+  // Default tier
+  window._selectedTier = 2;dow._selectedTier = 1;
+}
+
+// Per-tier handler
+function handleStripeTier(tier) {
+  window._selectedTier = tier;
+  handleStripe();
 }
 
 // Tier selection
 const TIER_CONFIG = {
-  1: { names: 20,  price: '$1.99', stripe: 'https://buy.stripe.com/aFa4gAenq7RZ3ge9zb2Fa00',},
-  2: { names: 100, price: '$4.99', stripe: 'https://buy.stripe.com/9B69AUenq1tBg30aDf2Fa01' },
-  3: { names: 999, price: '$9.99', stripe: 'https://buy.stripe.com/fZueVe936b4bcQ0eTv2Fa02' },
+  1: { names: 20,  price: '$1.99', stripe: 'https://buy.stripe.com/aFa4gAenq7RZ3ge9zb2Fa00',  paypal: 'https://www.paypal.com/paypalme/YOURHANDLE/1.99' },
+  2: { names: 100, price: '$4.99', stripe: 'https://buy.stripe.com/9B69AUenq1tBg30aDf2Fa01', paypal: 'https://www.paypal.com/paypalme/YOURHANDLE/4.99' },
+  3: { names: 999, price: '$9.99', stripe: 'https://buy.stripe.com/fZueVe936b4bcQ0eTv2Fa02', paypal: 'https://www.paypal.com/paypalme/YOURHANDLE/9.99' },
 };
 
 function selectTier(tier) {
@@ -1115,7 +1149,9 @@ function selectTier(tier) {
   });
   const cfg = TIER_CONFIG[tier];
   const stripeBtn = document.getElementById('stripe-btn-text');
+  const paypalBtn = document.getElementById('paypal-btn-text');
   if (stripeBtn) stripeBtn.textContent = 'Pay ' + cfg.price + ' · Apple Pay / Card';
+  if (paypalBtn) paypalBtn.textContent = 'Pay ' + cfg.price + ' with PayPal';
 }
 
 function handleStripe() {
@@ -1133,26 +1169,34 @@ function handleStripe() {
   if (emailError) emailError.style.display = 'none';
   localStorage.setItem('nameforest_email', email);
 
-  // Save answers to Supabase
-  fetch('https://project-rz9q4.vercel.app/api/save-answers', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, answers })
-  });
-
-  // Brevo email capture
-  fetch('https://project-rz9q4.vercel.app/api/generate', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: 'subscribe', email })
-  });
-
   const tier = window._selectedTier || 1;
   const cfg = TIER_CONFIG[tier];
   window.open(cfg.stripe + '?prefilled_email=' + encodeURIComponent(email), '_blank');
   showPostPaymentMessage(email);
 }
 
+function handlePayPalWithEmail() {
+  const emailInput = document.getElementById('upsell-email');
+  const emailError = document.getElementById('email-error');
+  const email = emailInput ? emailInput.value.trim() : '';
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  if (!emailValid) {
+    if (emailError) emailError.style.display = 'block';
+    if (emailInput) emailInput.focus();
+    return;
+  }
+
+  if (emailError) emailError.style.display = 'none';
+  localStorage.setItem('nameforest_email', email);
+
+  // REPLACE YOURHANDLE with your actual PayPal.me username
+  const tier = window._selectedTier || 1;
+  const cfg = TIER_CONFIG[tier];
+  window.open(cfg.paypal, '_blank');
+
+  showPostPaymentMessage(email);
+}
 
 function showPostPaymentMessage(email) {
   const upsellSection = document.getElementById('upsell-section');
@@ -1168,6 +1212,10 @@ function showPostPaymentMessage(email) {
           <button class="btn-stripe" onclick="window.open('https://buy.stripe.com/PLACEHOLDER?prefilled_email=${encodeURIComponent(email)}', '_blank')" style="display:flex; align-items:center; justify-content:center; gap:10px; width:100%; max-width:300px; padding:16px; background:#FDFAF7; border:none; border-radius:12px; font-family:'DM Sans',sans-serif; font-size:15px; color:#3A3530; cursor:pointer;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="#635BFF"><path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.591-7.305z"/></svg>
             Reopen Payment Page
+          </button>
+          <button class="btn-paypal" onclick="window.open('https://www.paypal.com/paypalme/YOURHANDLE/1.99', '_blank')" style="width:100%; max-width:300px;">
+            <span class="paypal-logo">Pay<span style="color:#009cde">Pal</span></span>
+            Reopen PayPal
           </button>
         </div>
       </div>
