@@ -618,32 +618,6 @@
     z-index: 1;
   }
 
-  .btn-paypal {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    padding: 16px 32px;
-    background: #FFC439;
-    border: none;
-    border-radius: 12px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 15px;
-    font-weight: 400;
-    color: #003087;
-    cursor: pointer;
-    transition: all 0.2s;
-    position: relative;
-    z-index: 1;
-    letter-spacing: 0.02em;
-  }
-
-  .btn-paypal:hover { background: #f0b429; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255,196,57,0.3); }
-
-  .paypal-logo {
-    font-weight: 700;
-    font-size: 16px;
-  }
-
   .skip-link {
     display: block;
     text-align: center;
@@ -1109,11 +1083,6 @@ function showResults(free, premium) {
           <span style="font-size:12px; color:rgba(247,243,238,0.4); letter-spacing:0.06em;">OR</span>
           <div style="flex:1; height:1px; background:rgba(247,243,238,0.15);"></div>
         </div>
-
-        <button class="btn-paypal" onclick="handlePayPalWithEmail()" style="width:100%;">
-          <span class="paypal-logo">Pay<span style="color:#009cde">Pal</span></span>
-          <span id="paypal-btn-text">Pay $1.99 with PayPal</span>
-        </button>
       </div>
 
       <div class="skip-link" onclick="handleSkip()">No thanks, I'm happy with 5 names</div>
@@ -1126,9 +1095,9 @@ function showResults(free, premium) {
 
 // Tier selection
 const TIER_CONFIG = {
-  1: { names: 20,  price: '$1.99', stripe: 'https://buy.stripe.com/aFa4gAenq7RZ3ge9zb2Fa00',  paypal: 'https://www.paypal.com/paypalme/YOURHANDLE/1.99' },
-  2: { names: 100, price: '$4.99', stripe: 'https://buy.stripe.com/9B69AUenq1tBg30aDf2Fa01', paypal: 'https://www.paypal.com/paypalme/YOURHANDLE/4.99' },
-  3: { names: 999, price: '$9.99', stripe: 'https://buy.stripe.com/fZueVe936b4bcQ0eTv2Fa02', paypal: 'https://www.paypal.com/paypalme/YOURHANDLE/9.99' },
+  1: { names: 20,  price: '$1.99', stripe: 'https://buy.stripe.com/aFa4gAenq7RZ3ge9zb2Fa00',},
+  2: { names: 100, price: '$4.99', stripe: 'https://buy.stripe.com/9B69AUenq1tBg30aDf2Fa01' },
+  3: { names: 999, price: '$9.99', stripe: 'https://buy.stripe.com/fZueVe936b4bcQ0eTv2Fa02' },
 };
 
 function selectTier(tier) {
@@ -1146,9 +1115,7 @@ function selectTier(tier) {
   });
   const cfg = TIER_CONFIG[tier];
   const stripeBtn = document.getElementById('stripe-btn-text');
-  const paypalBtn = document.getElementById('paypal-btn-text');
   if (stripeBtn) stripeBtn.textContent = 'Pay ' + cfg.price + ' · Apple Pay / Card';
-  if (paypalBtn) paypalBtn.textContent = 'Pay ' + cfg.price + ' with PayPal';
 }
 
 function handleStripe() {
@@ -1186,42 +1153,6 @@ function handleStripe() {
   showPostPaymentMessage(email);
 }
 
-function handlePayPalWithEmail() {
-  const emailInput = document.getElementById('upsell-email');
-  const emailError = document.getElementById('email-error');
-  const email = emailInput ? emailInput.value.trim() : '';
-  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
-  if (!emailValid) {
-    if (emailError) emailError.style.display = 'block';
-    if (emailInput) emailInput.focus();
-    return;
-  }
-
-  if (emailError) emailError.style.display = 'none';
-  localStorage.setItem('nameforest_email', email);
-
-  // Save answers to Supabase
-  fetch('https://project-rz9q4.vercel.app/api/save-answers', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, answers })
-  });
-
-  // Brevo email capture
-  fetch('https://project-rz9q4.vercel.app/api/generate', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: 'subscribe', email })
-  });
-
-  // REPLACE YOURHANDLE with your actual PayPal.me username
-  const tier = window._selectedTier || 1;
-  const cfg = TIER_CONFIG[tier];
-  window.open(cfg.paypal, '_blank');
-
-  showPostPaymentMessage(email);
-}
 
 function showPostPaymentMessage(email) {
   const upsellSection = document.getElementById('upsell-section');
@@ -1237,10 +1168,6 @@ function showPostPaymentMessage(email) {
           <button class="btn-stripe" onclick="window.open('https://buy.stripe.com/PLACEHOLDER?prefilled_email=${encodeURIComponent(email)}', '_blank')" style="display:flex; align-items:center; justify-content:center; gap:10px; width:100%; max-width:300px; padding:16px; background:#FDFAF7; border:none; border-radius:12px; font-family:'DM Sans',sans-serif; font-size:15px; color:#3A3530; cursor:pointer;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="#635BFF"><path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.591-7.305z"/></svg>
             Reopen Payment Page
-          </button>
-          <button class="btn-paypal" onclick="window.open('https://www.paypal.com/paypalme/YOURHANDLE/1.99', '_blank')" style="width:100%; max-width:300px;">
-            <span class="paypal-logo">Pay<span style="color:#009cde">Pal</span></span>
-            Reopen PayPal
           </button>
         </div>
       </div>
