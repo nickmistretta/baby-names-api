@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nomia — Match My Taste</title>
+<link rel="icon" type="image/svg+xml" href="https://raw.githubusercontent.com/nickmistretta/baby-names-api/main/nomia-favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #1C2B3A;
+    --navy-deep: #152230;
+    --navy-mid: #243548;
+    --cream: #FDFAF7;
+    --dusty-rose: #C9737A;
+    --rose: #E8B4B8;
+    --silver: #8B9EB0;
+    --muted: #8B9EB0;
+    --terracotta: #C9737A;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--navy);
+    color: var(--cream);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: -200px; right: -200px;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: rgba(201,115,122,0.06);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 16px 24px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 28px;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  .header h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(28px, 5vw, 42px);
+    font-weight: 400;
+    color: var(--cream);
+    line-height: 1.15;
+    margin-bottom: 10px;
+  }
+
+  .header h1 em { font-style: italic; color: var(--dusty-rose); }
+
+  .header p {
+    font-size: 15px;
+    color: var(--muted);
+    font-weight: 300;
+    line-height: 1.6;
+    max-width: 420px;
+    margin: 0 auto;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--silver);
+    text-decoration: none;
+    margin-bottom: 32px;
+    transition: color 0.2s;
+    letter-spacing: 0.04em;
+  }
+
+  .back-link:hover { color: var(--cream); }
+
+  /* Name input tags */
+  .names-input-wrap {
+    background: var(--navy-mid);
+    border: 0.5px solid rgba(253,250,247,0.15);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+    min-height: 80px;
+    cursor: text;
+    transition: border-color 0.2s;
+  }
+
+  .names-input-wrap:focus-within { border-color: var(--dusty-rose); }
+
+  .names-input-wrap .tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .name-tag-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: rgba(201,115,122,0.2);
+    border: 0.5px solid rgba(201,115,122,0.4);
+    border-radius: 99px;
+    font-size: 14px;
+    color: var(--cream);
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+  }
+
+  .name-tag-pill button {
+    background: none;
+    border: none;
+    color: rgba(253,250,247,0.5);
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+    transition: color 0.2s;
+  }
+
+  .name-tag-pill button:hover { color: var(--cream); }
+
+  .name-type-input {
+    background: none;
+    border: none;
+    outline: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--cream);
+    width: 200px;
+    min-width: 100px;
+  }
+
+  .name-type-input::placeholder { color: var(--silver); }
+
+  .input-hint {
+    font-size: 12px;
+    color: rgba(253,250,247,0.35);
+    margin-top: 4px;
+  }
+
+  /* Question cards */
+  .question-card {
+    background: var(--navy-mid);
+    border: 0.5px solid rgba(253,250,247,0.1);
+    border-radius: 20px;
+    padding: 32px 28px;
+    margin-bottom: 20px;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .question-label {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--dusty-rose);
+    font-weight: 400;
+    margin-bottom: 10px;
+  }
+
+  .question-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(18px, 3vw, 22px);
+    font-weight: 400;
+    color: var(--cream);
+    line-height: 1.3;
+    margin-bottom: 6px;
+  }
+
+  .question-hint {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 300;
+    margin-bottom: 20px;
+  }
+
+  .options-grid {
+    display: grid;
+    gap: 10px;
+  }
+
+  .options-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+
+  .option-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 16px;
+    background: rgba(253,250,247,0.06);
+    border: 0.5px solid rgba(253,250,247,0.15);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--cream);
+    text-align: left;
+  }
+
+  .option-btn:hover { border-color: var(--dusty-rose); background: rgba(201,115,122,0.1); }
+  .option-btn.selected { border-color: var(--dusty-rose); background: rgba(201,115,122,0.2); }
+
+  .option-dot {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    border: 0.5px solid rgba(253,250,247,0.25);
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+
+  .option-btn.selected .option-dot {
+    background: var(--dusty-rose);
+    border-color: var(--dusty-rose);
+  }
+
+  .option-btn.selected .option-dot::after {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: white;
+  }
+
+  .text-input {
+    width: 100%;
+    padding: 13px 16px;
+    background: rgba(253,250,247,0.07);
+    border: 0.5px solid rgba(253,250,247,0.2);
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--cream);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .text-input:focus { border-color: var(--dusty-rose); }
+  .text-input::placeholder { color: var(--silver); font-weight: 300; }
+
+  /* Generate button */
+  .btn-generate {
+    width: 100%;
+    padding: 16px;
+    background: var(--dusty-rose);
+    border: none;
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 300;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.04em;
+    margin-top: 8px;
+  }
+
+  .btn-generate:hover { background: #b85f66; transform: translateY(-1px); }
+  .btn-generate:disabled { background: rgba(253,250,247,0.1); color: var(--silver); cursor: not-allowed; transform: none; }
+
+  /* Loading */
+  .loading-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 80vh;
+    text-align: center;
+    padding: 40px 20px;
+  }
+
+  .loading-pulse-wrap {
+    position: relative;
+    width: 200px; height: 200px;
+    margin: 0 auto 48px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .loading-pulse-wrap::before, .loading-pulse-wrap::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(201,115,122,0.15);
+    animation: pulseRing 2.4s ease-out infinite;
+  }
+
+  .loading-pulse-wrap::before { width: 100%; height: 100%; animation-delay: 0s; }
+  .loading-pulse-wrap::after { width: 75%; height: 75%; animation-delay: 0.4s; }
+
+  .loading-pulse-inner {
+    width: 50%; height: 50%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,115,122,0.6) 0%, rgba(201,115,122,0.3) 60%, transparent 100%);
+    animation: pulseCore 2.4s ease-in-out infinite;
+    position: relative; z-index: 1;
+  }
+
+  .loading-pulse-ring {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(201,115,122,0.08);
+    width: 140%; height: 140%;
+    animation: pulseRing 2.4s ease-out infinite;
+    animation-delay: 0.8s;
+  }
+
+  @keyframes pulseRing {
+    0% { transform: scale(0.6); opacity: 0.8; }
+    70% { transform: scale(1.1); opacity: 0; }
+    100% { transform: scale(1.1); opacity: 0; }
+  }
+
+  @keyframes pulseCore {
+    0%, 100% { transform: scale(0.92); opacity: 0.7; }
+    50% { transform: scale(1.08); opacity: 1; }
+  }
+
+  .loading-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(28px, 5vw, 42px);
+    font-weight: 300;
+    color: var(--cream);
+    margin-bottom: 12px;
+  }
+
+  .loading-sub {
+    font-size: 15px;
+    color: var(--silver);
+    font-weight: 300;
+    letter-spacing: 0.04em;
+  }
+
+  /* Results */
+  .results-header {
+    text-align: center;
+    margin-bottom: 32px;
+    animation: fadeUp 0.7s ease both;
+  }
+
+  .results-header h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(24px, 4vw, 34px);
+    font-weight: 400;
+    color: var(--cream);
+    margin-bottom: 8px;
+  }
+
+  .results-header p { font-size: 14px; color: var(--silver); font-weight: 300; }
+
+  .name-card {
+    background: var(--navy-mid);
+    border: 0.5px solid rgba(253,250,247,0.1);
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    animation: fadeUp 0.5s ease both;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .name-card:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,0.2); }
+
+  .name-rank {
+    font-size: 11px;
+    color: var(--dusty-rose);
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    min-width: 24px;
+    padding-top: 4px;
+  }
+
+  .name-info { flex: 1; }
+
+  .name-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--cream);
+    margin-bottom: 4px;
+  }
+
+  .name-origin {
+    font-size: 12px;
+    color: var(--dusty-rose);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .name-meaning { font-size: 13px; color: var(--silver); font-weight: 300; line-height: 1.5; }
+
+  .name-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+
+  .name-tag {
+    padding: 3px 10px;
+    background: rgba(253,250,247,0.08);
+    border-radius: 99px;
+    font-size: 11px;
+    color: var(--silver);
+    letter-spacing: 0.04em;
+  }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- QUIZ SCREEN -->
+  <div class="screen active" id="screen-quiz">
+    <div style="animation: fadeUp 0.6s ease both;">
+      <a href="dashboard.html" class="back-link">← Back to dashboard</a>
+    </div>
+
+    <div class="header">
+      <h1>Match my <em>taste</em></h1>
+      <p>Enter names you already love and we'll find more with the same energy, roots, and magic.</p>
+    </div>
+
+    <!-- Name input -->
+    <div class="question-card" style="animation-delay:0.05s">
+      <div class="question-label">Your inspiration</div>
+      <div class="question-text">Enter names you already love</div>
+      <div class="question-hint">Add 2–5 names — press Enter or comma after each one</div>
+      <div class="names-input-wrap" id="names-wrap" onclick="document.getElementById('name-input').focus()">
+        <div class="tags-container" id="tags-container"></div>
+        <input type="text" class="name-type-input" id="name-input" placeholder="e.g. Isolde, Wren, Caspian…" />
+        <div class="input-hint">Press Enter or comma to add each name</div>
+      </div>
+    </div>
+
+    <!-- What you love about them -->
+    <div class="question-card" style="animation-delay:0.1s">
+      <div class="question-label">The feeling</div>
+      <div class="question-text">What do you love about those names?</div>
+      <div class="question-hint">Pick everything that resonates.</div>
+      <div class="options-grid cols-2" id="vibes-grid">
+        <button class="option-btn" data-val="The sound and rhythm"><span class="option-dot"></span>The sound and rhythm</button>
+        <button class="option-btn" data-val="The origin and meaning"><span class="option-dot"></span>The origin and meaning</button>
+        <button class="option-btn" data-val="How rare and unique they are"><span class="option-dot"></span>How rare and unique they are</button>
+        <button class="option-btn" data-val="The soft, gentle feel"><span class="option-dot"></span>The soft, gentle feel</button>
+        <button class="option-btn" data-val="The strength and boldness"><span class="option-dot"></span>The strength and boldness</button>
+        <button class="option-btn" data-val="The vintage, timeless quality"><span class="option-dot"></span>The vintage, timeless quality</button>
+        <button class="option-btn" data-val="The nature connection"><span class="option-dot"></span>The nature connection</button>
+        <button class="option-btn" data-val="How literary and poetic they feel"><span class="option-dot"></span>How literary and poetic they feel</button>
+      </div>
+    </div>
+
+    <!-- Gender -->
+    <div class="question-card" style="animation-delay:0.15s">
+      <div class="question-label">Gender</div>
+      <div class="question-text">What gender are you looking for?</div>
+      <div class="question-hint">We'll tailor the matches accordingly.</div>
+      <div class="options-grid cols-2" id="gender-grid">
+        <button class="option-btn" data-val="Girl"><span class="option-dot"></span>Girl</button>
+        <button class="option-btn" data-val="Boy"><span class="option-dot"></span>Boy</button>
+        <button class="option-btn" data-val="Gender-neutral"><span class="option-dot"></span>Gender-neutral</button>
+        <button class="option-btn" data-val="Surprise me"><span class="option-dot"></span>Surprise me</button>
+      </div>
+    </div>
+
+    <!-- Last name for flow -->
+    <div class="question-card" style="animation-delay:0.2s">
+      <div class="question-label">Optional</div>
+      <div class="question-text">Last name for flow testing?</div>
+      <div class="question-hint">We'll check how each name sounds with your surname.</div>
+      <input type="text" class="text-input" id="last-name" placeholder="Your last name (optional)" />
+    </div>
+
+    <button class="btn-generate" id="generate-btn" onclick="handleGenerate()">Find my matches ✦</button>
+  </div>
+
+  <!-- LOADING SCREEN -->
+  <div class="screen" id="screen-loading">
+    <div class="loading-screen">
+      <div class="loading-pulse-wrap">
+        <div class="loading-pulse-ring"></div>
+        <div class="loading-pulse-inner"></div>
+      </div>
+      <div class="loading-text">Finding your matches…</div>
+      <div class="loading-sub" id="loading-msg">Analysing your taste profile</div>
+    </div>
+  </div>
+
+  <!-- RESULTS SCREEN -->
+  <div class="screen" id="screen-results">
+    <div style="margin-bottom:24px;">
+      <a href="dashboard.html" class="back-link">← Back to dashboard</a>
+    </div>
+    <div class="results-header">
+      <h2>Your matched names</h2>
+      <p id="results-sub">25 names matched to your taste</p>
+    </div>
+    <div id="names-list"></div>
+    <div style="display:flex; flex-direction:column; gap:12px; margin-top:32px; align-items:center;">
+      <button onclick="location.reload()" style="width:100%; padding:15px; background:var(--dusty-rose); border:none; border-radius:12px; font-family:'DM Sans',sans-serif; font-size:15px; font-weight:300; color:white; cursor:pointer; transition:all 0.2s; letter-spacing:0.04em;">
+        ✦ Match again with different names
+      </button>
+      <a href="dashboard.html" style="width:100%; padding:14px; background:transparent; border:0.5px solid rgba(253,250,247,0.2); border-radius:12px; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:300; color:rgba(253,250,247,0.6); cursor:pointer; text-align:center; text-decoration:none; letter-spacing:0.04em; display:block;">
+        ← Back to dashboard
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // Check auth
+  const userEmail = localStorage.getItem('nomia_user_email');
+  if (!userEmail) window.location.href = 'dashboard.html';
+
+  // Name tags input
+  let inputtedNames = [];
+  const nameInput = document.getElementById('name-input');
+
+  nameInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      addName(this.value.trim().replace(',', ''));
+    } else if (e.key === 'Backspace' && this.value === '' && inputtedNames.length > 0) {
+      removeName(inputtedNames.length - 1);
+    }
+  });
+
+  nameInput.addEventListener('blur', function() {
+    if (this.value.trim()) addName(this.value.trim());
+  });
+
+  function addName(name) {
+    if (!name || inputtedNames.includes(name) || inputtedNames.length >= 5) return;
+    inputtedNames.push(name);
+    nameInput.value = '';
+    renderTags();
+  }
+
+  function removeName(idx) {
+    inputtedNames.splice(idx, 1);
+    renderTags();
+  }
+
+  function renderTags() {
+    const container = document.getElementById('tags-container');
+    container.innerHTML = inputtedNames.map((n, i) => `
+      <span class="name-tag-pill">
+        ${n}
+        <button onclick="removeName(${i})" type="button">×</button>
+      </span>
+    `).join('');
+  }
+
+  // Multi-select vibes
+  let selectedVibes = [];
+  document.querySelectorAll('#vibes-grid .option-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const val = this.dataset.val;
+      if (selectedVibes.includes(val)) {
+        selectedVibes = selectedVibes.filter(v => v !== val);
+        this.classList.remove('selected');
+      } else {
+        selectedVibes.push(val);
+        this.classList.add('selected');
+      }
+    });
+  });
+
+  // Single-select gender
+  let selectedGender = '';
+  document.querySelectorAll('#gender-grid .option-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('#gender-grid .option-btn').forEach(b => b.classList.remove('selected'));
+      this.classList.add('selected');
+      selectedGender = this.dataset.val;
+    });
+  });
+
+  const loadingMessages = [
+    'Analysing your taste profile…',
+    'Finding names with the same energy…',
+    'Exploring roots and origins…',
+    'Curating your matches…'
+  ];
+
+  async function handleGenerate() {
+    if (inputtedNames.length < 1) {
+      document.getElementById('names-wrap').style.borderColor = 'var(--dusty-rose)';
+      nameInput.focus();
+      return;
+    }
+
+    document.getElementById('screen-quiz').classList.remove('active');
+    document.getElementById('screen-loading').classList.add('active');
+
+    let msgIdx = 0;
+    const msgEl = document.getElementById('loading-msg');
+    const msgInterval = setInterval(() => {
+      msgIdx = (msgIdx + 1) % loadingMessages.length;
+      msgEl.textContent = loadingMessages[msgIdx];
+    }, 1800);
+
+    const lastName = document.getElementById('last-name').value.trim();
+    const vibesText = selectedVibes.length > 0 ? selectedVibes.join(', ') : 'no specific preference';
+
+    const prompt = `You are a baby name expert. The user loves these names: ${inputtedNames.join(', ')}.
+
+What they love about them: ${vibesText}
+Gender preference: ${selectedGender || 'no preference'}
+${lastName ? `Last name for flow: ${lastName} — check how each name sounds with this surname` : ''}
+
+Based on this taste profile, suggest exactly 25 baby names that feel like a natural extension of what they already love. Find names with similar energy, roots, sounds, or qualities — but don't repeat the names they gave you.
+
+Respond ONLY with a valid JSON array, no markdown, no explanation:
+[{"name": "...", "origin": "...", "meaning": "...", "tags": ["...", "..."]}]
+
+Tags should capture why it matches their taste, e.g. "same Celtic roots", "similar soft sound", "equally rare", etc.`;
+
+    try {
+      const res = await fetch('https://project-rz9q4.vercel.app/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 4000,
+          messages: [{ role: 'user', content: prompt }]
+        })
+      });
+
+      const data = await res.json();
+      let rawText = data.content[0].text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+      const start = rawText.indexOf('[');
+      const end = rawText.lastIndexOf(']');
+      const names = JSON.parse(rawText.slice(start, end + 1));
+
+      // Save to Supabase
+      if (userEmail && names.length > 0) {
+        fetch('https://project-rz9q4.vercel.app/api/save-names', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: userEmail, names })
+        });
+      }
+
+      clearInterval(msgInterval);
+      showResults(names);
+    } catch (e) {
+      console.error(e);
+      clearInterval(msgInterval);
+      showResults([]);
+    }
+  }
+
+  function showResults(names) {
+    document.getElementById('screen-loading').classList.remove('active');
+    document.getElementById('screen-results').classList.add('active');
+    document.getElementById('results-sub').textContent = `${names.length} names matched to your taste`;
+
+    document.getElementById('names-list').innerHTML = names.map((n, i) => `
+      <div class="name-card" style="animation-delay:${i * 0.05}s">
+        <div class="name-rank">${String(i+1).padStart(2,'0')}</div>
+        <div class="name-info">
+          <div class="name-title">${n.name}</div>
+          <div class="name-origin">${n.origin}</div>
+          <div class="name-meaning">${n.meaning}</div>
+          <div class="name-tags">${(n.tags||[]).map(t => `<span class="name-tag">${t}</span>`).join('')}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+</script>
+</body>
+</html>
