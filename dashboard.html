@@ -113,16 +113,6 @@
   }
 
   .auth-btn:hover { background: #b85f66; transform: translateY(-1px); }
-
-  .auth-toggle {
-    font-size: 13px;
-    color: var(--silver);
-    cursor: pointer;
-    text-decoration: underline;
-    text-underline-offset: 3px;
-  }
-
-  .auth-toggle:hover { color: var(--cream); }
   .auth-error { font-size: 13px; color: #F09595; margin-bottom: 12px; display: none; }
   .auth-success { font-size: 13px; color: #7EC8A4; margin-bottom: 12px; display: none; }
 
@@ -290,12 +280,49 @@
     background: var(--navy-mid);
     border: 0.5px solid rgba(253,250,247,0.08);
     border-radius: 16px;
-    padding: 20px;
+    padding: 20px 20px 16px;
     transition: all 0.2s;
     position: relative;
   }
 
   .name-tile:hover { border-color: rgba(253,250,247,0.18); transform: translateY(-2px); }
+
+  /* Top-right action buttons */
+  .name-tile-actions {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .name-tile-heart {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    color: rgba(253,250,247,0.2);
+    transition: all 0.2s;
+    padding: 4px;
+    line-height: 1;
+  }
+
+  .name-tile-heart:hover { color: var(--dusty-rose); transform: scale(1.2); }
+  .name-tile-heart.favorited { color: var(--dusty-rose); }
+
+  .name-tile-remove {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    color: rgba(253,250,247,0.15);
+    transition: all 0.2s;
+    padding: 4px;
+    line-height: 1;
+  }
+
+  .name-tile-remove:hover { color: #F09595; }
 
   .name-tile-name {
     font-family: 'Cormorant Garamond', serif;
@@ -303,6 +330,7 @@
     font-weight: 400;
     color: var(--cream);
     margin-bottom: 4px;
+    padding-right: 48px; /* clear the action buttons */
   }
 
   .name-tile-origin {
@@ -320,20 +348,32 @@
     line-height: 1.5;
   }
 
-  .name-tile-heart {
-    position: absolute;
-    top: 16px; right: 16px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
-    color: rgba(253,250,247,0.2);
-    transition: all 0.2s;
-    padding: 4px;
+  .name-tile-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 10px;
   }
 
-  .name-tile-heart:hover { color: var(--dusty-rose); transform: scale(1.2); }
-  .name-tile-heart.favorited { color: var(--dusty-rose); }
+  .name-tile-tag {
+    padding: 2px 8px;
+    background: rgba(253,250,247,0.06);
+    border-radius: 99px;
+    font-size: 10px;
+    color: var(--silver);
+    letter-spacing: 0.04em;
+  }
+
+  .name-tile-favorited-bar {
+    height: 2px;
+    background: var(--dusty-rose);
+    border-radius: 99px;
+    margin-top: 12px;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .name-tile.is-favorited .name-tile-favorited-bar { opacity: 1; }
 
   .empty-state {
     text-align: center;
@@ -341,16 +381,8 @@
     color: var(--silver);
   }
 
-  .empty-state p {
-    font-size: 15px;
-    font-weight: 300;
-    margin-bottom: 8px;
-  }
-
-  .empty-state span {
-    font-size: 13px;
-    opacity: 0.6;
-  }
+  .empty-state p { font-size: 15px; font-weight: 300; margin-bottom: 8px; }
+  .empty-state span { font-size: 13px; opacity: 0.6; }
 
   .divider {
     height: 0.5px;
@@ -358,10 +390,14 @@
     margin: 48px 0;
   }
 
-  /* Animations */
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(16px); }
     to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeOut {
+    from { opacity: 1; transform: scale(1); }
+    to { opacity: 0; transform: scale(0.95); }
   }
 
   @media (max-width: 640px) {
@@ -432,13 +468,11 @@
 
   <div class="dash-main">
 
-    <!-- Welcome -->
     <div class="dash-welcome">
       <h1>Welcome back, <em id="user-first-name">friend</em> ✦</h1>
       <p>Your Unlimited collection is waiting. What would you like to explore?</p>
     </div>
 
-    <!-- Quiz cards -->
     <div class="quiz-cards">
       <a href="quiz-unlimited.html" class="quiz-card">
         <div class="quiz-card-badge">✦ Style Discovery</div>
@@ -456,7 +490,6 @@
 
     <div class="divider"></div>
 
-    <!-- Saved names -->
     <div class="saved-section">
       <div class="saved-header">
         <div class="saved-title">Your Saved Names</div>
@@ -465,7 +498,7 @@
       <div class="names-grid" id="names-grid">
         <div class="empty-state">
           <p>No names saved yet</p>
-          <span>Run a quiz to start building your collection</span>
+          <span>Heart a name from your quiz results to save it here</span>
         </div>
       </div>
     </div>
@@ -480,7 +513,6 @@
 
   let currentUser = null;
 
-  // Check session on load
   async function init() {
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (session) {
@@ -504,20 +536,9 @@
     const password = document.getElementById('login-password').value;
     const errEl = document.getElementById('auth-error');
     errEl.style.display = 'none';
-
-    if (!email || !password) {
-      errEl.textContent = 'Please enter your email and password.';
-      errEl.style.display = 'block';
-      return;
-    }
-
+    if (!email || !password) { errEl.textContent = 'Please enter your email and password.'; errEl.style.display = 'block'; return; }
     const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-    if (error) {
-      errEl.textContent = error.message;
-      errEl.style.display = 'block';
-      return;
-    }
-
+    if (error) { errEl.textContent = error.message; errEl.style.display = 'block'; return; }
     currentUser = data.user;
     showDashboard();
   }
@@ -528,34 +549,12 @@
     const confirm = document.getElementById('signup-confirm').value;
     const errEl = document.getElementById('signup-error');
     const sucEl = document.getElementById('signup-success');
-    errEl.style.display = 'none';
-    sucEl.style.display = 'none';
-
-    if (!email || !password) {
-      errEl.textContent = 'Please fill in all fields.';
-      errEl.style.display = 'block';
-      return;
-    }
-
-    if (password !== confirm) {
-      errEl.textContent = 'Passwords do not match.';
-      errEl.style.display = 'block';
-      return;
-    }
-
-    if (password.length < 6) {
-      errEl.textContent = 'Password must be at least 6 characters.';
-      errEl.style.display = 'block';
-      return;
-    }
-
+    errEl.style.display = 'none'; sucEl.style.display = 'none';
+    if (!email || !password) { errEl.textContent = 'Please fill in all fields.'; errEl.style.display = 'block'; return; }
+    if (password !== confirm) { errEl.textContent = 'Passwords do not match.'; errEl.style.display = 'block'; return; }
+    if (password.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; errEl.style.display = 'block'; return; }
     const { data, error } = await supabaseClient.auth.signUp({ email, password });
-    if (error) {
-      errEl.textContent = error.message;
-      errEl.style.display = 'block';
-      return;
-    }
-
+    if (error) { errEl.textContent = error.message; errEl.style.display = 'block'; return; }
     currentUser = data.user;
     showDashboard();
   }
@@ -572,17 +571,10 @@
   async function showDashboard() {
     document.getElementById('auth-screen').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
-
-    // Store email in localStorage so quizzes know who the user is
     const email = currentUser.email;
     localStorage.setItem('nomia_user_email', email);
-
-    // Set first name from email
     const firstName = email.split('@')[0].split('.')[0];
-    const display = firstName.charAt(0).toUpperCase() + firstName.slice(1);
-    document.getElementById('user-first-name').textContent = display;
-
-    // Load saved names
+    document.getElementById('user-first-name').textContent = firstName.charAt(0).toUpperCase() + firstName.slice(1);
     await loadSavedNames();
   }
 
@@ -593,31 +585,116 @@
       .eq('email', currentUser.email)
       .order('created_at', { ascending: false });
 
+    const grid = document.getElementById('names-grid');
+
     if (error || !data || data.length === 0) {
       document.getElementById('saved-count').textContent = '';
+      grid.innerHTML = `
+        <div class="empty-state">
+          <p>No names saved yet</p>
+          <span>Heart a name from your quiz results to save it here</span>
+        </div>`;
       return;
     }
 
-    document.getElementById('saved-count').textContent = `${data.length} names`;
+    const favCount = data.filter(n => n.favorited).length;
+    document.getElementById('saved-count').textContent =
+      favCount > 0 ? `${data.length} saved · ${favCount} favourited` : `${data.length} saved`;
 
-    const grid = document.getElementById('names-grid');
-    grid.innerHTML = data.map(n => `
-      <div class="name-tile">
-        <button class="name-tile-heart ${n.favorited ? 'favorited' : ''}" onclick="toggleFavorite('${n.id}', this)">♡</button>
-        <div class="name-tile-name">${n.name}</div>
-        <div class="name-tile-origin">${n.origin || ''}</div>
-        <div class="name-tile-meaning">${n.meaning || ''}</div>
-      </div>
-    `).join('');
+    grid.innerHTML = data.map(n => {
+      const tags = Array.isArray(n.tags) ? n.tags : (n.tags ? JSON.parse(n.tags) : []);
+      return `
+        <div class="name-tile${n.favorited ? ' is-favorited' : ''}" id="tile-${n.id}">
+          <div class="name-tile-actions">
+            <button
+              class="name-tile-heart${n.favorited ? ' favorited' : ''}"
+              onclick="toggleFavorite('${n.id}', this)"
+              title="${n.favorited ? 'Remove favourite' : 'Mark as favourite'}"
+            >${n.favorited ? '♥' : '♡'}</button>
+            <button
+              class="name-tile-remove"
+              onclick="removeName('${n.id}', this)"
+              title="Remove from saved"
+            >✕</button>
+          </div>
+          <div class="name-tile-name">${n.name}</div>
+          <div class="name-tile-origin">${n.origin || ''}</div>
+          <div class="name-tile-meaning">${n.meaning || ''}</div>
+          ${tags.length > 0 ? `<div class="name-tile-tags">${tags.map(t => `<span class="name-tile-tag">${t}</span>`).join('')}</div>` : ''}
+          <div class="name-tile-favorited-bar"></div>
+        </div>
+      `;
+    }).join('');
   }
 
   async function toggleFavorite(id, btn) {
     const isFav = btn.classList.contains('favorited');
-    btn.classList.toggle('favorited');
-    await supabaseClient
+    const newFav = !isFav;
+
+    // Optimistic UI update
+    btn.textContent = newFav ? '♥' : '♡';
+    btn.classList.toggle('favorited', newFav);
+    btn.title = newFav ? 'Remove favourite' : 'Mark as favourite';
+    const tile = document.getElementById('tile-' + id);
+    if (tile) tile.classList.toggle('is-favorited', newFav);
+
+    const { error } = await supabaseClient
       .from('saved_names')
-      .update({ favorited: !isFav })
+      .update({ favorited: newFav })
       .eq('id', id);
+
+    if (error) {
+      // Revert on failure
+      btn.textContent = isFav ? '♥' : '♡';
+      btn.classList.toggle('favorited', isFav);
+      if (tile) tile.classList.toggle('is-favorited', isFav);
+    }
+
+    // Update the count label
+    await refreshCount();
+  }
+
+  async function removeName(id, btn) {
+    const tile = document.getElementById('tile-' + id);
+    if (tile) {
+      tile.style.animation = 'fadeOut 0.25s ease forwards';
+      setTimeout(() => tile.remove(), 250);
+    }
+
+    const { error } = await supabaseClient
+      .from('saved_names')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      // Revert — reload
+      await loadSavedNames();
+      return;
+    }
+
+    await refreshCount();
+
+    // Show empty state if nothing left
+    const grid = document.getElementById('names-grid');
+    if (grid && grid.querySelectorAll('.name-tile').length === 0) {
+      grid.innerHTML = `
+        <div class="empty-state">
+          <p>No names saved yet</p>
+          <span>Heart a name from your quiz results to save it here</span>
+        </div>`;
+    }
+  }
+
+  async function refreshCount() {
+    const { data } = await supabaseClient
+      .from('saved_names')
+      .select('id, favorited')
+      .eq('email', currentUser.email);
+    if (!data) return;
+    const favCount = data.filter(n => n.favorited).length;
+    document.getElementById('saved-count').textContent =
+      data.length === 0 ? '' :
+      favCount > 0 ? `${data.length} saved · ${favCount} favourited` : `${data.length} saved`;
   }
 
   init();
