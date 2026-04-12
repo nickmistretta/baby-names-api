@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nomia — Swipe Mode</title>
+<link rel="icon" type="image/svg+xml" href="https://raw.githubusercontent.com/nickmistretta/baby-names-api/main/nomia-favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:      #1C2B3A;
+    --navy-mid:  #243548;
+    --cream:     #FDFAF7;
+    --dusty-rose:#C9737A;
+    --silver:    #8B9EB0;
+    --white:     #FFFFFF;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--navy);
+    color: var(--cream);
+    min-height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Loading screen ── */
+  #loading-screen {
+    position: fixed; inset: 0;
+    background: var(--navy);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    transition: opacity 0.4s ease;
+  }
+  #loading-screen.hidden { opacity: 0; pointer-events: none; }
+
+  .pulse-wrap {
+    position: relative;
+    width: 180px; height: 180px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 36px;
+  }
+  .pulse-wrap::before, .pulse-wrap::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(201,115,122,0.15);
+    animation: pulseRing 2.4s ease-out infinite;
+  }
+  .pulse-wrap::before { width: 100%; height: 100%; animation-delay: 0s; }
+  .pulse-wrap::after  { width: 75%;  height: 75%;  animation-delay: 0.4s; }
+  .pulse-inner {
+    width: 50%; height: 50%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,115,122,0.6) 0%, rgba(201,115,122,0.3) 60%, transparent 100%);
+    animation: pulseCore 2.4s ease-in-out infinite;
+    position: relative; z-index: 1;
+  }
+  .pulse-ring {
+    position: absolute; border-radius: 50%;
+    background: rgba(201,115,122,0.08);
+    width: 140%; height: 140%;
+    animation: pulseRing 2.4s ease-out infinite;
+    animation-delay: 0.8s;
+  }
+  @keyframes pulseRing {
+    0%   { transform: scale(0.6); opacity: 0.8; }
+    70%  { transform: scale(1.1); opacity: 0; }
+    100% { transform: scale(1.1); opacity: 0; }
+  }
+  @keyframes pulseCore {
+    0%, 100% { transform: scale(0.92); opacity: 0.7; }
+    50%       { transform: scale(1.08); opacity: 1; }
+  }
+  .loading-label {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px; font-weight: 300;
+    color: var(--cream); margin-bottom: 10px;
+  }
+  .loading-sub {
+    font-size: 14px; color: var(--silver);
+    letter-spacing: 0.06em; font-weight: 300;
+  }
+
+  /* ── Main swipe view ── */
+  #swipe-view {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+    padding: 0 16px 24px;
+  }
+  #swipe-view.visible { display: flex; }
+
+  /* Header */
+  .swipe-header {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0 12px;
+    flex-shrink: 0;
+  }
+  .swipe-logo { display: inline-block; text-decoration: none; line-height: 0; }
+  .swipe-subtitle {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px; font-style: italic;
+    color: var(--dusty-rose);
+    margin-top: 4px;
+    letter-spacing: 0.04em;
+  }
+
+  /* Card stack area */
+  .card-arena {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 100%;
+  }
+
+  .card-stack {
+    position: relative;
+    width: min(85vw, 420px);
+    height: min(72vw, 460px);
+  }
+
+  /* Name card base */
+  .name-card {
+    position: absolute;
+    inset: 0;
+    background: var(--white);
+    border-radius: 24px;
+    padding: 40px 32px 32px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.22), 0 2px 8px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: grab;
+    will-change: transform;
+    overflow: hidden;
+  }
+  .name-card:active { cursor: grabbing; }
+
+  /* Peek card — sits behind, slightly smaller */
+  #peek-card {
+    transform: scale(0.95) translateY(8px);
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.7;
+  }
+
+  /* Top (active) card */
+  #top-card {
+    z-index: 2;
+    transition: box-shadow 0.2s ease;
+  }
+
+  /* Swipe hint indicators inside card */
+  .swipe-hint {
+    position: absolute;
+    top: 20px;
+    font-size: 28px;
+    font-weight: 700;
+    opacity: 0;
+    transition: opacity 0.1s ease;
+    pointer-events: none;
+    border: 3px solid currentColor;
+    border-radius: 6px;
+    padding: 2px 10px;
+    font-family: 'DM Sans', sans-serif;
+    letter-spacing: 0.08em;
+  }
+  .swipe-hint.left  { left: 20px;  color: #e05555; transform: rotate(-12deg); }
+  .swipe-hint.right { right: 20px; color: var(--dusty-rose); transform: rotate(12deg); }
+
+  /* Tint overlays inside card */
+  .tint-overlay {
+    position: absolute; inset: 0;
+    border-radius: 24px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.1s ease;
+  }
+  .tint-discard { background: rgba(220, 60, 60, 0.08); }
+  .tint-save    { background: rgba(201,115,122, 0.1); }
+
+  /* Card content */
+  .card-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(52px, 12vw, 68px);
+    font-weight: 300;
+    color: var(--navy);
+    text-align: center;
+    line-height: 1.0;
+    margin-bottom: 10px;
+  }
+  .card-origin {
+    font-size: 11px;
+    color: var(--dusty-rose);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-variant: small-caps;
+    margin-bottom: 12px;
+  }
+  .card-meaning {
+    font-size: 14px;
+    color: var(--silver);
+    text-align: center;
+    line-height: 1.6;
+    max-width: 280px;
+    margin-bottom: 16px;
+    font-weight: 300;
+  }
+  .card-tags {
+    display: flex; flex-wrap: wrap;
+    gap: 6px; justify-content: center;
+  }
+  .card-tag {
+    font-size: 10px;
+    color: var(--silver);
+    background: rgba(139,158,176,0.12);
+    border: 0.5px solid rgba(139,158,176,0.25);
+    border-radius: 99px;
+    padding: 3px 10px;
+    letter-spacing: 0.06em;
+  }
+
+  /* Action buttons */
+  .action-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    flex-shrink: 0;
+    padding: 12px 0 8px;
+  }
+  .action-btn {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    font-size: 24px;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.18s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.18s ease;
+    flex-shrink: 0;
+  }
+  .action-btn:active { transform: scale(0.92) !important; }
+
+  #btn-discard {
+    background: var(--white);
+    color: #e05555;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  }
+  #btn-discard:hover { transform: scale(1.08); box-shadow: 0 6px 22px rgba(0,0,0,0.2); }
+
+  #btn-save {
+    background: var(--dusty-rose);
+    color: var(--white);
+    box-shadow: 0 4px 20px rgba(201,115,122,0.45);
+  }
+  #btn-save:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(201,115,122,0.55); }
+  #btn-save.pulse {
+    animation: heartPulse 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes heartPulse {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.3); }
+    100% { transform: scale(1); }
+  }
+
+  /* Progress + back link */
+  .swipe-footer {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 4px;
+  }
+  #progress-text {
+    font-size: 12px;
+    color: var(--silver);
+    letter-spacing: 0.06em;
+  }
+  #back-link {
+    font-size: 12px;
+    color: rgba(139,158,176,0.6);
+    text-decoration: none;
+    letter-spacing: 0.04em;
+    transition: color 0.2s;
+  }
+  #back-link:hover { color: var(--silver); }
+
+  /* Toast */
+  #toast {
+    position: fixed;
+    bottom: 32px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--navy-mid);
+    color: var(--dusty-rose);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    padding: 10px 22px;
+    border-radius: 99px;
+    border: 0.5px solid rgba(201,115,122,0.3);
+    opacity: 0;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    pointer-events: none;
+    z-index: 200;
+    white-space: nowrap;
+  }
+  #toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Empty state */
+  #empty-state {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    padding: 40px 24px;
+    text-align: center;
+  }
+  #empty-state.visible { display: flex; }
+  .empty-card {
+    background: var(--navy-mid);
+    border: 0.5px solid rgba(253,250,247,0.1);
+    border-radius: 24px;
+    padding: 48px 36px;
+    max-width: 340px;
+    text-align: center;
+  }
+  .empty-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px; font-weight: 300;
+    color: var(--cream); margin-bottom: 12px;
+  }
+  .empty-sub {
+    font-size: 14px; color: var(--silver);
+    line-height: 1.6; margin-bottom: 28px;
+  }
+  .empty-btn {
+    display: inline-block;
+    background: var(--dusty-rose);
+    color: var(--white);
+    border: none; border-radius: 99px;
+    padding: 13px 32px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px; cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: opacity 0.2s;
+  }
+  .empty-btn:hover { opacity: 0.88; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 400px) {
+    .card-name { font-size: 48px; }
+    .card-stack { height: min(80vw, 400px); }
+    .action-btn { width: 56px; height: 56px; font-size: 20px; }
+    .action-row { gap: 32px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Loading screen -->
+<div id="loading-screen">
+  <div class="pulse-wrap">
+    <div class="pulse-ring"></div>
+    <div class="pulse-inner"></div>
+  </div>
+  <div class="loading-label">Finding names you'll love…</div>
+  <div class="loading-sub">Personalised to your taste</div>
+</div>
+
+<!-- Main swipe view -->
+<div id="swipe-view">
+  <div class="swipe-header">
+    <a href="dashboard.html" class="swipe-logo" aria-label="Back to dashboard">
+      <svg style="height:48px;width:auto;" viewBox="20 18 400 148" xmlns="http://www.w3.org/2000/svg">
+        <defs><style>@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,300&amp;display=swap');</style></defs>
+        <g transform="translate(28,62) scale(0.095)">
+          <g fill="#C9737A"><path d="M237.85 518.09 c-16.35 -1.79 -35.25 -6.32 -52.04 -12.51 -9 -3.32 -26.63 -11.56 -33.39 -15.58 -46.10 -27.58 -77.39 -65.83 -95.33 -116.27 -4.28 -12.20 -7.98 -26.05 -8.05 -30.58 -0.13 -7.02 3.96 -11.75 10.22 -11.75 3.64 0 5.87 1.21 11.62 6.39 17.69 15.71 39.20 28.73 59.38 36.01 22.67 8.11 46.99 11.88 71.19 10.98 12.13 -0.38 18.20 -0.96 18.20 -1.60 -0.06 -0.19 -2.23 -1.40 -4.98 -2.62 -10.79 -4.92 -24.52 -15.58 -33.20 -25.80 -12.83 -15.13 -20.94 -31.61 -25.16 -51.27 -1.28 -6.13 -1.47 -8.56 -1.47 -21.90 0.06 -13.03 0.26 -15.84 1.47 -21.39 2.17 -9.96 4.92 -17.75 9.71 -27.46 5.94 -12 11.30 -19.28 22.03 -30.07 10.28 -10.34 13.03 -12.07 18.45 -11.62 4.02 0.32 6.32 1.85 8.05 5.36 1.60 3.26 1.60 5.81 0 11.43 -3.32 11.37 -4.09 27.07 -1.98 39.46 1.15 6.39 1.66 8.11 2.17 7.41 0.13 -0.13 1.79 -3.19 3.64 -6.77 11.94 -23.05 35.76 -42.84 61.49 -51.21 17.43 -5.62 34.35 -7.60 39.78 -4.66 2.43 1.34 4.66 4.53 5.04 7.41 0.70 4.47 -1.09 7.60 -7.22 12.71 -10.60 8.88 -17.94 18.13 -24.07 30.39 -11.37 22.79 -12.45 49.17 -3 73.49 l1.85 4.79 8.56 0.19 c9.39 0.19 17.94 -1.09 27.20 -4.02 5.56 -1.79 20.62 -9 23.31 -11.17 4.02 -3.13 13.15 -19.22 27.71 -48.78 15.58 -31.67 22.09 -47.51 26.12 -63.60 3.83 -15.20 4.53 -30.39 1.66 -36.40 -0.77 -1.60 -4.47 -6.26 -8.30 -10.34 -7.98 -8.62 -9.64 -11.43 -9.64 -16.67 0 -6.07 2.68 -10.66 7.79 -13.28 2.30 -1.15 4.41 -1.21 52.81 -1.21 34.10 0 51.53 0.26 53.83 0.70 5.04 1.02 12.07 4.66 15.96 8.11 l3.38 3.06 20.11 1.79 c33.52 2.87 68.96 5.94 101.08 8.68 18.07 1.53 31.41 2.94 32.63 3.45 2.75 1.15 5.87 4.85 6.39 7.66 0.83 4.47 -1.60 9.32 -5.87 11.49 -1.98 1.02 -5.49 1.72 -16.28 3.32 -4.15 0.64 -8.05 1.47 -8.62 1.92 -0.89 0.70 -0.32 2.23 5.62 14.37 21.77 44.89 28.73 60.08 40.55 88.37 20.11 48.02 27.78 73.94 28.86 97.05 1.21 26.31 -8.30 55.30 -24.71 75.34 -12.96 15.77 -29.82 27.01 -48.21 32.05 -8.11 2.23 -24.84 2.81 -33.97 1.15 -33.71 -6 -61.87 -31.93 -73.88 -68 -2.94 -8.75 -4.66 -17.50 -5.62 -27.97 -2.04 -23.24 4.41 -49.68 23.88 -97.82 10.85 -26.88 30.20 -69.66 43.99 -97.25 l6.39 -12.71 -3.70 0.45 c-2.04 0.26 -3.96 0.64 -4.34 0.89 -0.32 0.19 -4.09 0.83 -8.30 1.40 -14.69 2.04 -27.52 3.83 -39.91 5.68 -6.83 1.02 -15.01 2.17 -18.20 2.55 -15.32 1.92 -16.86 2.36 -21.71 6.07 -8.56 6.51 -14.37 8.62 -24.77 9.07 -11.17 0.51 -10.98 0.19 -10.02 20.30 0.83 17.94 0.83 58.42 0 69.92 -2.87 39.40 -9.39 67.43 -22.48 97.05 -14.62 33.27 -34.86 60.98 -60.85 83.52 -31.61 27.46 -74.39 46.23 -116.85 51.14 -8.05 0.96 -36.01 0.77 -45.97 -0.32z"/><path d="M482.46 166.65 c-4.02 -1.28 -6.77 -5.30 -6.77 -9.90 0 -3.64 1.21 -6.13 4.28 -8.43 3.06 -2.30 8.62 -2.55 11.49 -0.45 6.19 4.60 6.32 13.09 0.19 17.62 -1.92 1.34 -6.64 1.98 -9.19 1.15z"/></g>
+        </g>
+        <text x="108" y="108" font-family="Cormorant Garamond,Georgia,serif" font-size="88" font-weight="300" font-style="italic" fill="#FDFAF7" letter-spacing="4">nomia</text>
+      </svg>
+    </a>
+    <div class="swipe-subtitle">Swipe Mode</div>
+  </div>
+
+  <div class="card-arena">
+    <div class="card-stack">
+      <!-- Peek card (next name, sits behind) -->
+      <div class="name-card" id="peek-card">
+        <div class="card-name"></div>
+      </div>
+      <!-- Top card (current name, draggable) -->
+      <div class="name-card" id="top-card">
+        <div class="swipe-hint left">NOPE</div>
+        <div class="swipe-hint right">SAVE</div>
+        <div class="tint-overlay tint-discard"></div>
+        <div class="tint-overlay tint-save"></div>
+        <div class="card-name"></div>
+        <div class="card-origin"></div>
+        <div class="card-meaning"></div>
+        <div class="card-tags"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="action-row">
+    <button class="action-btn" id="btn-discard" aria-label="Discard">✕</button>
+    <button class="action-btn" id="btn-save"    aria-label="Save">♥</button>
+  </div>
+
+  <div class="swipe-footer">
+    <div id="progress-text">0 names explored</div>
+    <a href="dashboard.html" id="back-link">← Back to dashboard</a>
+  </div>
+</div>
+
+<!-- Empty state -->
+<div id="empty-state">
+  <div class="empty-card">
+    <div style="font-size:32px; margin-bottom:16px;">✦</div>
+    <div class="empty-title">You've explored a lot of names</div>
+    <div class="empty-sub">Ready for a completely fresh batch? We'll generate 25 more based on your taste.</div>
+    <button class="empty-btn" id="btn-more">Generate more →</button>
+  </div>
+  <a href="dashboard.html" style="margin-top:24px; font-size:12px; color:rgba(139,158,176,0.6); text-decoration:none;">← Back to dashboard</a>
+</div>
+
+<!-- Toast -->
+<div id="toast">✦ Saved!</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ─────────────────────────────────────────────
+// Config
+// ─────────────────────────────────────────────
+const SUPABASE_URL     = 'https://naokzfwnttyoizanotcw.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hb2t6ZndudHR5b2l6YW5vdGN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MzIyOTksImV4cCI6MjA5MTUwODI5OX0.Tzxl7Px0GaBs4Cmw9KRn7Y4YMwcDvVSbLgIZkO6QVFc';
+const GENERATE_API     = 'https://project-rz9q4.vercel.app/api/generate';
+const SAVE_API         = 'https://project-rz9q4.vercel.app/api/save-names';
+
+// ─────────────────────────────────────────────
+// State
+// ─────────────────────────────────────────────
+let userEmail      = null;
+let userSavedNames = [];   // [{name, origin, meaning, tags}] from Supabase
+let nameQueue      = [];   // names ready to display
+let seenNames      = new Set();
+let discardedNames = new Set();
+let totalExplored  = 0;
+let isFetching     = false;
+
+// Drag state
+let isDragging   = false;
+let dragStartX   = 0;
+let dragCurrentX = 0;
+const THRESHOLD  = 80;
+
+// DOM refs
+const loadingScreen = document.getElementById('loading-screen');
+const swipeView     = document.getElementById('swipe-view');
+const emptyState    = document.getElementById('empty-state');
+const topCard       = document.getElementById('top-card');
+const peekCard      = document.getElementById('peek-card');
+const progressText  = document.getElementById('progress-text');
+const toastEl       = document.getElementById('toast');
+const btnDiscard    = document.getElementById('btn-discard');
+const btnSave       = document.getElementById('btn-save');
+
+// Supabase client
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ─────────────────────────────────────────────
+// Init
+// ─────────────────────────────────────────────
+async function init() {
+  // Auth guard
+  userEmail = localStorage.getItem('nomia_user_email');
+  if (!userEmail) {
+    window.location.href = 'dashboard.html';
+    return;
+  }
+
+  // Load discarded names from localStorage
+  try {
+    const stored = JSON.parse(localStorage.getItem('nomia_discarded_names') || '[]');
+    discardedNames = new Set(stored.map(n => n.toLowerCase()));
+  } catch (e) { discardedNames = new Set(); }
+
+  // Fetch user's saved names from Supabase
+  try {
+    const { data } = await db
+      .from('saved_names')
+      .select('name, origin, meaning, tags')
+      .eq('email', userEmail);
+    userSavedNames = data || [];
+  } catch (e) {
+    console.warn('Could not fetch saved names:', e);
+    userSavedNames = [];
+  }
+
+  // Fetch first batch
+  await fetchBatch();
+
+  // Hide loading, show swipe view
+  loadingScreen.classList.add('hidden');
+  setTimeout(() => { loadingScreen.style.display = 'none'; }, 400);
+  swipeView.classList.add('visible');
+
+  renderCurrentCard();
+}
+
+// ─────────────────────────────────────────────
+// Fetch a batch of 25 names from Claude
+// ─────────────────────────────────────────────
+async function fetchBatch() {
+  if (isFetching) return;
+  isFetching = true;
+
+  const exclusionSet = new Set([
+    ...seenNames,
+    ...discardedNames,
+    ...userSavedNames.map(n => n.name.toLowerCase())
+  ]);
+
+  const prompt = buildPrompt(userSavedNames, exclusionSet);
+
+  try {
+    const res = await fetch(GENERATE_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    const text = (data.content?.[0]?.text || '')
+      .replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+    const start = text.indexOf('[');
+    const end   = text.lastIndexOf(']');
+    if (start === -1 || end === -1) throw new Error('No JSON array');
+    const names = JSON.parse(text.slice(start, end + 1));
+
+    // Filter out anything already seen or discarded
+    const fresh = names.filter(n =>
+      n.name && !exclusionSet.has(n.name.toLowerCase())
+    );
+    nameQueue.push(...fresh);
+  } catch (err) {
+    console.error('fetchBatch error:', err);
+    // Push a small fallback so the user isn't stranded
+    if (nameQueue.length === 0) showEmpty();
+  } finally {
+    isFetching = false;
+  }
+}
+
+function buildPrompt(savedNames, excludeSet) {
+  const exclude = Array.from(excludeSet).join(', ');
+  if (savedNames.length > 0) {
+    const loved = savedNames.map(n => n.name).join(', ');
+    const doNotRepeat = exclude || loved;
+    return `The user loves these names: ${loved}. Based on this taste profile, generate 25 baby names with similar energy, roots, sounds, and qualities. Do not repeat any of these names: ${doNotRepeat}. Return ONLY a valid JSON array, no markdown: [{"name": "...", "origin": "...", "meaning": "...", "tags": ["...", "..."]}]`;
+  } else {
+    const excludePart = exclude ? ` Do not use: ${exclude}.` : '';
+    return `Generate 25 beautiful, rare, considered baby names across varied origins.${excludePart} Return ONLY a valid JSON array, no markdown: [{"name": "...", "origin": "...", "meaning": "...", "tags": ["...", "..."]}]`;
+  }
+}
+
+// ─────────────────────────────────────────────
+// Render the current card
+// ─────────────────────────────────────────────
+function renderCurrentCard() {
+  if (nameQueue.length === 0) {
+    if (!isFetching) showEmpty();
+    return;
+  }
+
+  // Prefetch when low
+  if (nameQueue.length <= 5 && !isFetching) {
+    fetchBatch(); // silent background fetch
+  }
+
+  const current = nameQueue[0];
+  seenNames.add(current.name.toLowerCase());
+
+  // Update top card content
+  setCardContent(topCard, current);
+
+  // Reset drag state + enter animation
+  topCard.style.transition = 'none';
+  topCard.style.opacity    = '0';
+  topCard.style.transform  = 'scale(0.95) translateY(10px)';
+  topCard.querySelector('.tint-discard').style.opacity = '0';
+  topCard.querySelector('.tint-save').style.opacity    = '0';
+  topCard.querySelector('.swipe-hint.left').style.opacity  = '0';
+  topCard.querySelector('.swipe-hint.right').style.opacity = '0';
+
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    topCard.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+    topCard.style.opacity    = '1';
+    topCard.style.transform  = '';
+  }));
+
+  // Update peek card
+  const next = nameQueue[1];
+  if (next) {
+    setCardContent(peekCard, next, true);
+    peekCard.style.opacity = '0.7';
+  } else {
+    peekCard.style.opacity = '0';
+  }
+
+  updateProgress();
+}
+
+function setCardContent(card, name, isPeek = false) {
+  if (isPeek) {
+    card.querySelector('.card-name').textContent = name.name || '';
+    return;
+  }
+  card.querySelector('.card-name').textContent    = name.name    || '';
+  card.querySelector('.card-origin').textContent  = name.origin  || '';
+  card.querySelector('.card-meaning').textContent = name.meaning || '';
+  const tagsEl = card.querySelector('.card-tags');
+  tagsEl.innerHTML = (name.tags || [])
+    .map(t => `<span class="card-tag">${t}</span>`).join('');
+}
+
+function updateProgress() {
+  progressText.textContent = `${totalExplored} name${totalExplored === 1 ? '' : 's'} explored`;
+}
+
+// ─────────────────────────────────────────────
+// Swipe mechanics
+// ─────────────────────────────────────────────
+function flyOff(direction) {
+  const vw = window.innerWidth;
+  const tx = direction === 'save' ? vw * 1.2 : -vw * 1.2;
+  const rot = direction === 'save' ? 20 : -20;
+
+  topCard.style.transition = 'transform 0.38s cubic-bezier(0.55,0,1,0.45), opacity 0.38s ease';
+  topCard.style.transform  = `translateX(${tx}px) rotate(${rot}deg)`;
+  topCard.style.opacity    = '0';
+
+  setTimeout(() => {
+    const nameObj = nameQueue.shift();
+    totalExplored++;
+
+    if (direction === 'save') {
+      saveName(nameObj);
+    } else {
+      discardName(nameObj);
+    }
+
+    renderCurrentCard();
+  }, 380);
+}
+
+function snapBack() {
+  topCard.style.transition = 'transform 0.5s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s ease, box-shadow 0.2s ease';
+  topCard.style.transform  = '';
+  topCard.style.opacity    = '1';
+  topCard.style.boxShadow  = '';
+  topCard.querySelector('.tint-discard').style.opacity = '0';
+  topCard.querySelector('.tint-save').style.opacity    = '0';
+  topCard.querySelector('.swipe-hint.left').style.opacity  = '0';
+  topCard.querySelector('.swipe-hint.right').style.opacity = '0';
+}
+
+// ─────────────────────────────────────────────
+// Drag event handlers
+// ─────────────────────────────────────────────
+function onDragStart(e) {
+  if (nameQueue.length === 0) return;
+  isDragging   = true;
+  dragStartX   = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+  dragCurrentX = 0;
+  topCard.style.transition = 'none';
+}
+
+function onDragMove(e) {
+  if (!isDragging) return;
+  const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+  dragCurrentX  = clientX - dragStartX;
+
+  const rot      = dragCurrentX * 0.05;
+  const progress = Math.min(Math.abs(dragCurrentX) / 120, 1);
+
+  topCard.style.transform = `translateX(${dragCurrentX}px) rotate(${rot}deg)`;
+
+  if (dragCurrentX > 0) {
+    topCard.querySelector('.tint-save').style.opacity    = progress * 0.8;
+    topCard.querySelector('.tint-discard').style.opacity = '0';
+    topCard.querySelector('.swipe-hint.right').style.opacity = progress;
+    topCard.querySelector('.swipe-hint.left').style.opacity  = '0';
+  } else {
+    topCard.querySelector('.tint-discard').style.opacity = progress * 0.8;
+    topCard.querySelector('.tint-save').style.opacity    = '0';
+    topCard.querySelector('.swipe-hint.left').style.opacity  = progress;
+    topCard.querySelector('.swipe-hint.right').style.opacity = '0';
+  }
+
+  if (e.cancelable) e.preventDefault();
+}
+
+function onDragEnd() {
+  if (!isDragging) return;
+  isDragging = false;
+
+  if      (dragCurrentX >  THRESHOLD) flyOff('save');
+  else if (dragCurrentX < -THRESHOLD) flyOff('discard');
+  else                                 snapBack();
+}
+
+// Attach drag handlers to top card
+topCard.addEventListener('mousedown',  onDragStart);
+topCard.addEventListener('touchstart', onDragStart, { passive: true });
+document.addEventListener('mousemove', onDragMove);
+document.addEventListener('touchmove', onDragMove, { passive: false });
+document.addEventListener('mouseup',   onDragEnd);
+document.addEventListener('touchend',  onDragEnd);
+
+// ─────────────────────────────────────────────
+// Button handlers
+// ─────────────────────────────────────────────
+btnDiscard.addEventListener('click', () => {
+  if (nameQueue.length === 0 || isDragging) return;
+  flyOff('discard');
+});
+
+btnSave.addEventListener('click', () => {
+  if (nameQueue.length === 0 || isDragging) return;
+  flyOff('save');
+});
+
+// Keyboard support
+document.addEventListener('keydown', e => {
+  if (nameQueue.length === 0) return;
+  if (e.key === 'ArrowLeft')  flyOff('discard');
+  if (e.key === 'ArrowRight') flyOff('save');
+});
+
+// ─────────────────────────────────────────────
+// Save / Discard actions
+// ─────────────────────────────────────────────
+async function saveName(nameObj) {
+  showToast('✦ Saved!');
+  pulseSaveBtn();
+
+  try {
+    await fetch(SAVE_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: userEmail, names: [nameObj] })
+    });
+    // Add to local saved names so future prompts account for it
+    userSavedNames.push(nameObj);
+  } catch (err) {
+    console.error('Save error:', err);
+  }
+}
+
+function discardName(nameObj) {
+  const key = nameObj.name.toLowerCase();
+  discardedNames.add(key);
+  // Persist to localStorage
+  try {
+    localStorage.setItem('nomia_discarded_names', JSON.stringify(Array.from(discardedNames)));
+  } catch (e) {}
+}
+
+// ─────────────────────────────────────────────
+// Toast
+// ─────────────────────────────────────────────
+let toastTimeout = null;
+function showToast(msg) {
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => toastEl.classList.remove('show'), 1500);
+}
+
+function pulseSaveBtn() {
+  btnSave.classList.remove('pulse');
+  void btnSave.offsetWidth; // reflow
+  btnSave.classList.add('pulse');
+  btnSave.addEventListener('animationend', () => btnSave.classList.remove('pulse'), { once: true });
+}
+
+// ─────────────────────────────────────────────
+// Empty state
+// ─────────────────────────────────────────────
+function showEmpty() {
+  swipeView.classList.remove('visible');
+  emptyState.classList.add('visible');
+}
+
+document.getElementById('btn-more').addEventListener('click', async () => {
+  emptyState.classList.remove('visible');
+  loadingScreen.style.display = 'flex';
+  loadingScreen.classList.remove('hidden');
+  swipeView.classList.remove('visible');
+
+  await fetchBatch();
+
+  loadingScreen.classList.add('hidden');
+  setTimeout(() => { loadingScreen.style.display = 'none'; }, 400);
+  swipeView.classList.add('visible');
+  renderCurrentCard();
+});
+
+// ─────────────────────────────────────────────
+// Go
+// ─────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>

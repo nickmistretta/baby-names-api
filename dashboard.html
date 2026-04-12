@@ -174,13 +174,13 @@
   /* Quiz cards */
   .quiz-cards {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 16px;
     margin-bottom: 56px;
     animation: fadeUp 0.7s 0.1s ease both;
   }
 
-  @media (max-width: 560px) { .quiz-cards { grid-template-columns: 1fr; } }
+  @media (max-width: 640px) { .quiz-cards { grid-template-columns: 1fr; } }
 
   .quiz-card {
     background: var(--navy-mid);
@@ -485,6 +485,12 @@
         <h2>Match My Taste</h2>
         <p>Enter names you already love and we'll find more like them — same energy, same roots, same magic.</p>
         <div class="quiz-card-cta">Find matches →</div>
+      </a>
+      <a href="swipe.html" class="quiz-card">
+        <div class="quiz-card-badge">✦ Swipe Mode</div>
+        <h2>Swipe Mode</h2>
+        <p>Swipe through names one by one — heart the ones you love, skip the rest. Gets smarter the more you save.</p>
+        <div class="quiz-card-cta">Start swiping →</div>
       </a>
     </div>
 
