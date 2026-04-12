@@ -660,7 +660,7 @@
 
   const steps = [
     { id: 'gender',   type: 'single' },
-    { id: 'origin',   type: 'single' },
+    { id: 'origin',   type: 'multi' },
     { id: 'names',    type: 'bubbles' },
     { id: 'vibes',    type: 'multi' },
     { id: 'nickname', type: 'single' },
@@ -677,7 +677,7 @@
     origin: {
       label: 'Step 2',
       text: 'Any country of origin to draw from?',
-      hint: "We'll focus on names rooted in that tradition.",
+      hint: 'Select as many as you like — or skip if no preference.',
       options: [
         'Irish', 'Scottish', 'English', 'French', 'Italian',
         'Spanish', 'Portuguese', 'German', 'Scandinavian', 'Greek',
@@ -967,7 +967,8 @@
       msgEl.textContent = loadingMessages[msgIdx];
     }, 1800);
 
-    const originText = answers.origin && answers.origin !== 'No preference' ? answers.origin : null;
+    const originSelections = (answers.origin || []).filter(o => o !== 'No preference');
+    const originText = originSelections.length > 0 ? originSelections.join(', ') : null;
     const vibesText = answers.vibes && answers.vibes.length > 0 ? answers.vibes.join(', ') : null;
     const lastName = answers.lastname || '';
     const nicknamePreference = answers.nickname || 'No preference';
