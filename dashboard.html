@@ -435,8 +435,8 @@
       <p class="auth-sub">Sign in to your Nomia Unlimited account.</p>
       <div id="auth-error" class="auth-error"></div>
       <div id="auth-success" class="auth-success"></div>
-      <input type="email" class="auth-input" id="login-email" placeholder="Your email address" />
-      <input type="password" class="auth-input" id="login-password" placeholder="Password" />
+      <input type="email" class="auth-input" id="login-email" placeholder="Your email address" onkeydown="if(event.key==='Enter')handleLogin()" />
+      <input type="password" class="auth-input" id="login-password" placeholder="Password" onkeydown="if(event.key==='Enter')handleLogin()" />
       <div style="display:flex; flex-direction:column; gap:10px; margin-top:4px;">
         <button class="auth-btn" style="margin-bottom:0;" onclick="handleLogin()">Sign In</button>
         <button class="auth-btn" style="margin-bottom:0; background:transparent; border:0.5px solid rgba(253,250,247,0.2); color:rgba(253,250,247,0.7);" onclick="showSignup()">Set Up Your Account</button>
@@ -449,9 +449,9 @@
       <p class="auth-sub">Set a password to access your Nomia Unlimited dashboard.</p>
       <div id="signup-error" class="auth-error"></div>
       <div id="signup-success" class="auth-success"></div>
-      <input type="email" class="auth-input" id="signup-email" placeholder="Your email address" />
-      <input type="password" class="auth-input" id="signup-password" placeholder="Choose a password" />
-      <input type="password" class="auth-input" id="signup-confirm" placeholder="Confirm password" />
+      <input type="email" class="auth-input" id="signup-email" placeholder="Your email address" onkeydown="if(event.key==='Enter')handleSignup()" />
+      <input type="password" class="auth-input" id="signup-password" placeholder="Choose a password" onkeydown="if(event.key==='Enter')handleSignup()" />
+      <input type="password" class="auth-input" id="signup-confirm" placeholder="Confirm password" onkeydown="if(event.key==='Enter')handleSignup()" />
       <div style="display:flex; flex-direction:column; gap:10px; margin-top:4px;">
         <button class="auth-btn" style="margin-bottom:0;" onclick="handleSignup()">Set Up Your Account</button>
         <button class="auth-btn" style="margin-bottom:0; background:transparent; border:0.5px solid rgba(253,250,247,0.2); color:rgba(253,250,247,0.7);" onclick="showLogin()">Sign In</button>
