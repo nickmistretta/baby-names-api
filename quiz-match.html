@@ -439,6 +439,23 @@
 
   .name-card:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(122,92,68,0.12); }
 
+  .save-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: rgba(28,43,58,0.2);
+    cursor: pointer;
+    padding: 4px;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    align-self: center;
+    line-height: 1;
+  }
+
+  .save-btn:hover { color: var(--dusty-rose); transform: scale(1.2); }
+  .save-btn.saved { color: var(--dusty-rose); cursor: default; }
+  .save-btn:disabled { cursor: default; }
+
   .name-rank {
     font-size: 11px;
     color: var(--dusty-rose);
@@ -861,15 +878,6 @@ Tags should capture why each name matches their taste, e.g. "same Celtic roots",
       const end = rawText.lastIndexOf(']');
       const names = JSON.parse(rawText.slice(start, end + 1));
 
-      // Save to Supabase
-      if (userEmail && names.length > 0) {
-        fetch('https://project-rz9q4.vercel.app/api/save-names', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: userEmail, names })
-        });
-      }
-
       clearInterval(msgInterval);
       showResults(names);
     } catch (e) {
@@ -879,10 +887,37 @@ Tags should capture why each name matches their taste, e.g. "same Celtic roots",
     }
   }
 
+  // Track saved names to prevent double-saves
+  const savedNames = new Set();
+
+  async function saveName(name, btn) {
+    if (!userEmail || savedNames.has(name.name)) return;
+    btn.textContent = '♥';
+    btn.classList.add('saved');
+    btn.disabled = true;
+    savedNames.add(name.name);
+    try {
+      await fetch('https://project-rz9q4.vercel.app/api/save-names', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: userEmail, names: [name] })
+      });
+    } catch (e) {
+      console.error('Save failed', e);
+      btn.textContent = '♡';
+      btn.classList.remove('saved');
+      btn.disabled = false;
+      savedNames.delete(name.name);
+    }
+  }
+
   function showResults(names) {
     document.getElementById('screen-loading').classList.remove('active');
     document.getElementById('screen-results').classList.add('active');
     document.getElementById('results-sub').textContent = `${names.length} names matched to your taste`;
+
+    // Store names array for save callbacks
+    window._resultNames = names;
 
     document.getElementById('names-list').innerHTML = names.map((n, i) => `
       <div class="name-card" style="animation-delay:${i * 0.05}s">
@@ -893,6 +928,7 @@ Tags should capture why each name matches their taste, e.g. "same Celtic roots",
           <div class="name-meaning">${n.meaning}</div>
           <div class="name-tags">${(n.tags||[]).map(t => `<span class="name-tag">${t}</span>`).join('')}</div>
         </div>
+        <button class="save-btn" onclick="saveName(window._resultNames[${i}], this)" title="Save to dashboard">♡</button>
       </div>
     `).join('');
 
