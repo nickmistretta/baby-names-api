@@ -55,6 +55,9 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: 'API key not configured' });
   }
 
+  // Strip optional email/quiz_answers before forwarding to Anthropic
+  const { email, quiz_answers, ...anthropicBody } = req.body || {};
+
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -63,12 +66,64 @@ module.exports = async function handler(req, res) {
         'x-api-key': apiKey,
         'anthropic-version': '2023-06-01'
       },
-      body: JSON.stringify(req.body)
+      body: JSON.stringify(anthropicBody)
     });
 
     const data = await response.json();
+
+    // If email was provided, parse the generated names and save to Supabase
+    if (email && data.content && data.content[0] && data.content[0].text) {
+      try {
+        const rawText = data.content[0].text
+          .replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+        const jsonStart = rawText.indexOf('{');
+        const jsonEnd = rawText.lastIndexOf('}');
+        if (jsonStart !== -1 && jsonEnd !== -1) {
+          const parsed = JSON.parse(rawText.slice(jsonStart, jsonEnd + 1));
+          const allNames = [...(parsed.free || []), ...(parsed.premium || [])];
+          if (allNames.length > 0) {
+            await saveGeneratedNames(email, allNames, quiz_answers || {});
+          }
+        }
+      } catch (saveErr) {
+        // Non-fatal — don't fail the response if the save fails
+        console.error('Failed to save generated names:', saveErr);
+      }
+    }
+
     return res.status(200).json(data);
   } catch (err) {
     return res.status(500).json({ error: err.message });
+  }
+};
+
+async function saveGeneratedNames(email, names, quizAnswers) {
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_ANON_KEY;
+  if (!supabaseUrl || !supabaseKey) return;
+
+  const rows = names.map(n => ({
+    email,
+    name: n.name,
+    origin: n.origin || '',
+    meaning: n.meaning || '',
+    tags: Array.isArray(n.tags) ? n.tags : [],
+    quiz_answers: quizAnswers
+  }));
+
+  const res = await fetch(`${supabaseUrl}/rest/v1/generated_names`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': supabaseKey,
+      'Authorization': `Bearer ${supabaseKey}`,
+      'Prefer': 'return=minimal'
+    },
+    body: JSON.stringify(rows)
+  });
+
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(JSON.stringify(err));
   }
 }

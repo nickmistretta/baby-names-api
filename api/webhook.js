@@ -76,6 +76,28 @@ module.exports = async function handler(req, res) {
     // Generate names via Claude
     const nameList = await generateNames(anthropicKey, answers, nameCount, tier);
 
+    // Save all generated names to generated_names for email sequences
+    if (nameList.length > 0) {
+      const generatedRows = nameList.map(n => ({
+        email,
+        name: n.name,
+        origin: n.origin || '',
+        meaning: n.meaning || '',
+        tags: Array.isArray(n.tags) ? n.tags : [],
+        quiz_answers: answers
+      }));
+      await fetch(`${supabaseUrl}/rest/v1/generated_names`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': supabaseKey,
+          'Authorization': `Bearer ${supabaseKey}`,
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify(generatedRows)
+      });
+    }
+
     // Save purchase to Supabase
     await fetch(`${supabaseUrl}/rest/v1/purchases`, {
       method: 'POST',
