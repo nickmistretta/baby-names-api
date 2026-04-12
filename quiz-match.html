@@ -207,53 +207,6 @@
   .option-btn.selected .option-dot { background: var(--dusty-rose); border-color: var(--terracotta); }
   .option-btn.selected .option-dot::after { content: ''; width: 6px; height: 6px; border-radius: 50%; background: white; }
 
-  /* Name tag input */
-  .names-input-wrap {
-    background: var(--off-white);
-    border: 0.5px solid rgba(28,43,58,0.1);
-    border-radius: 12px;
-    padding: 16px 18px;
-    min-height: 80px;
-    cursor: text;
-    transition: border-color 0.2s;
-  }
-
-  .names-input-wrap:focus-within { border-color: var(--dusty-rose); }
-
-  .tags-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 8px;
-  }
-
-  .name-tag-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    background: rgba(201,115,122,0.12);
-    border: 0.5px solid rgba(201,115,122,0.3);
-    border-radius: 99px;
-    font-size: 14px;
-    color: var(--navy);
-    font-family: 'Cormorant Garamond', serif;
-    font-style: italic;
-  }
-
-  .name-tag-pill button {
-    background: none;
-    border: none;
-    color: rgba(28,43,58,0.4);
-    cursor: pointer;
-    font-size: 16px;
-    line-height: 1;
-    padding: 0;
-    transition: color 0.2s;
-  }
-
-  .name-tag-pill button:hover { color: var(--dusty-rose); }
-
   .name-type-input {
     background: none;
     border: none;
@@ -267,6 +220,104 @@
   }
 
   .name-type-input::placeholder { color: var(--muted); }
+
+  /* Name bubbles */
+  .bubbles-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .bubble-loading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 0 8px;
+    font-size: 14px;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  .bubble-spinner {
+    width: 16px; height: 16px;
+    border: 1.5px solid rgba(201,115,122,0.3);
+    border-top-color: var(--dusty-rose);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .name-bubble {
+    padding: 9px 18px;
+    background: var(--off-white);
+    border: 0.5px solid rgba(28,43,58,0.12);
+    border-radius: 99px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 17px;
+    font-style: italic;
+    color: var(--navy);
+    cursor: pointer;
+    transition: all 0.18s ease;
+    user-select: none;
+  }
+
+  .name-bubble:hover {
+    border-color: var(--dusty-rose);
+    background: #FBF7F2;
+    transform: translateY(-1px);
+  }
+
+  .name-bubble.selected {
+    background: rgba(201,115,122,0.12);
+    border-color: var(--dusty-rose);
+    color: var(--dusty-rose);
+  }
+
+  .bubble-divider {
+    width: 100%;
+    height: 0.5px;
+    background: rgba(28,43,58,0.08);
+    margin: 4px 0 16px;
+  }
+
+  .bubble-add-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .bubble-add-input {
+    flex: 1;
+    padding: 10px 14px;
+    background: var(--off-white);
+    border: 0.5px solid rgba(28,43,58,0.1);
+    border-radius: 99px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--navy);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .bubble-add-input:focus { border-color: var(--dusty-rose); }
+  .bubble-add-input::placeholder { color: var(--muted); }
+
+  .bubble-add-btn {
+    padding: 10px 18px;
+    background: var(--dusty-rose);
+    border: none;
+    border-radius: 99px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .bubble-add-btn:hover { background: #b85f66; }
 
   .input-hint {
     font-size: 12px;
@@ -605,14 +656,12 @@
   // State
   let current = 0;
   let answers = {};
-  let inputtedNames = [];
-  let selectedVibes = [];
-
-  const TOTAL_STEPS = 5;
+  const TOTAL_STEPS = 6;
 
   const steps = [
     { id: 'gender',   type: 'single' },
-    { id: 'names',    type: 'names' },
+    { id: 'origin',   type: 'single' },
+    { id: 'names',    type: 'bubbles' },
     { id: 'vibes',    type: 'multi' },
     { id: 'nickname', type: 'single' },
     { id: 'lastname', type: 'text' }
@@ -625,13 +674,24 @@
       hint: "We'll use this as the foundation for every match.",
       options: ['Girl', 'Boy', 'Gender-neutral', 'Surprise me']
     },
-    names: {
+    origin: {
       label: 'Step 2',
-      text: 'Enter names you already love',
-      hint: 'Add 2–5 names — press Enter or comma after each one'
+      text: 'Any country of origin to draw from?',
+      hint: "We'll focus on names rooted in that tradition.",
+      options: [
+        'Irish', 'Scottish', 'English', 'French', 'Italian',
+        'Spanish', 'Portuguese', 'German', 'Scandinavian', 'Greek',
+        'Russian', 'Japanese', 'Chinese', 'Indian', 'Arabic',
+        'Hebrew', 'Nigerian', 'Ethiopian', 'Latin American', 'No preference'
+      ]
+    },
+    names: {
+      label: 'Step 3',
+      text: 'Pick names you already love',
+      hint: 'Select as many as feel right — or add your own below'
     },
     vibes: {
-      label: 'Step 3',
+      label: 'Step 4',
       text: 'What do you love about those names?',
       hint: 'Pick everything that resonates.',
       options: [
@@ -646,13 +706,13 @@
       ]
     },
     nickname: {
-      label: 'Step 4',
+      label: 'Step 5',
       text: 'Should the name have a good nickname?',
       hint: 'Think Josephine → Jo, Theodore → Theo, Beatrice → Bea.',
       options: ['Yes please', 'No preference', 'Not important']
     },
     lastname: {
-      label: 'Step 5',
+      label: 'Step 6',
       text: 'Last name for flow testing?',
       hint: "We'll check how each name sounds with your surname.",
       placeholder: 'Your last name (optional)'
@@ -675,18 +735,29 @@
 
     let bodyHTML = '';
 
-    if (step.type === 'names') {
-      bodyHTML = `
-        <div class="names-input-wrap" id="names-wrap" onclick="document.getElementById('name-input').focus()">
-          <div class="tags-container" id="tags-container"></div>
-          <input type="text" class="name-type-input" id="name-input" placeholder="e.g. Isolde, Wren, Caspian…" autocomplete="off" />
-          <div class="input-hint">Press Enter or comma to add · max 5 names</div>
-        </div>
-      `;
+    if (step.type === 'bubbles') {
+      const bubbleList = window._suggestedBubbles || [];
+      if (bubbleList.length === 0) {
+        bodyHTML = `<div class="bubble-loading"><div class="bubble-spinner"></div> Loading name suggestions…</div>`;
+      } else {
+        const selected = answers.names || [];
+        bodyHTML = `
+          <div class="bubbles-wrap" id="bubbles-wrap">
+            ${bubbleList.map(n => `
+              <button class="name-bubble${selected.includes(n) ? ' selected' : ''}" data-name="${n}">${n}</button>
+            `).join('')}
+          </div>
+          <div class="bubble-divider"></div>
+          <div class="bubble-add-wrap">
+            <input type="text" class="bubble-add-input" id="bubble-add-input" placeholder="Add your own name…" autocomplete="off" />
+            <button class="bubble-add-btn" onclick="bubbleAddCustom()">Add</button>
+          </div>
+        `;
+      }
     } else if (step.type === 'multi') {
       bodyHTML = `<div class="options-grid cols-2" id="multi-grid">` +
         cfg.options.map(o => `
-          <button class="option-btn${selectedVibes.includes(o) ? ' selected' : ''}" data-val="${o}">
+          <button class="option-btn${(answers[step.id] || []).includes(o) ? ' selected' : ''}" data-val="${o}">
             <span class="option-dot"></span>${o}
           </button>`).join('') +
         `</div>`;
@@ -709,33 +780,29 @@
       ${bodyHTML}
     `;
 
-    // Wire names input
-    if (step.type === 'names') {
-      renderTags();
-      const inp = document.getElementById('name-input');
-      inp.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' || e.key === ',') {
-          e.preventDefault();
-          addName(this.value.trim().replace(',', ''));
-        } else if (e.key === 'Backspace' && this.value === '' && inputtedNames.length > 0) {
-          removeName(inputtedNames.length - 1);
-        }
-      });
-      inp.addEventListener('blur', function() {
-        if (this.value.trim()) addName(this.value.trim());
-      });
+    // Wire bubbles
+    if (step.type === 'bubbles') {
+      if (!answers.names) answers.names = [];
+      wireBubbles();
+      const addInp = document.getElementById('bubble-add-input');
+      if (addInp) {
+        addInp.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter') { e.preventDefault(); bubbleAddCustom(); }
+        });
+      }
     }
 
     // Wire multi-select
     if (step.type === 'multi') {
+      if (!answers[step.id]) answers[step.id] = [];
       card.querySelectorAll('#multi-grid .option-btn').forEach(btn => {
         btn.addEventListener('click', function() {
           const val = this.dataset.val;
-          if (selectedVibes.includes(val)) {
-            selectedVibes = selectedVibes.filter(v => v !== val);
+          if (answers[step.id].includes(val)) {
+            answers[step.id] = answers[step.id].filter(v => v !== val);
             this.classList.remove('selected');
           } else {
-            selectedVibes.push(val);
+            answers[step.id].push(val);
             this.classList.add('selected');
           }
         });
@@ -763,40 +830,84 @@
     requestAnimationFrame(() => { card.style.animation = 'fadeUp 0.5s ease both'; });
   }
 
-  function addName(name) {
-    if (!name || inputtedNames.includes(name) || inputtedNames.length >= 5) return;
-    inputtedNames.push(name);
-    document.getElementById('name-input').value = '';
-    renderTags();
+  function wireBubbles() {
+    document.querySelectorAll('.name-bubble').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const name = this.dataset.name;
+        if (!answers.names) answers.names = [];
+        if (answers.names.includes(name)) {
+          answers.names = answers.names.filter(n => n !== name);
+          this.classList.remove('selected');
+        } else {
+          answers.names.push(name);
+          this.classList.add('selected');
+        }
+      });
+    });
   }
 
-  function removeName(idx) {
-    inputtedNames.splice(idx, 1);
-    renderTags();
+  function bubbleAddCustom() {
+    const inp = document.getElementById('bubble-add-input');
+    if (!inp) return;
+    const name = inp.value.trim();
+    if (!name) return;
+    if (!answers.names) answers.names = [];
+    if (answers.names.includes(name)) { inp.value = ''; return; }
+    // Add to suggested list and re-render bubbles section
+    if (!window._suggestedBubbles) window._suggestedBubbles = [];
+    if (!window._suggestedBubbles.includes(name)) window._suggestedBubbles.push(name);
+    answers.names.push(name);
+    inp.value = '';
+    // Rebuild the bubbles wrap
+    const wrap = document.getElementById('bubbles-wrap');
+    if (wrap) {
+      const newBtn = document.createElement('button');
+      newBtn.className = 'name-bubble selected';
+      newBtn.dataset.name = name;
+      newBtn.textContent = name;
+      wrap.appendChild(newBtn);
+      newBtn.addEventListener('click', function() {
+        answers.names = answers.names.filter(n => n !== name);
+        this.classList.remove('selected');
+      });
+    }
   }
 
-  function renderTags() {
-    const container = document.getElementById('tags-container');
-    if (!container) return;
-    container.innerHTML = inputtedNames.map((n, i) => `
-      <span class="name-tag-pill">
-        ${n}
-        <button onclick="removeName(${i})" type="button">×</button>
-      </span>
-    `).join('');
+  async function fetchBubbleSuggestions() {
+    const gender = answers.gender || 'any';
+    const origin = answers.origin && answers.origin !== 'No preference' ? answers.origin : 'any origin';
+    try {
+      const res = await fetch('https://project-rz9q4.vercel.app/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 400,
+          messages: [{
+            role: 'user',
+            content: `List exactly 24 beautiful ${gender} baby names with ${origin} roots. Return ONLY a JSON array of name strings, no explanations, no markdown: ["Name1","Name2",...]`
+          }]
+        })
+      });
+      const data = await res.json();
+      let raw = data.content[0].text.replace(/```json\s*/g,'').replace(/```\s*/g,'').trim();
+      const start = raw.indexOf('['), end = raw.lastIndexOf(']');
+      return JSON.parse(raw.slice(start, end + 1));
+    } catch(e) {
+      console.error('Bubble fetch failed', e);
+      return [];
+    }
   }
 
   function nextQ() {
     const step = steps[current];
 
     // Validate required steps
-    if (step.type === 'names' && inputtedNames.length < 1) {
-      const wrap = document.getElementById('names-wrap');
-      wrap.style.animation = 'none';
-      wrap.offsetHeight;
-      wrap.style.animation = 'shake 0.3s ease';
-      wrap.style.borderColor = 'var(--dusty-rose)';
-      document.getElementById('name-input').focus();
+    if (step.type === 'bubbles' && (!answers.names || answers.names.length < 1)) {
+      const card = document.getElementById('question-card');
+      card.style.animation = 'none';
+      card.offsetHeight;
+      card.style.animation = 'shake 0.3s ease';
       return;
     }
     if (step.type === 'single' && !answers[step.id]) {
@@ -809,9 +920,22 @@
     // multi and text are optional
 
     if (current < TOTAL_STEPS - 1) {
-      current++;
-      renderQ();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      const nextStep = steps[current + 1];
+      // If we're about to show the bubbles step, fetch suggestions first
+      if (nextStep && nextStep.type === 'bubbles') {
+        current++;
+        window._suggestedBubbles = [];
+        renderQ(); // shows loading state immediately
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        fetchBubbleSuggestions().then(names => {
+          window._suggestedBubbles = names;
+          renderQ(); // re-render with bubbles populated
+        });
+      } else {
+        current++;
+        renderQ();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     } else {
       generateNames();
     }
@@ -843,7 +967,8 @@
       msgEl.textContent = loadingMessages[msgIdx];
     }, 1800);
 
-    const vibesText = selectedVibes.length > 0 ? selectedVibes.join(', ') : 'no specific preference';
+    const originText = answers.origin && answers.origin !== 'No preference' ? answers.origin : null;
+    const vibesText = answers.vibes && answers.vibes.length > 0 ? answers.vibes.join(', ') : null;
     const lastName = answers.lastname || '';
     const nicknamePreference = answers.nickname || 'No preference';
     const nicknameInstruction = nicknamePreference === 'Yes please'
@@ -856,11 +981,12 @@
       ? `CRITICAL: Gender is a HARD filter — only suggest ${answers.gender} names. Do not suggest names outside this gender regardless of the inspiration names provided.`
       : `Gender preference: ${answers.gender || 'no preference'} — feel free to suggest names across genders.`;
 
-    const prompt = `You are a baby name expert. The user loves these names: ${inputtedNames.join(', ')}.
+    const prompt = `You are a baby name expert. The user loves these names: ${(answers.names || []).join(', ')}.
 
 ${genderInstruction}
 
-What they love about their inspiration names: ${vibesText}
+${originText ? `Country of origin: ${originText} — prioritise names rooted in this tradition.` : ''}
+${vibesText ? `What they love about their inspiration names: ${vibesText}` : ''}
 ${nicknameInstruction ? nicknameInstruction + '\n' : ''}${lastName ? `Last name for flow: ${lastName} — note how each suggested name pairs with this surname` : ''}
 
 Suggest exactly 25 baby names that feel like a natural extension of what they already love — same energy, roots, sounds, or qualities. Do not repeat any of the inspiration names.
