@@ -60,7 +60,7 @@
   .container {
     max-width: 680px;
     margin: 0 auto;
-    padding: 16px 24px 80px;
+    padding: 8px 24px 80px;
     position: relative;
     z-index: 1;
   }
@@ -68,7 +68,7 @@
   /* Header */
   .header {
     text-align: center;
-    margin-bottom: 28px;
+    margin-bottom: 16px;
     animation: fadeUp 0.8s ease both;
   }
 
@@ -104,7 +104,7 @@
 
   /* Progress bar */
   .progress-wrap {
-    margin-bottom: 36px;
+    margin-bottom: 20px;
     animation: fadeUp 0.8s 0.1s ease both;
   }
 
@@ -137,7 +137,7 @@
     background: var(--white);
     border: 0.5px solid rgba(28,43,58,0.08);
     border-radius: 20px;
-    padding: 36px 32px;
+    padding: 24px 24px;
     margin-bottom: 24px;
     box-shadow: 0 4px 24px rgba(122,92,68,0.08);
     animation: fadeUp 0.6s ease both;
@@ -165,7 +165,7 @@
     font-size: 14px;
     color: var(--muted);
     font-weight: 300;
-    margin-bottom: 28px;
+    margin-bottom: 18px;
   }
 
   /* Options */
@@ -261,6 +261,18 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 10px;
+  }
+
+  @media (max-width: 640px) {
+    .container {
+      padding-top: 4px;
+    }
+    .header {
+      margin-bottom: 10px;
+    }
+    .question-card {
+      padding: 20px 18px;
+    }
   }
 
   @media (max-width: 480px) {
@@ -721,7 +733,7 @@
   <!-- QUIZ SCREEN -->
   <div class="screen active" id="screen-quiz">
     <div class="header">
-      <div style="text-align:center; margin-bottom:16px;"><svg style="height:80px;width:auto;" viewBox="20 18 400 148" xmlns="http://www.w3.org/2000/svg"><defs>
+      <div style="text-align:center; margin-bottom:16px;"><svg style="height:64px;width:auto;" viewBox="20 18 400 148" xmlns="http://www.w3.org/2000/svg"><defs>
     <style>@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,300&amp;family=DM+Sans:wght@200&amp;display=swap');</style>
   </defs>
   <g transform="translate(28, 62) scale(0.095)">
