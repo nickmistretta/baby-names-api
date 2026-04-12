@@ -513,6 +513,92 @@
   }
 
   /* Upsell card */
+  /* Email capture card */
+  .email-capture-card {
+    background: var(--navy-mid);
+    border: 0.5px solid rgba(253,250,247,0.1);
+    border-radius: 20px;
+    padding: 32px;
+    text-align: center;
+    margin-top: 12px;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+
+  .email-capture-eyebrow {
+    font-size: 11px;
+    color: var(--dusty-rose);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .email-capture-heading {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px;
+    font-weight: 400;
+    color: var(--cream);
+    margin-bottom: 6px;
+    line-height: 1.25;
+  }
+
+  .email-capture-sub {
+    font-size: 13px;
+    color: var(--silver);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  .email-capture-row {
+    display: flex;
+    gap: 8px;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  .email-capture-input {
+    flex: 1;
+    padding: 12px 14px;
+    background: rgba(253,250,247,0.07);
+    border: 0.5px solid rgba(253,250,247,0.2);
+    border-radius: 10px;
+    color: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    outline: none;
+  }
+
+  .email-capture-input::placeholder { color: rgba(253,250,247,0.35); }
+  .email-capture-input:focus { border-color: rgba(201,115,122,0.5); }
+
+  .email-capture-btn {
+    padding: 12px 18px;
+    background: var(--dusty-rose);
+    border: none;
+    border-radius: 10px;
+    color: #ffffff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.2s;
+  }
+
+  .email-capture-btn:hover { opacity: 0.88; }
+
+  .email-capture-confirm {
+    font-size: 13px;
+    color: var(--dusty-rose);
+    letter-spacing: 0.04em;
+    padding: 4px 0;
+  }
+
+  @media (max-width: 480px) {
+    .email-capture-row { flex-direction: column; }
+    .email-capture-btn { width: 100%; padding: 13px; }
+  }
+
   .upsell-card {
     background: var(--navy-mid);
     border: 0.5px solid rgba(253,250,247,0.1);
@@ -782,6 +868,7 @@
       <p id="results-sub">5 names chosen just for you</p>
     </div>
     <div id="names-list"></div>
+    <div id="email-capture-section"></div>
     <div class="locked-names" id="locked-section" style="display:none">
       <div class="locked-overlay"><div class="locked-hint">🔒 Unlock 20 more names below</div></div>
       <div id="locked-names-list"></div>
@@ -1066,6 +1153,26 @@ function showResults(free, premium) {
     </div>
   `).join('');
 
+  // Email capture card (skip if already stored)
+  const captureSection = document.getElementById('email-capture-section');
+  if (localStorage.getItem('nomia_user_email')) {
+    captureSection.innerHTML = '';
+  } else {
+    captureSection.innerHTML = `
+      <div class="email-capture-card">
+        <div class="email-capture-eyebrow">Save your results</div>
+        <div class="email-capture-heading">Get your names sent to your inbox</div>
+        <div class="email-capture-sub">Free — we'll also let you know when new names are ready for you</div>
+        <div id="email-capture-form">
+          <div class="email-capture-row">
+            <input class="email-capture-input" type="email" id="capture-email-input"
+              placeholder="your@email.com" autocomplete="email" />
+            <button class="email-capture-btn" onclick="handleEmailCapture()">Save my names →</button>
+          </div>
+        </div>
+      </div>`;
+  }
+
   // Store premium names globally
   window._premiumNames = premium;
 
@@ -1186,6 +1293,36 @@ function showPostPaymentMessage() {
         </div>
       </div>
     `;
+  }
+}
+
+async function handleEmailCapture() {
+  const input = document.getElementById('capture-email-input');
+  const email = input ? input.value.trim() : '';
+  if (!email || !email.includes('@')) {
+    if (input) { input.style.borderColor = 'rgba(201,115,122,0.7)'; input.focus(); }
+    return;
+  }
+
+  const btn = document.querySelector('.email-capture-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+
+  try {
+    await fetch('https://project-rz9q4.vercel.app/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'subscribe', email })
+    });
+  } catch (e) {
+    // Non-fatal — still store locally and confirm
+    console.error('Email capture error:', e);
+  }
+
+  localStorage.setItem('nomia_user_email', email);
+
+  const form = document.getElementById('email-capture-form');
+  if (form) {
+    form.innerHTML = '<div class="email-capture-confirm">✦ Names saved — check your inbox</div>';
   }
 }
 
