@@ -611,21 +611,27 @@
   const TOTAL_STEPS = 5;
 
   const steps = [
+    { id: 'gender',   type: 'single' },
     { id: 'names',    type: 'names' },
     { id: 'vibes',    type: 'multi' },
-    { id: 'gender',   type: 'single' },
     { id: 'nickname', type: 'single' },
     { id: 'lastname', type: 'text' }
   ];
 
   const stepConfig = {
-    names: {
+    gender: {
       label: 'Step 1',
+      text: 'What gender are you looking for?',
+      hint: "We'll use this as the foundation for every match.",
+      options: ['Girl', 'Boy', 'Gender-neutral', 'Surprise me']
+    },
+    names: {
+      label: 'Step 2',
       text: 'Enter names you already love',
       hint: 'Add 2–5 names — press Enter or comma after each one'
     },
     vibes: {
-      label: 'Step 2',
+      label: 'Step 3',
       text: 'What do you love about those names?',
       hint: 'Pick everything that resonates.',
       options: [
@@ -638,12 +644,6 @@
         'The nature connection',
         'How literary and poetic they feel'
       ]
-    },
-    gender: {
-      label: 'Step 3',
-      text: 'What gender are you looking for?',
-      hint: "We'll tailor the matches accordingly.",
-      options: ['Girl', 'Boy', 'Gender-neutral', 'Surprise me']
     },
     nickname: {
       label: 'Step 4',
@@ -846,15 +846,24 @@
     const vibesText = selectedVibes.length > 0 ? selectedVibes.join(', ') : 'no specific preference';
     const lastName = answers.lastname || '';
     const nicknamePreference = answers.nickname || 'No preference';
+    const nicknameInstruction = nicknamePreference === 'Yes please'
+      ? 'Nickname: prioritise names with great short forms or nicknames (e.g. Josephine → Jo, Theodore → Theo, Beatrice → Bea). Note the nickname in the tags.'
+      : nicknamePreference === 'Not important'
+      ? 'Nickname: avoid names commonly shortened — suggest names that stand well on their own.'
+      : '';
+
+    const genderInstruction = (answers.gender === 'Girl' || answers.gender === 'Boy')
+      ? `CRITICAL: Gender is a HARD filter — only suggest ${answers.gender} names. Do not suggest names outside this gender regardless of the inspiration names provided.`
+      : `Gender preference: ${answers.gender || 'no preference'} — feel free to suggest names across genders.`;
 
     const prompt = `You are a baby name expert. The user loves these names: ${inputtedNames.join(', ')}.
 
-What they love about them: ${vibesText}
-Gender preference: ${answers.gender || 'no preference'}
-Nickname preference: ${nicknamePreference}${nicknamePreference === 'Yes please' ? ' — prioritise names with great nicknames or short forms (e.g. Josephine → Jo, Theodore → Theo, Beatrice → Bea). Note the nickname in the tags.' : ''}
-${lastName ? `Last name for flow: ${lastName} — note how each suggested name pairs with this surname` : ''}
+${genderInstruction}
 
-Suggest exactly 25 baby names that feel like a natural extension of what they already love. Find names with similar energy, roots, sounds, or qualities — but do not repeat the names they gave you.
+What they love about their inspiration names: ${vibesText}
+${nicknameInstruction ? nicknameInstruction + '\n' : ''}${lastName ? `Last name for flow: ${lastName} — note how each suggested name pairs with this surname` : ''}
+
+Suggest exactly 25 baby names that feel like a natural extension of what they already love — same energy, roots, sounds, or qualities. Do not repeat any of the inspiration names.
 
 Respond ONLY with a valid JSON array, no markdown, no explanation:
 [{"name": "...", "origin": "...", "meaning": "...", "tags": ["...", "..."]}]
