@@ -592,10 +592,29 @@ async function fetchBatch() {
 
 function buildPrompt(savedNames, excludeSet) {
   const exclude = Array.from(excludeSet).join(', ');
+
+  // Infer gender from tags on saved names
+  let girlSignals = 0;
+  let boySignals = 0;
+  for (const n of savedNames) {
+    for (const tag of (n.tags || [])) {
+      const t = tag.toLowerCase();
+      if (t.includes('girl') || t.includes('feminine') || t.includes('female')) girlSignals++;
+      if (t.includes('boy') || t.includes('masculine') || t.includes('male')) boySignals++;
+    }
+  }
+  const gender = girlSignals > boySignals ? 'girl' : boySignals > girlSignals ? 'boy' : null;
+
   if (savedNames.length > 0) {
     const loved = savedNames.map(n => n.name).join(', ');
     const doNotRepeat = exclude || loved;
-    return `The user loves these names: ${loved}. Based on this taste profile, generate 25 baby names with similar energy, roots, sounds, and qualities. Do not repeat any of these names: ${doNotRepeat}. Return ONLY a valid JSON array, no markdown: [{"name": "...", "origin": "...", "meaning": "...", "tags": ["...", "..."]}]`;
+    if (gender === 'girl') {
+      return `The user loves these names: ${loved}. Based on this taste profile, generate 25 girl baby names with similar energy, roots, sounds, and qualities. Generate only girl names — no boy names. Do not repeat any of these names: ${doNotRepeat}. Return ONLY a valid JSON array, no markdown: [{"name": "...", "origin": "...", "meaning": "...", "tags": ["...", "..."]}]`;
+    } else if (gender === 'boy') {
+      return `The user loves these names: ${loved}. Based on this taste profile, generate 25 boy baby names with similar energy, roots, sounds, and qualities. Generate only boy names — no girl names. Do not repeat any of these names: ${doNotRepeat}. Return ONLY a valid JSON array, no markdown: [{"name": "...", "origin": "...", "meaning": "...", "tags": ["...", "..."]}]`;
+    } else {
+      return `The user loves these names: ${loved}. Based on this taste profile, generate 25 baby names with similar energy, roots, sounds, and qualities. Do not repeat any of these names: ${doNotRepeat}. Return ONLY a valid JSON array, no markdown: [{"name": "...", "origin": "...", "meaning": "...", "tags": ["...", "..."]}]`;
+    }
   } else {
     const excludePart = exclude ? ` Do not use: ${exclude}.` : '';
     return `Generate 25 beautiful, rare, considered baby names across varied origins.${excludePart} Return ONLY a valid JSON array, no markdown: [{"name": "...", "origin": "...", "meaning": "...", "tags": ["...", "..."]}]`;
