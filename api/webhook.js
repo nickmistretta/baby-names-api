@@ -50,16 +50,52 @@ module.exports = async function handler(req, res) {
   }
 
   // Determine tier from amount
-  let tier, nameCount;
+  let tier, nameCount, statusLabel;
   if (amountTotal <= 199) {
-    tier = 1; nameCount = 20;
+    tier = 1; nameCount = 20;  statusLabel = 'starter';
   } else if (amountTotal <= 499) {
-    tier = 2; nameCount = 100;
+    tier = 2; nameCount = 100; statusLabel = 'family';
   } else {
-    tier = 3; nameCount = 999;
+    tier = 3; nameCount = 999; statusLabel = 'unlimited';
   }
 
   try {
+    const supabaseHeaders = {
+      'Content-Type': 'application/json',
+      'apikey': supabaseKey,
+      'Authorization': `Bearer ${supabaseKey}`
+    };
+
+    // Update user_status to paid tier (always overwrite — can only go up)
+    await fetch(`${supabaseUrl}/rest/v1/user_status`, {
+      method: 'POST',
+      headers: { ...supabaseHeaders, 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify({ email, status: statusLabel, updated_at: new Date().toISOString() })
+    });
+
+    // Cancel any pending day3 / day7 sequences — they've already purchased
+    await fetch(
+      `${supabaseUrl}/rest/v1/scheduled_emails?email=eq.${encodeURIComponent(email)}&sent=eq.false&cancelled=eq.false&type=in.(day3,day7)`,
+      {
+        method: 'PATCH',
+        headers: { ...supabaseHeaders, 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ cancelled: true })
+      }
+    );
+
+    // If starter or family, schedule an upgrade_nudge for 14 days from now
+    if (tier === 1 || tier === 2) {
+      await fetch(`${supabaseUrl}/rest/v1/scheduled_emails`, {
+        method: 'POST',
+        headers: { ...supabaseHeaders, 'Prefer': 'return=minimal' },
+        body: JSON.stringify({
+          email,
+          type: 'upgrade_nudge',
+          send_after: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
+        })
+      });
+    }
+
     // Look up quiz answers from Supabase
     const sessionRes = await fetch(
       `${supabaseUrl}/rest/v1/quiz_sessions?email=eq.${encodeURIComponent(email)}&order=created_at.desc&limit=1`,

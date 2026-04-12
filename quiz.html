@@ -1173,7 +1173,8 @@ function showResults(free, premium) {
       </div>`;
   }
 
-  // Store premium names globally
+  // Store names globally for email capture
+  window._freeNames = free;
   window._premiumNames = premium;
 
   // Upsell with 3 tiers + email capture
@@ -1311,7 +1312,12 @@ async function handleEmailCapture() {
     await fetch('https://project-rz9q4.vercel.app/api/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'subscribe', email })
+      body: JSON.stringify({
+        action: 'subscribe',
+        email,
+        names: window._freeNames || [],
+        quiz_answers: answers || {}
+      })
     });
   } catch (e) {
     // Non-fatal — still store locally and confirm
