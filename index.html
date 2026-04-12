@@ -870,5 +870,126 @@ const observer = new IntersectionObserver((entries) => {
 }, { threshold: 0.1 });
 reveals.forEach(el => observer.observe(el));
 </script>
+
+<!-- Social proof FOMO notifications -->
+<style>
+  #fomo-notification {
+    position: fixed;
+    bottom: 24px;
+    left: 24px;
+    max-width: 280px;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    z-index: 999;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    transform: translateY(120px);
+    opacity: 0;
+    transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+    pointer-events: none;
+  }
+  #fomo-notification.fomo-visible {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  .fomo-icon {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #C9737A;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: #ffffff;
+    line-height: 1;
+  }
+  .fomo-body {
+    flex: 1;
+    min-width: 0;
+  }
+  .fomo-message {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: #1C2B3A;
+    line-height: 1.4;
+    font-weight: 400;
+  }
+  .fomo-time {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    color: #8B9EB0;
+    margin-top: 2px;
+  }
+  @media (max-width: 480px) {
+    #fomo-notification {
+      bottom: 16px;
+      left: 16px;
+      max-width: calc(100vw - 32px);
+    }
+  }
+</style>
+
+<div id="fomo-notification" aria-live="polite" aria-atomic="true">
+  <div class="fomo-icon">✦</div>
+  <div class="fomo-body">
+    <div class="fomo-message" id="fomo-msg"></div>
+    <div class="fomo-time" id="fomo-time"></div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const notifications = [
+    { msg: "Sarah from New Jersey unlocked Nomia Family", time: "just now" },
+    { msg: "Someone in Austin purchased Nomia Unlimited", time: "1 minute ago" },
+    { msg: "Emma from London saved 4 names to her dashboard", time: "2 minutes ago" },
+    { msg: "James & Priya just completed the name quiz", time: "3 minutes ago" },
+    { msg: "Someone in Chicago unlocked Nomia Starter", time: "4 minutes ago" },
+    { msg: "Melissa from Sydney unlocked Nomia Family", time: "5 minutes ago" },
+    { msg: "12 parents have taken the quiz in the last hour", time: "just now" },
+    { msg: "Someone in Toronto purchased Nomia Unlimited", time: "2 minutes ago" },
+    { msg: "Rachel from Boston saved her favourite name", time: "3 minutes ago" },
+    { msg: "Someone in Seattle unlocked Nomia Family", time: "6 minutes ago" },
+    { msg: "Anna & Tom just found their baby's name", time: "1 minute ago" },
+    { msg: "Someone in Miami unlocked Nomia Starter", time: "4 minutes ago" },
+    { msg: "8 parents are taking the quiz right now", time: "just now" },
+    { msg: "Sophie from Dublin saved 6 names to her list", time: "2 minutes ago" },
+    { msg: "Someone in Los Angeles unlocked Nomia Unlimited", time: "5 minutes ago" }
+  ];
+
+  let fomoIndex = Math.floor(Math.random() * notifications.length);
+  let fomoTimer = null;
+  let fomoHideTimer = null;
+
+  function showFomo() {
+    const n = notifications[fomoIndex % notifications.length];
+    fomoIndex++;
+
+    document.getElementById('fomo-msg').textContent = n.msg;
+    document.getElementById('fomo-time').textContent = n.time;
+
+    const el = document.getElementById('fomo-notification');
+    el.classList.add('fomo-visible');
+
+    fomoHideTimer = setTimeout(function() {
+      el.classList.remove('fomo-visible');
+      scheduleFomo();
+    }, 4500);
+  }
+
+  function scheduleFomo() {
+    const delay = 18000 + Math.random() * 10000;
+    fomoTimer = setTimeout(showFomo, delay);
+  }
+
+  // First fire after 8 seconds
+  fomoTimer = setTimeout(showFomo, 8000);
+})();
+</script>
 </body>
 </html>
