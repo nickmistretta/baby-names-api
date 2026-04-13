@@ -690,6 +690,7 @@ async function generateNames(bypassCache = false) {
   // Check cache unless bypassed
   if (!bypassCache) {
     const cacheKey = buildUnlimCacheKey(answers);
+    console.log('Cache key:', cacheKey);
     const cachedResult = await checkUnlimCache(cacheKey);
     if (cachedResult) {
       console.log('✅ Served from cache');

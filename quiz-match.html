@@ -977,6 +977,7 @@
 
     // Check cache before hitting the API
     const cacheKey = buildMatchCacheKey(answers);
+    console.log('Cache key:', cacheKey);
     const cachedResult = await checkMatchCache(cacheKey);
     if (cachedResult) {
       console.log('✅ Served from cache');
