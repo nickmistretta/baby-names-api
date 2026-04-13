@@ -1153,51 +1153,108 @@ Respond ONLY with valid JSON, no markdown, no explanation:
 Each object: {"name": "...", "origin": "...", "meaning": "...", "tags": ["...", "..."]}
 Tags: 2–3 short feel descriptors — capture emotional texture, not category (e.g. "quietly confident", "ancient warmth", "modern clarity")`;
 
+  // Fetch with 529 retry logic
+  async function fetchWithRetry(body, retries = 3) {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      const res = await fetch('https://project-rz9q4.vercel.app/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (res.status !== 529) return res;
+      console.warn(`529 overloaded, attempt ${attempt}/${retries} — retrying in 3s`);
+      if (attempt < retries) {
+        msgEl.textContent = 'Just a moment, almost there…';
+        await new Promise(r => setTimeout(r, 3000));
+      }
+    }
+    return null; // all retries exhausted
+  }
+
+  // Parse free+premium JSON from response text
+  function parseMainResponse(text) {
+    const clean = text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+    const start = clean.indexOf('{');
+    const end = clean.lastIndexOf('}');
+    if (start === -1 || end === -1) throw new Error('No JSON found');
+    const parsed = JSON.parse(clean.slice(start, end + 1));
+    if (!parsed.free || !parsed.premium) throw new Error('Invalid structure');
+    return parsed;
+  }
+
   try {
-    const res = await fetch('https://project-rz9q4.vercel.app/api/generate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 4000,
-        messages: [{ role: 'user', content: prompt }]
-      })
+    // — Main attempt (with 529 retries) —
+    let free = null;
+    let premium = null;
+
+    const res = await fetchWithRetry({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 4000,
+      messages: [{ role: 'user', content: prompt }]
     });
 
-    const data = await res.json();
-    
-    let rawText = '';
-    if (data.content && data.content[0] && data.content[0].text) {
-      rawText = data.content[0].text;
-    } else {
-      throw new Error('No content in response');
+    if (res) {
+      const data = await res.json();
+      const text = data.content?.[0]?.text;
+      if (text) {
+        try {
+          const parsed = parseMainResponse(text);
+          free = parsed.free;
+          premium = parsed.premium;
+        } catch (parseErr) {
+          console.error('Main parse error:', parseErr, 'Raw:', text);
+        }
+      } else {
+        console.error('Main call: no content.', 'stop_reason:', data.stop_reason, 'detail:', JSON.stringify(data).slice(0, 300));
+      }
     }
-    
-    rawText = rawText.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
-    const jsonStart = rawText.indexOf('{');
-    const jsonEnd = rawText.lastIndexOf('}');
-    if (jsonStart === -1 || jsonEnd === -1) throw new Error('No JSON found');
-    const jsonStr = rawText.slice(jsonStart, jsonEnd + 1);
-    const parsed = JSON.parse(jsonStr);
-    if (!parsed.free || !parsed.premium) throw new Error('Invalid structure');
+
+    // — Simple fallback prompt if main failed —
+    if (!free) {
+      console.warn('Main call failed — trying simple fallback prompt');
+      msgEl.textContent = 'Just a moment, almost there…';
+      const fallbackPrompt = `Suggest 5 baby names. Gender: ${answers.gender}. Style: ${answers.style}. Respond only with valid JSON array, no markdown: [{"name":"...","origin":"...","meaning":"...","tags":["...","..."]}]`;
+      try {
+        const fbRes = await fetch('https://project-rz9q4.vercel.app/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: 800,
+            messages: [{ role: 'user', content: fallbackPrompt }]
+          })
+        });
+        const fbData = await fbRes.json();
+        const fbText = (fbData.content?.[0]?.text || '').replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+        const arrStart = fbText.indexOf('[');
+        const arrEnd = fbText.lastIndexOf(']');
+        if (arrStart !== -1 && arrEnd !== -1) {
+          free = JSON.parse(fbText.slice(arrStart, arrEnd + 1));
+        }
+      } catch (fbErr) {
+        console.error('Fallback prompt error:', fbErr);
+      }
+    }
+
+    // — Last resort: hardcoded stock names —
+    if (!free) {
+      console.warn('Both API calls failed — showing hardcoded stock names');
+      free = [
+        { name: 'Rowan', origin: 'Celtic', meaning: 'Little red one; the rowan tree', tags: ['nature-rooted', 'gender-neutral', 'timeless'] },
+        { name: 'Hazel', origin: 'Old English', meaning: 'The hazel tree; wisdom', tags: ['vintage', 'warm', 'earthy'] },
+        { name: 'Soren', origin: 'Scandinavian', meaning: 'Stern; serious; thunder', tags: ['modern', 'strong', 'unique'] },
+        { name: 'Wren', origin: 'English', meaning: 'Small bird; free spirit', tags: ['nature', 'short', 'lyrical'] },
+        { name: 'Lucian', origin: 'Latin', meaning: 'Light; illumination', tags: ['classic', 'elegant', 'radiant'] }
+      ];
+    }
 
     clearInterval(msgInterval);
-    showResults(parsed.free, parsed.premium);
+    showResults(free, premium || fallbackPremium());
   } catch (e) {
-    console.error('Parse error:', e);
+    console.error('generateNames error:', e);
     clearInterval(msgInterval);
-    showResults(fallbackFree(answers), fallbackPremium());
+    showResults(fallbackPremium().slice(0, 5), fallbackPremium());
   }
-}
-
-function fallbackFree(a) {
-  return [
-    { name: 'Rowan', origin: 'Celtic', meaning: 'Little red one; the rowan tree', tags: ['nature-rooted', 'gender-neutral', 'timeless'] },
-    { name: 'Hazel', origin: 'Old English', meaning: 'The hazel tree; wisdom', tags: ['vintage', 'warm', 'earthy'] },
-    { name: 'Soren', origin: 'Scandinavian', meaning: 'Stern; serious; thunder', tags: ['modern', 'strong', 'unique'] },
-    { name: 'Wren', origin: 'English', meaning: 'Small bird; free spirit', tags: ['nature', 'short', 'lyrical'] },
-    { name: 'Lucian', origin: 'Latin', meaning: 'Light; illumination', tags: ['classic', 'elegant', 'radiant'] }
-  ];
 }
 
 function fallbackPremium() {
