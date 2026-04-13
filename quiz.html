@@ -1047,55 +1047,51 @@ async function generateNames() {
     msgEl.textContent = loadingMessages[msgIdx];
   }, 1800);
 
-  const prompt = `You are a baby name expert. Based on these preferences, suggest exactly 5 baby names for the FREE list and 20 additional names for the PREMIUM list.
+  const prompt = `You are a baby name expert. Treat the parent's inputs as an emotional brief — a mood board, not a shopping list. Your goal is names that feel inevitable once heard.
 
-HARD RULES — these cannot be broken:
-- Gender: ${answers.gender || 'neutral'}. If gender is 'Girl', ONLY suggest girl names. Never suggest a boy name. If gender is 'Boy', ONLY suggest boy names. Never suggest a girl name.
-- Do NOT repeat any name between the free and premium lists.
-- Every name must be different — no variations of the same name (e.g. if you suggest Kate, do not also suggest Katherine).
+GENDER RULE (hard): ${answers.gender}. Girl = girl names only. Boy = boy names only. If "Gender-neutral" or "No preference" or "Surprise me" = prioritize genuinely androgynous names that work for any child without feeling like a compromise — names like Rowan, Sage, Quinn, Marlowe, River, Emerson, Avery. Only use "Surprise me" as a signal for a true 50/50 split of clearly gendered names.
 
-PREFERENCES to match closely:
-- Style: ${answers.style || 'classic'}
-- Cultural background: ${answers.culture || 'no preference'}
-- Name vibe: ${answers.vibe || 'warm'}
-- Sound preferences: ${answers.sound || 'none specified'}
-- Meaning themes: ${answers.meaning || 'no preference'}
-- Birth season: ${answers.season || 'not specified'}
+NEVER use a word from the inputs as a name. "Grace" as a meaning input means elegance and ease — not the name Grace. "Joy" means radiance — not the name Joy. "Light" means luminous energy — not Luna, Luz, or Claire. Treat every input as a feeling to evoke, not a word to echo.
 
-STYLE INSTRUCTIONS:
-- If style is 'classic' or 'traditional': use well-known timeless names popular for decades. Think Elizabeth, Charlotte, James, William, Catherine, Thomas, Margaret, Henry. Avoid anything obscure or hard to pronounce.
-- If style is 'unique' or 'rare': use uncommon, distinctive names that feel special and considered. Avoid overused names.
-- If style is 'modern': use names that feel current and fresh, popular in the last 10-20 years.
-- If style is 'nature': use names inspired by nature, seasons, plants, animals, celestial bodies.
+THE BRIEF:
+Style: ${answers.style}
+Culture: ${answers.culture}
+Vibe: ${answers.vibe}
+Meaning resonance: ${answers.meaning}
+Sound: ${answers.sound || 'none specified'}
+Season: ${answers.season}
 
-CULTURE INSTRUCTIONS:
-- If culture is 'European / Western' or 'No preference': include a genuine mix of English, American, French, Italian, Scandinavian and German names. Include recognisably familiar names like Samantha, Jennifer, Caroline, Alexandra alongside more interesting finds. Do NOT make every name sound ancient or foreign.
-- If culture is 'Latin / Spanish': use Spanish, Portuguese and Latin American names.
-- If culture is 'Asian / East Asian': use Japanese, Chinese, Korean names.
-- If culture is 'South Asian': use Indian, Hindi, Sanskrit names.
-- If culture is 'Middle Eastern': use Arabic, Persian, Turkish names.
-- If culture is 'African / African-American': use African and African-American names.
-- If culture is 'Hebrew': use Hebrew and Jewish names.
-- If culture is 'Indigenous': use Indigenous names.
+STYLE:
+- Classic/timeless: well-loved for decades, immediately recognizable — Elizabeth, James, Catherine, Henry, Margaret, Thomas
+- Modern/fresh: feels current, popular in last 10–15 years — Isla, Finn, Nova, Declan, Aria
+- Rare/unique: genuinely uncommon, not invented — real names with history that are underused
+- Vintage revival: peaked 80–120 years ago, feels fresh again — Mabel, Harriet, Archie, Walter
+- Nature-inspired: plants, landscape, weather, celestial bodies
+- Short/strong: 1–2 syllables, punchy and confident
 
-VIBE INSTRUCTIONS — match the emotional feel of the name to the vibe:
-- gentle/soft: names that sound light, flowing, warm — avoid hard consonants
-- strong/bold: names with power and presence
-- playful: names that feel fun and energetic
-- elegant: names that feel sophisticated and refined
-- earthy/natural: names grounded and organic feeling
+CULTURE:
+- European/Western: cast wide — English, French, Italian, Scandinavian, German, Irish, Scottish. Mix freely, do not cluster around one nationality. Include some familiar names alongside more interesting finds.
+- Latin/Spanish: Spanish, Portuguese, Latin American names
+- Asian/East Asian: Japanese, Chinese, Korean names
+- South Asian: Sanskrit, Hindi, Tamil names
+- Middle Eastern: Arabic, Persian, Turkish names
+- African/African-American: pan-African and African-American names
+- Indigenous: Indigenous names with traceable cultural heritage
 
-QUALITY RULES:
-- Vary first letters across the list — don't cluster around the same sounds
-- FREE list: the 5 most perfectly matched names — crowd pleasers that feel immediately right
-- PREMIUM list: 20 names that go deeper — rarer finds, more culturally specific, hidden gems the user wouldn't find easily, plus some classics they may have overlooked
-- Each name should feel intentional and well-reasoned for this specific person
+DIVERSITY RULES — all must be met:
+- No two names from the same language family
+- No two names starting with the same letter
+- No name variations of each other (Kate and Katherine cannot both appear)
+- Zero overlap between free and premium lists
+- No thematic clusters — do not give 3 virtue names, 3 flower names, 3 celestial names etc.
 
-Respond ONLY with valid JSON in this exact format, no markdown, no explanation:
-{ "free": [...], "premium": [...] }
+FREE LIST (5): Your 5 most confident recommendations. Should feel immediately, obviously right for this brief.
+PREMIUM LIST (20): Go deeper. Rarer finds, more culturally specific, hidden gems, overlooked classics. Names the parent would not discover on their own. Hold the same diversity rules.
 
-Each name object: {"name": "...", "origin": "...", "meaning": "...", "tags": ["...", "..."]}
-Tags should be 2-3 short descriptors that capture the feel of the name (e.g. "timeless", "soft", "bold", "rare", "nature-rooted").`;
+Respond ONLY with valid JSON, no markdown, no explanation:
+{"free": [...], "premium": [...]}
+Each object: {"name": "...", "origin": "...", "meaning": "...", "tags": ["...", "..."]}
+Tags: 2–3 short feel descriptors — capture emotional texture, not category (e.g. "quietly confident", "ancient warmth", "modern clarity")`;
 
   try {
     const res = await fetch('https://project-rz9q4.vercel.app/api/generate', {

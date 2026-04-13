@@ -571,10 +571,11 @@ async function fetchBatch() {
     const data = await res.json();
     const text = (data.content?.[0]?.text || '')
       .replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
-    const start = text.indexOf('[');
-    const end   = text.lastIndexOf(']');
-    if (start === -1 || end === -1) throw new Error('No JSON array');
-    const names = JSON.parse(text.slice(start, end + 1));
+    const objStart = text.indexOf('{');
+    const objEnd   = text.lastIndexOf('}');
+    if (objStart === -1 || objEnd === -1) throw new Error('No JSON found');
+    const parsed = JSON.parse(text.slice(objStart, objEnd + 1));
+    const names = parsed.names || parsed;
 
     // Filter out anything already seen or discarded
     const fresh = names.filter(n =>
@@ -592,32 +593,38 @@ async function fetchBatch() {
 
 function buildPrompt(savedNames, excludeSet) {
   const exclude = Array.from(excludeSet).join(', ');
-
-  // Infer gender from tags on saved names
-  let girlSignals = 0;
-  let boySignals = 0;
-  for (const n of savedNames) {
-    for (const tag of (n.tags || [])) {
-      const t = tag.toLowerCase();
-      if (t.includes('girl') || t.includes('feminine') || t.includes('female')) girlSignals++;
-      if (t.includes('boy') || t.includes('masculine') || t.includes('male')) boySignals++;
-    }
-  }
-  const gender = girlSignals > boySignals ? 'girl' : boySignals > girlSignals ? 'boy' : null;
+  const excludeLine = exclude ? `\n- Do NOT suggest any of these already-seen names: ${exclude}` : '';
 
   if (savedNames.length > 0) {
-    const loved = savedNames.map(n => n.name).join(', ');
-    const doNotRepeat = exclude || loved;
-    if (gender === 'girl') {
-      return `The user loves these names: ${loved}. Based on this taste profile, generate 25 girl baby names with similar energy, roots, sounds, and qualities. Generate only girl names — no boy names. Do not repeat any of these names: ${doNotRepeat}. Return ONLY a valid JSON array, no markdown: [{"name": "...", "origin": "...", "meaning": "...", "tags": ["...", "..."]}]`;
-    } else if (gender === 'boy') {
-      return `The user loves these names: ${loved}. Based on this taste profile, generate 25 boy baby names with similar energy, roots, sounds, and qualities. Generate only boy names — no girl names. Do not repeat any of these names: ${doNotRepeat}. Return ONLY a valid JSON array, no markdown: [{"name": "...", "origin": "...", "meaning": "...", "tags": ["...", "..."]}]`;
-    } else {
-      return `The user loves these names: ${loved}. Based on this taste profile, generate 25 baby names with similar energy, roots, sounds, and qualities. Do not repeat any of these names: ${doNotRepeat}. Return ONLY a valid JSON array, no markdown: [{"name": "...", "origin": "...", "meaning": "...", "tags": ["...", "..."]}]`;
-    }
+    return `You are a baby name expert. A parent has saved the following names and you must use only these as your signal.
+
+SAVED NAMES: ${savedNames.map(n => n.name).join(', ')}
+
+Analyze these names carefully. Look for patterns in their origin, sound, length, syllable structure, cultural roots, and emotional feel. Do not ask what style they said they wanted — derive everything purely from what they actually saved.
+
+GENDER RULE (hard): Only suggest names that match the gender of the saved names. If all saved names are girl names, suggest girl names only. If all are boy names, suggest boy names only. If the saved names are a mix, prioritize genuinely androgynous names.
+
+YOUR TASK: Suggest 20 names that share the same DNA as the saved list. Each name should feel like a natural discovery — something the parent would have saved if they had seen it.
+
+DIVERSITY RULES — all must be met:
+- No name already in the saved list
+- No two names from the same language family
+- No two names starting with the same letter
+- No name variations of each other
+- No thematic clusters${excludeLine}
+
+Respond ONLY with valid JSON, no markdown, no explanation:
+{"names": [...]}
+Each object: {"name": "...", "origin": "...", "meaning": "...", "tags": ["...", "..."]}
+Tags: 2–3 short feel descriptors that capture why this name matches the saved list's energy.`;
   } else {
-    const excludePart = exclude ? ` Do not use: ${exclude}.` : '';
-    return `Generate 25 beautiful, rare, considered baby names across varied origins.${excludePart} Return ONLY a valid JSON array, no markdown: [{"name": "...", "origin": "...", "meaning": "...", "tags": ["...", "..."]}]`;
+    const excludePart = excludeLine ? `\nDIVERSITY RULES:${excludeLine}` : '';
+    return `You are a baby name expert. Generate 20 beautiful, considered baby names across varied origins and cultures. Each should feel intentional — real names with history, not invented.${excludePart}
+
+Respond ONLY with valid JSON, no markdown, no explanation:
+{"names": [...]}
+Each object: {"name": "...", "origin": "...", "meaning": "...", "tags": ["...", "..."]}
+Tags: 2–3 short feel descriptors.`;
   }
 }
 
