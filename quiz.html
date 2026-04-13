@@ -1459,6 +1459,34 @@ async function handleEmailCapture() {
   const btn = document.querySelector('.email-capture-btn');
   if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
 
+  // Check if this email is already a user in Supabase
+  let isExistingUser = false;
+  try {
+    const checkRes = await fetch(
+      `${SUPABASE_URL}/rest/v1/user_status?email=eq.${encodeURIComponent(email)}&select=email`,
+      { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
+    );
+    const checkData = await checkRes.json();
+    isExistingUser = Array.isArray(checkData) && checkData.length > 0;
+  } catch (e) {
+    console.error('User status check failed:', e);
+  }
+
+  const form = document.getElementById('email-capture-form');
+
+  if (isExistingUser) {
+    localStorage.setItem('nomia_user_email', email);
+    if (form) {
+      form.innerHTML = `
+        <div class="email-capture-confirm" style="display:flex; flex-direction:column; align-items:center; gap:12px;">
+          <div>Welcome back! Log in to save these names to your dashboard.</div>
+          <a href="dashboard.html" style="display:inline-block; padding:10px 24px; background:var(--dusty-rose); color:#fff; border-radius:10px; font-family:'DM Sans',sans-serif; font-size:13px; text-decoration:none; letter-spacing:0.03em;">Go to dashboard →</a>
+        </div>`;
+    }
+    return;
+  }
+
+  // New user — run normal subscribe flow
   try {
     await fetch('https://project-rz9q4.vercel.app/api/generate', {
       method: 'POST',
@@ -1477,7 +1505,6 @@ async function handleEmailCapture() {
 
   localStorage.setItem('nomia_user_email', email);
 
-  const form = document.getElementById('email-capture-form');
   if (form) {
     form.innerHTML = '<div class="email-capture-confirm">✦ Names saved — check your inbox</div>';
   }
