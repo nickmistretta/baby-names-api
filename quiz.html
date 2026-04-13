@@ -1540,6 +1540,7 @@ async function handleEmailCapture() {
       { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
     );
     const checkData = await checkRes.json();
+    console.log('User status check — HTTP:', checkRes.status, '| data:', JSON.stringify(checkData));
     isExistingUser = Array.isArray(checkData) && checkData.length > 0;
   } catch (e) {
     console.error('User status check failed:', e);
