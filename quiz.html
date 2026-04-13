@@ -788,6 +788,8 @@
     filter: blur(4px);
     pointer-events: none;
     user-select: none;
+    height: 60px;
+    overflow: hidden;
   }
 
   /* Animations */
@@ -1170,7 +1172,7 @@ function showResults(free, premium) {
   const lockedSection = document.getElementById('locked-section');
   const lockedList = document.getElementById('locked-names-list');
   lockedSection.style.display = 'block';
-  lockedList.innerHTML = premium.slice(0, 4).map((n, i) => `
+  lockedList.innerHTML = premium.slice(0, 2).map((n, i) => `
     <div class="name-card blurred" style="animation-delay:${i * 0.06}s">
       <div class="name-rank">${String(i+6).padStart(2,'0')}</div>
       <div class="name-info">
