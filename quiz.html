@@ -1172,6 +1172,7 @@ async function generateNames() {
 
   // Check cache before hitting the API
   const cacheKey = buildCacheKey(answers);
+  console.log('Cache key:', cacheKey);
   const cachedResult = await checkCache(cacheKey);
   if (cachedResult) {
     console.log('Cache hit:', cacheKey);
