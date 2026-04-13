@@ -120,6 +120,11 @@ module.exports = async function handler(req, res) {
 
     const data = await response.json();
 
+    if (!response.ok) {
+      console.error('Anthropic API error:', response.status, JSON.stringify(data));
+      return res.status(response.status).json({ error: data?.error?.message || 'Anthropic API error', detail: data });
+    }
+
     // If email was provided at generation time, parse and save names
     if (email && data.content?.[0]?.text) {
       try {
