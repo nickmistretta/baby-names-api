@@ -675,8 +675,9 @@ const loadingMessages = [
   'Curating your personal collection…'
 ];
 
-async function generateNames() {
+async function generateNames(bypassCache = false) {
   document.getElementById('screen-quiz').classList.remove('active');
+  document.getElementById('screen-results').classList.remove('active');
   document.getElementById('screen-loading').classList.add('active');
 
   let msgIdx = 0;
@@ -685,6 +686,19 @@ async function generateNames() {
     msgIdx = (msgIdx + 1) % loadingMessages.length;
     msgEl.textContent = loadingMessages[msgIdx];
   }, 1800);
+
+  // Check cache unless bypassed
+  if (!bypassCache) {
+    const cacheKey = buildUnlimCacheKey(answers);
+    const cachedResult = await checkUnlimCache(cacheKey);
+    if (cachedResult) {
+      console.log('✅ Served from cache');
+      incrementUnlimCacheHit(cacheKey, cachedResult.hit_count);
+      clearInterval(msgInterval);
+      showResults(cachedResult.free_names);
+      return;
+    }
+  }
 
   const prompt = `You are a baby name expert. Based on these preferences, suggest exactly 25 beautifully curated baby names.
 
@@ -743,6 +757,8 @@ Make names feel warm, considered, and beautifully matched to the preferences. Va
 
     // ✅ No auto-save of names — user saves individually via heart button
 
+    storeUnlimCache(buildUnlimCacheKey(answers), names); // fire and forget
+    console.log('🌐 Served from API — stored in cache');
     clearInterval(msgInterval);
     showResults(names);
   } catch (e) {
@@ -771,6 +787,46 @@ function fallbackNames() {
 const savedNames = new Set();
 const SUPABASE_URL = 'https://naokzfwnttyoizanotcw.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hb2t6ZndudHR5b2l6YW5vdGN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MzIyOTksImV4cCI6MjA5MTUwODI5OX0.Tzxl7Px0GaBs4Cmw9KRn7Y4YMwcDvVSbLgIZkO6QVFc';
+
+// ── Cache helpers ───────────────────────────────────────
+function buildUnlimCacheKey(a) {
+  return 'unlim-' + [a.gender, a.style, a.culture, a.vibe, a.meaning, a.season]
+    .map(v => (v || '').toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, ''))
+    .join('-');
+}
+
+async function checkUnlimCache(key) {
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/cached_results?cache_key=eq.${encodeURIComponent(key)}&select=free_names,hit_count`,
+      { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
+    );
+    const data = await res.json();
+    if (Array.isArray(data) && data.length > 0) return data[0];
+  } catch (e) { console.warn('Cache read failed:', e); }
+  return null;
+}
+
+async function storeUnlimCache(key, names) {
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/cached_results`, {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ cache_key: key, free_names: names, premium_names: [] })
+    });
+  } catch (e) { console.warn('Cache store failed:', e); }
+}
+
+async function incrementUnlimCacheHit(key, count) {
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/cached_results?cache_key=eq.${encodeURIComponent(key)}`, {
+      method: 'PATCH',
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ hit_count: count + 1 })
+    });
+  } catch (e) { console.warn('Cache increment failed:', e); }
+}
+// ────────────────────────────────────────────────────────
 
 async function saveName(name, btn) {
   if (!userEmail) return;
@@ -821,6 +877,18 @@ function showResults(names) {
   document.getElementById('screen-loading').classList.remove('active');
   document.getElementById('screen-results').classList.add('active');
   document.getElementById('results-sub').textContent = `${names.length} names curated just for you`;
+
+  const existingFresh = document.getElementById('fresh-names-btn');
+  if (!existingFresh) {
+    const btn = document.createElement('button');
+    btn.id = 'fresh-names-btn';
+    btn.textContent = 'Generate fresh names ↺';
+    btn.onclick = () => generateNames(true);
+    btn.style.cssText = 'display:block; margin:8px auto 0; background:none; border:none; font-family:"DM Sans",sans-serif; font-size:12px; color:rgba(253,250,247,0.4); cursor:pointer; letter-spacing:0.06em; text-transform:uppercase; padding:4px 8px; transition:color 0.2s;';
+    btn.onmouseenter = () => btn.style.color = 'rgba(253,250,247,0.7)';
+    btn.onmouseleave = () => btn.style.color = 'rgba(253,250,247,0.4)';
+    document.getElementById('results-sub').insertAdjacentElement('afterend', btn);
+  }
 
   // Store for save callbacks
   window._resultNames = names;

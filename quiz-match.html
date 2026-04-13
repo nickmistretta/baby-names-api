@@ -975,6 +975,17 @@
       msgEl.textContent = loadingMessages[msgIdx];
     }, 1800);
 
+    // Check cache before hitting the API
+    const cacheKey = buildMatchCacheKey(answers);
+    const cachedResult = await checkMatchCache(cacheKey);
+    if (cachedResult) {
+      console.log('✅ Served from cache');
+      incrementMatchCacheHit(cacheKey, cachedResult.hit_count);
+      clearInterval(msgInterval);
+      showResults(cachedResult.free_names);
+      return;
+    }
+
     const originSelections = (answers.origin || []).filter(o => o !== 'No preference');
     const originText = originSelections.length > 0 ? originSelections.join(', ') : null;
     const vibesText = answers.vibes && answers.vibes.length > 0 ? answers.vibes.join(', ') : null;
@@ -1022,6 +1033,8 @@ Tags should capture why each name matches their taste, e.g. "same Celtic roots",
       const end = rawText.lastIndexOf(']');
       const names = JSON.parse(rawText.slice(start, end + 1));
 
+      storeMatchCache(cacheKey, names); // fire and forget
+      console.log('🌐 Served from API — stored in cache');
       clearInterval(msgInterval);
       showResults(names);
     } catch (e) {
@@ -1035,6 +1048,48 @@ Tags should capture why each name matches their taste, e.g. "same Celtic roots",
   const savedNames = new Set();
   const SUPABASE_URL = 'https://naokzfwnttyoizanotcw.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hb2t6ZndudHR5b2l6YW5vdGN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MzIyOTksImV4cCI6MjA5MTUwODI5OX0.Tzxl7Px0GaBs4Cmw9KRn7Y4YMwcDvVSbLgIZkO6QVFc';
+
+  // ── Cache helpers ───────────────────────────────────────
+  function buildMatchCacheKey(a) {
+    const norm = v => (v || '').toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
+    const names   = (a.names   || []).slice().sort().map(norm).join('_');
+    const origins = (a.origin  || []).slice().sort().map(norm).join('_');
+    const vibes   = (a.vibes   || []).slice().sort().map(norm).join('_');
+    return `match-${[names, norm(a.gender), origins, vibes, norm(a.nickname), norm(a.lastname)].join('-')}`;
+  }
+
+  async function checkMatchCache(key) {
+    try {
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/cached_results?cache_key=eq.${encodeURIComponent(key)}&select=free_names,hit_count`,
+        { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
+      );
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) return data[0];
+    } catch (e) { console.warn('Cache read failed:', e); }
+    return null;
+  }
+
+  async function storeMatchCache(key, names) {
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/cached_results`, {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ cache_key: key, free_names: names, premium_names: [] })
+      });
+    } catch (e) { console.warn('Cache store failed:', e); }
+  }
+
+  async function incrementMatchCacheHit(key, count) {
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/cached_results?cache_key=eq.${encodeURIComponent(key)}`, {
+        method: 'PATCH',
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ hit_count: count + 1 })
+      });
+    } catch (e) { console.warn('Cache increment failed:', e); }
+  }
+  // ────────────────────────────────────────────────────────
 
   async function saveName(name, btn) {
     if (!userEmail) return;
