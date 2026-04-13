@@ -120,9 +120,17 @@ module.exports = async function handler(req, res) {
 
     const data = await response.json();
 
+    console.log('Anthropic status:', response.status);
+    console.log('Anthropic response:', JSON.stringify(data).slice(0, 500));
+
     if (!response.ok) {
       console.error('Anthropic API error:', response.status, JSON.stringify(data));
       return res.status(response.status).json({ error: data?.error?.message || 'Anthropic API error', detail: data });
+    }
+
+    if (!data.content?.[0]?.text) {
+      console.error('Anthropic returned no content. stop_reason:', data.stop_reason, 'usage:', JSON.stringify(data.usage));
+      return res.status(500).json({ error: 'No content in Anthropic response', stop_reason: data.stop_reason, usage: data.usage, detail: data });
     }
 
     // If email was provided at generation time, parse and save names
