@@ -904,6 +904,64 @@ const SUPABASE_URL = 'https://naokzfwnttyoizanotcw.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hb2t6ZndudHR5b2l6YW5vdGN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MzIyOTksImV4cCI6MjA5MTUwODI5OX0.Tzxl7Px0GaBs4Cmw9KRn7Y4YMwcDvVSbLgIZkO6QVFc';
 const savedNamesSet = new Set();
 
+// ── Cache helpers ──────────────────────────────────────────
+function buildCacheKey(a) {
+  return [a.gender, a.style, a.culture, a.vibe, a.meaning, a.season]
+    .map(v => (v || '').toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, ''))
+    .join('-');
+}
+
+async function checkCache(key) {
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/cached_results?cache_key=eq.${encodeURIComponent(key)}&select=free_names,premium_names,hit_count`,
+      { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
+    );
+    const data = await res.json();
+    if (Array.isArray(data) && data.length > 0) return data[0];
+  } catch (e) {
+    console.warn('Cache read failed:', e);
+  }
+  return null;
+}
+
+async function storeCacheResult(key, free, premium) {
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/cached_results`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({ cache_key: key, free_names: free, premium_names: premium })
+    });
+  } catch (e) {
+    console.warn('Cache store failed:', e);
+  }
+}
+
+async function incrementCacheHit(key, currentCount) {
+  try {
+    await fetch(
+      `${SUPABASE_URL}/rest/v1/cached_results?cache_key=eq.${encodeURIComponent(key)}`,
+      {
+        method: 'PATCH',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ hit_count: currentCount + 1 })
+      }
+    );
+  } catch (e) {
+    console.warn('Cache increment failed:', e);
+  }
+}
+// ───────────────────────────────────────────────────────────
+
 async function saveName(name, btn) {
   const userEmail = localStorage.getItem('nomia_user_email');
 
@@ -1112,6 +1170,17 @@ async function generateNames() {
     msgEl.textContent = loadingMessages[msgIdx];
   }, 1800);
 
+  // Check cache before hitting the API
+  const cacheKey = buildCacheKey(answers);
+  const cachedResult = await checkCache(cacheKey);
+  if (cachedResult) {
+    console.log('Cache hit:', cacheKey);
+    incrementCacheHit(cacheKey, cachedResult.hit_count);
+    clearInterval(msgInterval);
+    showResults(cachedResult.free_names, cachedResult.premium_names);
+    return;
+  }
+
   const prompt = `You are a baby name expert. Treat the parent's inputs as an emotional brief — a mood board, not a shopping list. Your goal is names that feel inevitable once heard.
 
 GENDER RULE (hard): ${answers.gender}. Girl = girl names only. Boy = boy names only. If "Gender-neutral" or "No preference" or "Surprise me" = prioritize genuinely androgynous names that work for any child without feeling like a compromise — names like Rowan, Sage, Quinn, Marlowe, River, Emerson, Avery. Only use "Surprise me" as a signal for a true 50/50 split of clearly gendered names.
@@ -1206,6 +1275,7 @@ Tags: 2–3 short feel descriptors — capture emotional texture, not category (
           const parsed = parseMainResponse(text);
           free = parsed.free;
           premium = parsed.premium;
+          storeCacheResult(cacheKey, free, premium); // fire and forget
         } catch (parseErr) {
           console.error('Main parse error:', parseErr, 'Raw:', text);
         }
