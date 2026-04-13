@@ -906,41 +906,46 @@ const savedNamesSet = new Set();
 
 async function saveName(name, btn) {
   const userEmail = localStorage.getItem('nomia_user_email');
-  if (!userEmail) return;
 
   if (savedNamesSet.has(name.name)) {
+    // Toggle off — always update UI
     btn.textContent = '♡';
     btn.classList.remove('saved');
     savedNamesSet.delete(name.name);
-    try {
-      await fetch(
-        `${SUPABASE_URL}/rest/v1/saved_names?email=eq.${encodeURIComponent(userEmail)}&name=eq.${encodeURIComponent(name.name)}`,
-        {
-          method: 'DELETE',
-          headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
-        }
-      );
-    } catch (e) {
-      console.error('Delete failed', e);
-      btn.textContent = '♥';
-      btn.classList.add('saved');
-      savedNamesSet.add(name.name);
+    if (userEmail) {
+      try {
+        await fetch(
+          `${SUPABASE_URL}/rest/v1/saved_names?email=eq.${encodeURIComponent(userEmail)}&name=eq.${encodeURIComponent(name.name)}`,
+          {
+            method: 'DELETE',
+            headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+          }
+        );
+      } catch (e) {
+        console.error('Delete failed', e);
+        btn.textContent = '♥';
+        btn.classList.add('saved');
+        savedNamesSet.add(name.name);
+      }
     }
   } else {
+    // Toggle on — always update UI
     btn.textContent = '♥';
     btn.classList.add('saved');
     savedNamesSet.add(name.name);
-    try {
-      await fetch('https://project-rz9q4.vercel.app/api/save-names', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: userEmail, names: [name] })
-      });
-    } catch (e) {
-      console.error('Save failed', e);
-      btn.textContent = '♡';
-      btn.classList.remove('saved');
-      savedNamesSet.delete(name.name);
+    if (userEmail) {
+      try {
+        await fetch('https://project-rz9q4.vercel.app/api/save-names', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: userEmail, names: [name] })
+        });
+      } catch (e) {
+        console.error('Save failed', e);
+        btn.textContent = '♡';
+        btn.classList.remove('saved');
+        savedNamesSet.delete(name.name);
+      }
     }
   }
 }
