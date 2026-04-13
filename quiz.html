@@ -461,6 +461,21 @@
     box-shadow: 0 8px 28px rgba(122,92,68,0.12);
   }
 
+  .save-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: rgba(28,43,58,0.2);
+    cursor: pointer;
+    padding: 4px;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    align-self: center;
+    line-height: 1;
+  }
+  .save-btn:hover { color: var(--dusty-rose); transform: scale(1.2); }
+  .save-btn.saved { color: var(--dusty-rose); }
+
   .name-rank {
     font-size: 11px;
     color: var(--clay);
@@ -885,6 +900,51 @@
 </div>
 
 <script>
+const SUPABASE_URL = 'https://naokzfwnttyoizanotcw.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hb2t6ZndudHR5b2l6YW5vdGN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MzIyOTksImV4cCI6MjA5MTUwODI5OX0.Tzxl7Px0GaBs4Cmw9KRn7Y4YMwcDvVSbLgIZkO6QVFc';
+const savedNamesSet = new Set();
+
+async function saveName(name, btn) {
+  const userEmail = localStorage.getItem('nomia_user_email');
+  if (!userEmail) return;
+
+  if (savedNamesSet.has(name.name)) {
+    btn.textContent = '♡';
+    btn.classList.remove('saved');
+    savedNamesSet.delete(name.name);
+    try {
+      await fetch(
+        `${SUPABASE_URL}/rest/v1/saved_names?email=eq.${encodeURIComponent(userEmail)}&name=eq.${encodeURIComponent(name.name)}`,
+        {
+          method: 'DELETE',
+          headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+        }
+      );
+    } catch (e) {
+      console.error('Delete failed', e);
+      btn.textContent = '♥';
+      btn.classList.add('saved');
+      savedNamesSet.add(name.name);
+    }
+  } else {
+    btn.textContent = '♥';
+    btn.classList.add('saved');
+    savedNamesSet.add(name.name);
+    try {
+      await fetch('https://project-rz9q4.vercel.app/api/save-names', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: userEmail, names: [name] })
+      });
+    } catch (e) {
+      console.error('Save failed', e);
+      btn.textContent = '♡';
+      btn.classList.remove('saved');
+      savedNamesSet.delete(name.name);
+    }
+  }
+}
+
 const questions = [
   {
     id: 'gender',
@@ -1154,6 +1214,7 @@ function showResults(free, premium) {
   sub.textContent = `${free.length} names chosen just for you · based on your answers`;
 
   const namesList = document.getElementById('names-list');
+  window._freeNames = free;
   namesList.innerHTML = free.map((n, i) => `
     <div class="name-card" style="animation-delay:${i * 0.08}s">
       <div class="name-rank">${String(i+1).padStart(2,'0')}</div>
@@ -1163,6 +1224,7 @@ function showResults(free, premium) {
         <div class="name-meaning">${n.meaning}</div>
         <div class="name-tags">${(n.tags||[]).map(t => `<span class="name-tag">${t}</span>`).join('')}</div>
       </div>
+      <button class="save-btn" onclick="saveName(window._freeNames[${i}], this)" title="Save to dashboard">♡</button>
     </div>
   `).join('');
 
@@ -1202,8 +1264,6 @@ function showResults(free, premium) {
       </div>`;
   }
 
-  // Store names globally for email capture
-  window._freeNames = free;
   window._premiumNames = premium;
 
   // Upsell with 3 tiers + email capture
