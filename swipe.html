@@ -558,16 +558,37 @@ async function fetchBatch() {
 
   const prompt = buildPrompt(userSavedNames, exclusionSet);
 
+  const requestBody = JSON.stringify({
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 4000,
+    messages: [{ role: 'user', content: prompt }]
+  });
+
+  let res = null;
+  let lastErr = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      res = await fetch(GENERATE_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: requestBody
+      });
+      if (res.status === 529) {
+        lastErr = new Error('529 overloaded');
+        res = null;
+        if (attempt < 2) await new Promise(r => setTimeout(r, 3000));
+        continue;
+      }
+      break;
+    } catch (err) {
+      lastErr = err;
+      if (attempt < 2) await new Promise(r => setTimeout(r, 3000));
+    }
+  }
+
   try {
-    const res = await fetch(GENERATE_API, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 4000,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
+    if (!res) throw lastErr || new Error('All retries failed');
+
     const data = await res.json();
     const text = (data.content?.[0]?.text || '')
       .replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
@@ -584,8 +605,96 @@ async function fetchBatch() {
     nameQueue.push(...fresh);
   } catch (err) {
     console.error('fetchBatch error:', err);
-    // Push a small fallback so the user isn't stranded
-    if (nameQueue.length === 0) showEmpty();
+    if (nameQueue.length === 0) {
+      // Infer gender from saved names tags
+      const savedTags = userSavedNames.flatMap(n => Array.isArray(n.tags) ? n.tags : []).map(t => t.toLowerCase());
+      const girlCount = savedTags.filter(t => t === 'girl').length;
+      const boyCount  = savedTags.filter(t => t === 'boy').length;
+      const inferredGender = girlCount > boyCount ? 'girl' : boyCount > girlCount ? 'boy' : 'neutral';
+
+      const fallbackGirl = [
+        { name: 'Olivia',    origin: 'Latin',      meaning: 'Olive tree',               tags: ['classic', 'girl', 'elegant'] },
+        { name: 'Emma',      origin: 'Germanic',   meaning: 'Whole, universal',          tags: ['timeless', 'girl', 'simple'] },
+        { name: 'Charlotte', origin: 'French',     meaning: 'Free woman',                tags: ['royal', 'girl', 'classic'] },
+        { name: 'Amelia',    origin: 'Germanic',   meaning: 'Work, industrious',         tags: ['vintage', 'girl', 'sweet'] },
+        { name: 'Sophia',    origin: 'Greek',      meaning: 'Wisdom',                    tags: ['classic', 'girl', 'bright'] },
+        { name: 'Mia',       origin: 'Scandinavian', meaning: 'Mine, beloved',           tags: ['short', 'girl', 'modern'] },
+        { name: 'Isabella',  origin: 'Hebrew',     meaning: 'Devoted to God',            tags: ['romantic', 'girl', 'flowing'] },
+        { name: 'Luna',      origin: 'Latin',      meaning: 'Moon',                      tags: ['celestial', 'girl', 'dreamy'] },
+        { name: 'Harper',    origin: 'English',    meaning: 'Harp player',               tags: ['modern', 'girl', 'musical'] },
+        { name: 'Evelyn',    origin: 'English',    meaning: 'Wished-for child',          tags: ['vintage', 'girl', 'soft'] },
+        { name: 'Camila',    origin: 'Latin',      meaning: 'Young ceremonial attendant',tags: ['lyrical', 'girl', 'warm'] },
+        { name: 'Aria',      origin: 'Italian',    meaning: 'Air, song',                 tags: ['musical', 'girl', 'elegant'] },
+        { name: 'Eliana',    origin: 'Hebrew',     meaning: 'My God has answered',       tags: ['radiant', 'girl', 'flowing'] },
+        { name: 'Nora',      origin: 'Irish',      meaning: 'Light, honour',             tags: ['gentle', 'girl', 'timeless'] },
+        { name: 'Chloe',     origin: 'Greek',      meaning: 'Blooming',                  tags: ['fresh', 'girl', 'bright'] },
+        { name: 'Penelope',  origin: 'Greek',      meaning: 'Weaver',                    tags: ['mythological', 'girl', 'classic'] },
+        { name: 'Layla',     origin: 'Arabic',     meaning: 'Night, dark beauty',        tags: ['romantic', 'girl', 'lyrical'] },
+        { name: 'Riley',     origin: 'Irish',      meaning: 'Courageous',                tags: ['spirited', 'girl', 'modern'] },
+        { name: 'Zoey',      origin: 'Greek',      meaning: 'Life',                      tags: ['vibrant', 'girl', 'playful'] },
+        { name: 'Stella',    origin: 'Latin',      meaning: 'Star',                      tags: ['celestial', 'girl', 'elegant'] }
+      ];
+
+      const fallbackBoy = [
+        { name: 'Liam',      origin: 'Irish',      meaning: 'Strong-willed warrior',     tags: ['strong', 'boy', 'popular'] },
+        { name: 'Noah',      origin: 'Hebrew',     meaning: 'Rest, comfort',             tags: ['biblical', 'boy', 'calm'] },
+        { name: 'Oliver',    origin: 'Latin',      meaning: 'Olive tree',                tags: ['classic', 'boy', 'gentle'] },
+        { name: 'James',     origin: 'Hebrew',     meaning: 'Supplanter',                tags: ['timeless', 'boy', 'strong'] },
+        { name: 'Elijah',    origin: 'Hebrew',     meaning: 'My God is Yahweh',          tags: ['biblical', 'boy', 'warm'] },
+        { name: 'William',   origin: 'Germanic',   meaning: 'Resolute protector',        tags: ['classic', 'boy', 'royal'] },
+        { name: 'Henry',     origin: 'Germanic',   meaning: 'Ruler of the home',         tags: ['vintage', 'boy', 'strong'] },
+        { name: 'Lucas',     origin: 'Latin',      meaning: 'Light',                     tags: ['bright', 'boy', 'modern'] },
+        { name: 'Benjamin',  origin: 'Hebrew',     meaning: 'Son of the right hand',     tags: ['biblical', 'boy', 'warm'] },
+        { name: 'Theodore',  origin: 'Greek',      meaning: 'Gift of God',               tags: ['vintage', 'boy', 'elegant'] },
+        { name: 'Jack',      origin: 'English',    meaning: 'God is gracious',           tags: ['classic', 'boy', 'crisp'] },
+        { name: 'Sebastian', origin: 'Greek',      meaning: 'Venerable',                 tags: ['lyrical', 'boy', 'distinguished'] },
+        { name: 'Mateo',     origin: 'Spanish',    meaning: 'Gift of God',               tags: ['warm', 'boy', 'rhythmic'] },
+        { name: 'Aiden',     origin: 'Irish',      meaning: 'Little fire',               tags: ['spirited', 'boy', 'modern'] },
+        { name: 'Leo',       origin: 'Latin',      meaning: 'Lion',                      tags: ['bold', 'boy', 'short'] },
+        { name: 'Owen',      origin: 'Welsh',      meaning: 'Young warrior',             tags: ['gentle', 'boy', 'Celtic'] },
+        { name: 'Ezra',      origin: 'Hebrew',     meaning: 'Help',                      tags: ['biblical', 'boy', 'modern'] },
+        { name: 'Asher',     origin: 'Hebrew',     meaning: 'Fortunate, blessed',        tags: ['joyful', 'boy', 'warm'] },
+        { name: 'Caleb',     origin: 'Hebrew',     meaning: 'Faithful, devoted',         tags: ['biblical', 'boy', 'strong'] },
+        { name: 'Miles',     origin: 'Latin',      meaning: 'Soldier, merciful',         tags: ['cool', 'boy', 'timeless'] }
+      ];
+
+      const fallbackNeutral = [
+        { name: 'Avery',     origin: 'English',    meaning: 'Ruler of the elves',        tags: ['modern', 'neutral', 'soft'] },
+        { name: 'Riley',     origin: 'Irish',      meaning: 'Courageous',                tags: ['spirited', 'neutral', 'modern'] },
+        { name: 'Jordan',    origin: 'Hebrew',     meaning: 'Flowing down',              tags: ['classic', 'neutral', 'strong'] },
+        { name: 'Quinn',     origin: 'Irish',      meaning: 'Wisdom, intelligence',      tags: ['crisp', 'neutral', 'modern'] },
+        { name: 'River',     origin: 'English',    meaning: 'A flowing body of water',   tags: ['nature', 'neutral', 'free'] },
+        { name: 'Sage',      origin: 'Latin',      meaning: 'Wise, herb',                tags: ['earthy', 'neutral', 'calm'] },
+        { name: 'Rowan',     origin: 'Irish',      meaning: 'Little red one',            tags: ['nature', 'neutral', 'gentle'] },
+        { name: 'Finley',    origin: 'Scottish',   meaning: 'Fair warrior',              tags: ['Celtic', 'neutral', 'soft'] },
+        { name: 'Parker',    origin: 'English',    meaning: 'Park keeper',               tags: ['modern', 'neutral', 'fresh'] },
+        { name: 'Morgan',    origin: 'Welsh',      meaning: 'Sea circle',                tags: ['Celtic', 'neutral', 'timeless'] },
+        { name: 'Emerson',   origin: 'Germanic',   meaning: 'Son of Emery',              tags: ['literary', 'neutral', 'warm'] },
+        { name: 'Marlowe',   origin: 'English',    meaning: 'Driftwood',                 tags: ['artistic', 'neutral', 'soft'] },
+        { name: 'Ellis',     origin: 'Welsh',      meaning: 'Benevolent',                tags: ['gentle', 'neutral', 'crisp'] },
+        { name: 'Lennox',    origin: 'Scottish',   meaning: 'Elm grove',                 tags: ['bold', 'neutral', 'cool'] },
+        { name: 'Reese',     origin: 'Welsh',      meaning: 'Enthusiasm',                tags: ['bright', 'neutral', 'modern'] },
+        { name: 'Phoenix',   origin: 'Greek',      meaning: 'Dark red, mythical bird',   tags: ['mythological', 'neutral', 'bold'] },
+        { name: 'Hayden',    origin: 'English',    meaning: 'Hay valley',                tags: ['nature', 'neutral', 'soft'] },
+        { name: 'Skyler',    origin: 'Dutch',      meaning: 'Scholar',                   tags: ['modern', 'neutral', 'airy'] },
+        { name: 'Peyton',    origin: 'English',    meaning: 'Fighting-man\'s estate',    tags: ['modern', 'neutral', 'crisp'] },
+        { name: 'Drew',      origin: 'Greek',      meaning: 'Strong and manly',          tags: ['short', 'neutral', 'classic'] }
+      ];
+
+      const pool = inferredGender === 'girl' ? fallbackGirl : inferredGender === 'boy' ? fallbackBoy : fallbackNeutral;
+      const fresh = pool.filter(n => !exclusionSet.has(n.name.toLowerCase()));
+      nameQueue.push(...fresh);
+
+      // Show fallback banner
+      let banner = document.getElementById('fallback-banner');
+      if (!banner) {
+        banner = document.createElement('div');
+        banner.id = 'fallback-banner';
+        banner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:rgba(201,115,122,0.15);border-bottom:0.5px solid rgba(201,115,122,0.3);color:rgba(201,115,122,0.9);font-size:12px;letter-spacing:0.05em;text-align:center;padding:8px 16px;z-index:300;';
+        banner.textContent = 'Showing popular names — our AI is taking a quick break';
+        document.body.appendChild(banner);
+      }
+    }
   } finally {
     isFetching = false;
   }
