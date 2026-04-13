@@ -1175,6 +1175,7 @@ async function generateNames() {
   const cachedResult = await checkCache(cacheKey);
   if (cachedResult) {
     console.log('Cache hit:', cacheKey);
+    console.log('✅ Served from cache');
     incrementCacheHit(cacheKey, cachedResult.hit_count);
     clearInterval(msgInterval);
     showResults(cachedResult.free_names, cachedResult.premium_names);
@@ -1276,6 +1277,7 @@ Tags: 2–3 short feel descriptors — capture emotional texture, not category (
           free = parsed.free;
           premium = parsed.premium;
           storeCacheResult(cacheKey, free, premium); // fire and forget
+          console.log('🌐 Served from API — stored in cache');
         } catch (parseErr) {
           console.error('Main parse error:', parseErr, 'Raw:', text);
         }
