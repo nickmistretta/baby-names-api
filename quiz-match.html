@@ -1022,9 +1022,18 @@
       msgEl.textContent = loadingMessages[msgIdx];
     }, 1800);
 
-    // cache disabled
     const cacheKey = buildMatchCacheKey(answers);
     console.log('Cache key:', cacheKey);
+
+    const cached = await checkMatchCache(cacheKey);
+    if (cached && Array.isArray(cached.free_names) && cached.free_names.length > 0) {
+      console.log('💾 Cache hit — serving stored names');
+      incrementMatchCacheHit(cacheKey, cached.hit_count || 0); // fire and forget
+      clearInterval(msgInterval);
+      showResults(cached.free_names);
+      return;
+    }
+    console.log('🌐 Cache miss — generating fresh');
 
     const originSelections = (answers.origin || []).filter(o => o !== 'No preference');
     const originText = originSelections.length > 0 ? originSelections.join(', ') : null;
@@ -1073,8 +1082,8 @@ Tags should capture why each name matches their taste, e.g. "same Celtic roots",
       const end = rawText.lastIndexOf(']');
       const names = JSON.parse(rawText.slice(start, end + 1));
 
-      // storeMatchCache disabled
-      console.log('🌐 Served from API');
+      storeMatchCache(cacheKey, names); // fire and forget
+      console.log('🌐 Served from API, cached for next time');
       clearInterval(msgInterval);
       showResults(names);
     } catch (e) {
