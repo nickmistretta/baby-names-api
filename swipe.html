@@ -667,16 +667,6 @@ async function fetchBatch() {
       localStorage.setItem('nomia_seen_names', JSON.stringify(Array.from(seenNames)));
     } catch (e) {}
 
-    // If Claude gave us too few fresh names (likely because the exclusion
-    // list got long and it ignored it), fire one more fetch in the background
-    // to keep the queue healthy. Marker flag prevents infinite recursion.
-    if (fresh.length < 10 && !fetchBatch._retrying) {
-      fetchBatch._retrying = true;
-      isFetching = false;
-      fetchBatch().finally(() => { fetchBatch._retrying = false; });
-      return;
-    }
-
     // Persist fresh batch to Supabase so future sessions know about them
     if (fresh.length > 0 && userEmail) {
       const rows = fresh.map(n => ({
@@ -849,8 +839,8 @@ function renderCurrentCard() {
     return;
   }
 
-  // Prefetch when low
-  if (nameQueue.length <= 5 && !isFetching) {
+  // Prefetch when low — keep threshold small to avoid over-fetching
+  if (nameQueue.length <= 3 && !isFetching) {
     fetchBatch(); // silent background fetch
   }
 
