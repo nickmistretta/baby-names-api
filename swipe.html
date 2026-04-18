@@ -648,10 +648,12 @@ async function fetchBatch() {
         tags: Array.isArray(n.tags) ? n.tags : [],
         quiz_answers: { source: 'swipe' }
       }));
-      db.from('generated_names').insert(rows).then(
-        () => {},
-        (err) => console.warn('Could not persist generated_names:', err)
-      );
+      db.from('generated_names')
+        .upsert(rows, { onConflict: 'email,name', ignoreDuplicates: true })
+        .then(
+          () => {},
+          (err) => console.warn('Could not persist generated_names:', err)
+        );
     }
   } catch (err) {
     console.error('fetchBatch error:', err);
@@ -794,7 +796,7 @@ Tags: 2–3 short feel descriptors.`;
 // ─────────────────────────────────────────────
 function renderCurrentCard() {
   if (nameQueue.length === 0) {
-    if (!isFetching) autoRefillNames();
+    autoRefillNames();
     return;
   }
 
@@ -1025,7 +1027,14 @@ async function autoRefillNames() {
   if (subEl) subEl.textContent = 'Finding more names…';
   loadingScreen.style.display = 'flex';
   loadingScreen.classList.remove('hidden');
-  await fetchBatch();
+
+  // If a silent prefetch is already in-flight, wait for it instead of firing another
+  if (isFetching) {
+    while (isFetching) await new Promise(r => setTimeout(r, 100));
+  } else {
+    await fetchBatch();
+  }
+
   if (subEl) subEl.textContent = origText;
   loadingScreen.classList.add('hidden');
   setTimeout(() => { loadingScreen.style.display = 'none'; }, 400);
