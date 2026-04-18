@@ -792,8 +792,11 @@ async function fetchBatch() {
 }
 
 function buildPrompt(savedNames, excludeSet) {
-  const exclude = Array.from(excludeSet).join(', ');
-  const excludeLine = exclude ? `\n- Do NOT suggest any of these already-seen names: ${exclude}` : '';
+  // Cap at the 50 most-recent exclusions to keep prompt size bounded.
+  // Client-side filtering still uses the FULL excludeSet — this is only what we tell Claude.
+  const recentExclusions = Array.from(excludeSet).slice(-50);
+  const exclude = recentExclusions.join(', ');
+  const excludeLine = exclude ? `\n- Do NOT suggest any of these recently-seen names: ${exclude}` : '';
 
   if (savedNames.length > 0) {
     const savedDetailed = savedNames.map(n =>
