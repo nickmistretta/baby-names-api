@@ -1850,5 +1850,235 @@ renderQ();
   fomoTimer = setTimeout(showFomo, 8000);
 })();
 </script>
+
+<!-- Exit-intent email capture modal -->
+<style>
+  #exit-intent-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(21,34,48,0.85);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 9998;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: exitFadeIn 0.25s ease;
+  }
+  #exit-intent-overlay.visible { display: flex; }
+  @keyframes exitFadeIn { from { opacity: 0; } to { opacity: 1; } }
+  #exit-intent-modal {
+    background: #243548;
+    border: 0.5px solid rgba(253,250,247,0.12);
+    border-radius: 20px;
+    padding: 36px 32px 28px;
+    max-width: 420px;
+    width: 100%;
+    text-align: center;
+    position: relative;
+    animation: exitSlideUp 0.35s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes exitSlideUp {
+    from { opacity: 0; transform: translateY(20px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  #exit-intent-close {
+    position: absolute;
+    top: 12px; right: 14px;
+    background: none;
+    border: none;
+    color: rgba(253,250,247,0.4);
+    font-size: 22px;
+    cursor: pointer;
+    padding: 4px 8px;
+    line-height: 1;
+  }
+  #exit-intent-close:hover { color: rgba(253,250,247,0.8); }
+  .exit-intent-eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #C9737A;
+    margin-bottom: 10px;
+  }
+  .exit-intent-heading {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px;
+    color: #FDFAF7;
+    font-weight: 400;
+    line-height: 1.25;
+    margin-bottom: 10px;
+  }
+  .exit-intent-sub {
+    font-size: 14px;
+    color: rgba(253,250,247,0.65);
+    line-height: 1.5;
+    margin-bottom: 20px;
+  }
+  .exit-intent-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .exit-intent-input {
+    flex: 1;
+    padding: 13px 14px;
+    background: rgba(253,250,247,0.08);
+    border: 0.5px solid rgba(253,250,247,0.2);
+    border-radius: 10px;
+    color: #FDFAF7;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    outline: none;
+  }
+  .exit-intent-input::placeholder { color: rgba(253,250,247,0.35); }
+  .exit-intent-input:focus { border-color: rgba(201,115,122,0.5); }
+  .exit-intent-btn {
+    padding: 13px 20px;
+    background: #C9737A;
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.2s;
+  }
+  .exit-intent-btn:hover { opacity: 0.88; }
+  .exit-intent-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .exit-intent-fineprint {
+    font-size: 11px;
+    color: rgba(253,250,247,0.35);
+    letter-spacing: 0.02em;
+  }
+  .exit-intent-confirm {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    color: #C9737A;
+    padding: 10px 0;
+  }
+  @media (max-width: 480px) {
+    .exit-intent-row { flex-direction: column; }
+    .exit-intent-btn { width: 100%; padding: 14px; }
+  }
+</style>
+
+<div id="exit-intent-overlay" role="dialog" aria-modal="true" aria-labelledby="exit-intent-heading">
+  <div id="exit-intent-modal">
+    <button id="exit-intent-close" aria-label="Close">×</button>
+    <div class="exit-intent-eyebrow">Don't lose your progress</div>
+    <div class="exit-intent-heading" id="exit-intent-heading">Save your spot — we'll send your names when they're ready</div>
+    <div class="exit-intent-sub">Enter your email and we'll keep your quiz results safe. No spam, just the names we curate for you.</div>
+    <div id="exit-intent-form">
+      <div class="exit-intent-row">
+        <input class="exit-intent-input" type="email" id="exit-intent-email" placeholder="your@email.com" autocomplete="email" />
+        <button class="exit-intent-btn" id="exit-intent-submit">Save →</button>
+      </div>
+      <div class="exit-intent-fineprint">Unsubscribe anytime.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  var SHOWN_KEY = 'nomia_exit_intent_shown';
+  var IDLE_MS = 60000; // 60 seconds idle on mobile before triggering
+  var shown = false;
+  var idleTimer = null;
+
+  function alreadyCaptured() {
+    return !!localStorage.getItem('nomia_user_email');
+  }
+  function alreadyShown() {
+    return !!localStorage.getItem(SHOWN_KEY);
+  }
+  function markShown() {
+    try { localStorage.setItem(SHOWN_KEY, '1'); } catch (e) {}
+    shown = true;
+  }
+
+  function showModal() {
+    if (shown || alreadyCaptured() || alreadyShown()) return;
+    var overlay = document.getElementById('exit-intent-overlay');
+    if (!overlay) return;
+    markShown();
+    overlay.classList.add('visible');
+    var input = document.getElementById('exit-intent-email');
+    if (input) setTimeout(function() { input.focus(); }, 200);
+    if (typeof gtag === 'function') gtag('event', 'exit_intent_shown');
+  }
+
+  function hideModal() {
+    var overlay = document.getElementById('exit-intent-overlay');
+    if (overlay) overlay.classList.remove('visible');
+  }
+
+  // Desktop: mouse leaves the top of the viewport
+  document.addEventListener('mouseout', function(e) {
+    if (e.clientY <= 0 && !e.relatedTarget && !e.toElement) {
+      showModal();
+    }
+  });
+
+  // Mobile: after 60 seconds of no interaction, show modal
+  function resetIdleTimer() {
+    if (idleTimer) clearTimeout(idleTimer);
+    idleTimer = setTimeout(showModal, IDLE_MS);
+  }
+  ['touchstart','scroll','click','keydown'].forEach(function(ev) {
+    document.addEventListener(ev, resetIdleTimer, { passive: true });
+  });
+  resetIdleTimer();
+
+  // Close button and overlay click
+  document.getElementById('exit-intent-close').addEventListener('click', hideModal);
+  document.getElementById('exit-intent-overlay').addEventListener('click', function(e) {
+    if (e.target === this) hideModal();
+  });
+
+  // Submit handler — reuses the existing /api/generate subscribe endpoint
+  document.getElementById('exit-intent-submit').addEventListener('click', async function() {
+    var input = document.getElementById('exit-intent-email');
+    var email = input ? input.value.trim() : '';
+    if (!email || !email.includes('@')) {
+      if (input) { input.style.borderColor = 'rgba(201,115,122,0.7)'; input.focus(); }
+      return;
+    }
+    var btn = this;
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+
+    try {
+      await fetch('https://project-rz9q4.vercel.app/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'subscribe',
+          email: email,
+          names: (typeof window !== 'undefined' && window._freeNames) ? window._freeNames : [],
+          quiz_answers: (typeof answers !== 'undefined') ? answers : {}
+        })
+      });
+    } catch (e) {
+      console.error('Exit-intent capture error:', e);
+    }
+
+    try { localStorage.setItem('nomia_user_email', email); } catch (e) {}
+    if (typeof gtag === 'function') gtag('event', 'exit_intent_captured');
+
+    var form = document.getElementById('exit-intent-form');
+    if (form) form.innerHTML = '<div class="exit-intent-confirm">✦ Saved — check your inbox</div>';
+    setTimeout(hideModal, 2000);
+  });
+
+  // Enter key submits
+  document.getElementById('exit-intent-email').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') document.getElementById('exit-intent-submit').click();
+  });
+})();
+</script>
+
 </body>
 </html>
