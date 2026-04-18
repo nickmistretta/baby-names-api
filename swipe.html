@@ -594,7 +594,8 @@ async function fetchBatch() {
   const exclusionSet = new Set([
     ...seenNames,
     ...discardedNames,
-    ...userSavedNames.map(n => n.name.toLowerCase())
+    ...userSavedNames.map(n => n.name.toLowerCase()),
+    ...nameQueue.map(n => n.name ? n.name.toLowerCase() : '').filter(Boolean)
   ]);
 
   const prompt = buildPrompt(userSavedNames, exclusionSet);
@@ -644,6 +645,12 @@ async function fetchBatch() {
       n.name && !exclusionSet.has(n.name.toLowerCase())
     );
     nameQueue.push(...fresh);
+
+    // Claim these names for seenNames immediately so concurrent fetches exclude them
+    fresh.forEach(n => seenNames.add(n.name.toLowerCase()));
+    try {
+      localStorage.setItem('nomia_seen_names', JSON.stringify(Array.from(seenNames)));
+    } catch (e) {}
 
     // If Claude gave us too few fresh names (likely because the exclusion
     // list got long and it ignored it), fire one more fetch in the background
@@ -830,10 +837,6 @@ function renderCurrentCard() {
   }
 
   const current = nameQueue[0];
-  seenNames.add(current.name.toLowerCase());
-  try {
-    localStorage.setItem('nomia_seen_names', JSON.stringify(Array.from(seenNames)));
-  } catch (e) {}
 
   // Update top card content
   setCardContent(topCard, current);
