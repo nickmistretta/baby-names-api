@@ -67,12 +67,14 @@ module.exports = async function handler(req, res) {
 
       // 3. Upsert user_status as 'free' — ignore if email already exists (don't downgrade paid users)
       try {
+        console.log('user_status upsert — attempting for:', email);
         const r = await fetch(`${supabaseUrl}/rest/v1/user_status`, {
           method: 'POST',
           headers: { ...headers, 'Prefer': 'resolution=ignore-duplicates,return=minimal' },
           body: JSON.stringify({ email, status: 'free' })
         });
         results.status = r.ok;
+        console.log('user_status upsert — HTTP:', r.status, '| ok:', r.ok);
         if (!r.ok) console.error('user_status error:', await r.json());
       } catch (err) {
         console.error('user_status catch:', err);

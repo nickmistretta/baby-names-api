@@ -1,6 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "wbjwb4x7if");
+</script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-4DSE8P2WL9"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-4DSE8P2WL9');
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta property="og:title" content="Nomia — Find the Perfect Baby Name">
@@ -975,17 +990,9 @@
       msgEl.textContent = loadingMessages[msgIdx];
     }, 1800);
 
-    // Check cache before hitting the API
+    // cache disabled
     const cacheKey = buildMatchCacheKey(answers);
     console.log('Cache key:', cacheKey);
-    const cachedResult = await checkMatchCache(cacheKey);
-    if (cachedResult) {
-      console.log('✅ Served from cache');
-      incrementMatchCacheHit(cacheKey, cachedResult.hit_count);
-      clearInterval(msgInterval);
-      showResults(cachedResult.free_names);
-      return;
-    }
 
     const originSelections = (answers.origin || []).filter(o => o !== 'No preference');
     const originText = originSelections.length > 0 ? originSelections.join(', ') : null;
@@ -1034,8 +1041,8 @@ Tags should capture why each name matches their taste, e.g. "same Celtic roots",
       const end = rawText.lastIndexOf(']');
       const names = JSON.parse(rawText.slice(start, end + 1));
 
-      storeMatchCache(cacheKey, names); // fire and forget
-      console.log('🌐 Served from API — stored in cache');
+      // storeMatchCache disabled
+      console.log('🌐 Served from API');
       clearInterval(msgInterval);
       showResults(names);
     } catch (e) {
@@ -1122,6 +1129,7 @@ Tags should capture why each name matches their taste, e.g. "same Celtic roots",
       btn.textContent = '♥';
       btn.classList.add('saved');
       savedNames.add(name.name);
+      gtag('event', 'name_hearted', {name: name.name, origin: name.origin});
       try {
         await fetch('https://project-rz9q4.vercel.app/api/save-names', {
           method: 'POST',
@@ -1157,6 +1165,7 @@ Tags should capture why each name matches their taste, e.g. "same Celtic roots",
         <button class="save-btn" onclick="saveName(window._resultNames[${i}], this)" title="Save to dashboard">♡</button>
       </div>
     `).join('');
+    gtag('event', 'quiz_completed', {gender: answers.gender, style: answers.style, culture: answers.culture});
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }

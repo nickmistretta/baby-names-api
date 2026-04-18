@@ -1,6 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "wbjwb4x7if");
+</script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-4DSE8P2WL9"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-4DSE8P2WL9');
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Nomia — Find the Perfect Baby Name</title>
@@ -646,15 +661,15 @@
     </svg>
   </span>
   <div class="nav-desktop">
-    <a href="about.html" class="nav-link">About</a>
-    <a href="dashboard.html" class="nav-link">Member Login</a>
-    <a href="quiz.html" class="nav-cta">Find your name</a>
+    <a href="about.html" class="nav-link" onclick="gtag('event', 'nav_click', {label: 'nav_about'})">About</a>
+    <a href="dashboard.html" class="nav-link" onclick="gtag('event', 'nav_click', {label: 'nav_member_login'})">Member Login</a>
+    <a href="quiz.html" class="nav-cta" onclick="gtag('event', 'nav_click', {label: 'nav_find_your_name'})">Find your name</a>
   </div>
-  <button class="hamburger" id="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></button>
+  <button class="hamburger" id="hamburger" onclick="gtag('event', 'nav_click', {label: 'nav_hamburger'}); toggleMenu()"><span></span><span></span><span></span></button>
   <div class="mobile-menu" id="mobileMenu">
-    <a href="about.html" onclick="toggleMenu()">About</a>
-    <a href="dashboard.html" onclick="toggleMenu()">Member Login</a>
-    <a href="quiz.html" class="mobile-cta" onclick="toggleMenu()">Find your name</a>
+    <a href="about.html" onclick="gtag('event', 'nav_click', {label: 'mobile_nav_about'}); toggleMenu()">About</a>
+    <a href="dashboard.html" onclick="gtag('event', 'nav_click', {label: 'mobile_nav_member_login'}); toggleMenu()">Member Login</a>
+    <a href="quiz.html" class="mobile-cta" onclick="gtag('event', 'nav_click', {label: 'mobile_nav_find_your_name'}); toggleMenu()">Find your name</a>
   </div>
 </nav>
 
@@ -665,8 +680,8 @@
     <h1>The name they'll carry<br><em>forever</em> starts here</h1>
     <p class="hero-sub">Answer 7 thoughtful questions. Our AI searches 3 million names across 190 cultures to find the one that's truly yours.</p>
     <div class="hero-actions">
-      <a href="quiz.html" class="btn-primary">Find my baby's name</a>
-      <a href="about.html" class="btn-ghost">How it works</a>
+      <a href="quiz.html" class="btn-primary" onclick="gtag('event', 'nav_click', {label: 'hero_find_my_babys_name'})">Find my baby's name</a>
+      <a href="about.html" class="btn-ghost" onclick="gtag('event', 'nav_click', {label: 'hero_how_it_works'})">How it works</a>
     </div>
     <div class="name-cycle-wrap">
       <div class="cycle-label">names our AI has discovered</div>
@@ -741,7 +756,7 @@
         <div class="eyebrow eyebrow-silver reveal">What's included</div>
         <h2 class="section-title title-cream reveal">More than just a name — a story worth <em class="title-em">telling</em></h2>
         <p class="section-sub sub-muted reveal">Every name comes with its full origin story, cultural roots, and the meaning behind it. Because the best names have something to say.</p>
-        <a href="quiz.html" class="btn-primary reveal">Start for free</a>
+        <a href="quiz.html" class="btn-primary reveal" onclick="gtag('event', 'nav_click', {label: 'cta_start_for_free'})">Start for free</a>
       </div>
       <div class="feature-cards">
         <div class="feature-card reveal">
@@ -806,7 +821,7 @@
     <h2 class="section-title title-cream reveal" style="text-align:center;">Find the name they'll carry <em class="title-em">forever</em></h2>
     <p class="section-sub sub-muted reveal" style="text-align:center; margin:0 auto 40px;">It takes 2 minutes, it's free to start, and your baby's perfect name might be one quiz away.</p>
     <div style="text-align:center;" class="reveal">
-      <a href="quiz.html" class="btn-primary" style="font-size:16px; padding:18px 48px;">Find my baby's name</a>
+      <a href="quiz.html" class="btn-primary" style="font-size:16px; padding:18px 48px;" onclick="gtag('event', 'nav_click', {label: 'cta_find_my_babys_name'})">Find my baby's name</a>
     </div>
   </div>
 </section>
@@ -818,9 +833,9 @@
     <text x="108" y="108" font-family="Cormorant Garamond,Georgia,serif" font-size="88" font-weight="300" font-style="italic" fill="rgba(253,250,247,0.6)" letter-spacing="4">nomia</text>
   </svg>
   <div class="footer-links">
-    <a href="about.html" class="footer-link">About</a>
-    <a href="quiz.html" class="footer-link">Take the quiz</a>
-    <a href="dashboard.html" class="footer-link">Member Login</a>
+    <a href="about.html" class="footer-link" onclick="gtag('event', 'nav_click', {label: 'footer_about'})">About</a>
+    <a href="quiz.html" class="footer-link" onclick="gtag('event', 'nav_click', {label: 'footer_take_the_quiz'})">Take the quiz</a>
+    <a href="dashboard.html" class="footer-link" onclick="gtag('event', 'nav_click', {label: 'footer_member_login'})">Member Login</a>
   </div>
   <div class="footer-copy">© 2026 Nomia · Made with love in New Jersey</div>
 </footer>

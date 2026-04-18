@@ -1,6 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "wbjwb4x7if");
+</script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-4DSE8P2WL9"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-4DSE8P2WL9');
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta property="og:title" content="Nomia — Find the Perfect Baby Name">
@@ -687,19 +702,9 @@ async function generateNames(bypassCache = false) {
     msgEl.textContent = loadingMessages[msgIdx];
   }, 1800);
 
-  // Check cache unless bypassed
-  if (!bypassCache) {
-    const cacheKey = buildUnlimCacheKey(answers);
-    console.log('Cache key:', cacheKey);
-    const cachedResult = await checkUnlimCache(cacheKey);
-    if (cachedResult) {
-      console.log('✅ Served from cache');
-      incrementUnlimCacheHit(cacheKey, cachedResult.hit_count);
-      clearInterval(msgInterval);
-      showResults(cachedResult.free_names);
-      return;
-    }
-  }
+  // cache disabled
+  const cacheKey = buildUnlimCacheKey(answers);
+  console.log('Cache key:', cacheKey);
 
   const prompt = `You are a baby name expert. Based on these preferences, suggest exactly 25 beautifully curated baby names.
 
@@ -758,8 +763,8 @@ Make names feel warm, considered, and beautifully matched to the preferences. Va
 
     // ✅ No auto-save of names — user saves individually via heart button
 
-    storeUnlimCache(buildUnlimCacheKey(answers), names); // fire and forget
-    console.log('🌐 Served from API — stored in cache');
+    // storeUnlimCache disabled
+    console.log('🌐 Served from API');
     clearInterval(msgInterval);
     showResults(names);
   } catch (e) {

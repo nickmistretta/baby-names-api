@@ -1,6 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "wbjwb4x7if");
+</script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-4DSE8P2WL9"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-4DSE8P2WL9');
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Nomia — Find Your Baby's Name</title>
@@ -991,6 +1006,7 @@ async function saveName(name, btn) {
     btn.textContent = '♥';
     btn.classList.add('saved');
     savedNamesSet.add(name.name);
+    gtag('event', 'name_hearted', {name: name.name, origin: name.origin});
     if (userEmail) {
       try {
         await fetch('https://project-rz9q4.vercel.app/api/save-names', {
@@ -1170,64 +1186,28 @@ async function generateNames() {
     msgEl.textContent = loadingMessages[msgIdx];
   }, 1800);
 
-  // Check cache before hitting the API
+  // cache disabled
   const cacheKey = buildCacheKey(answers);
   console.log('Cache key:', cacheKey);
-  const cachedResult = await checkCache(cacheKey);
-  if (cachedResult) {
-    console.log('Cache hit:', cacheKey);
-    console.log('✅ Served from cache');
-    incrementCacheHit(cacheKey, cachedResult.hit_count);
-    clearInterval(msgInterval);
-    showResults(cachedResult.free_names, cachedResult.premium_names);
-    return;
-  }
 
-  const prompt = `You are a baby name expert. Treat the parent's inputs as an emotional brief — a mood board, not a shopping list. Your goal is names that feel inevitable once heard.
+  const prompt = `You are a baby name expert. Based on these preferences, suggest exactly 5 baby names for the FREE list and 20 additional names for the PREMIUM list.
 
-GENDER RULE (hard): ${answers.gender}. Girl = girl names only. Boy = boy names only. If "Gender-neutral" or "No preference" or "Surprise me" = prioritize genuinely androgynous names that work for any child without feeling like a compromise — names like Rowan, Sage, Quinn, Marlowe, River, Emerson, Avery. Only use "Surprise me" as a signal for a true 50/50 split of clearly gendered names.
+Preferences:
+- Gender: ${answers.gender || 'neutral'}
+- Style: ${answers.style || 'classic'}
+- Cultural background: ${answers.culture || 'no preference'}
+  (Note: "European / Western" includes Celtic/Irish/Scottish, Norse/Scandinavian, Latin Romance/Italian/French, Germanic, Greek, and Slavic traditions — vary names across all of these, do not default to English or French only)
+- Name vibe: ${answers.vibe || 'warm'}
+- Sound preferences: ${answers.sound || 'none specified'}
+- Meaning themes: ${answers.meaning || 'no preference'}
+- Style guidance: If style is 'Classic & timeless': use names that have been consistently popular for 50+ years and feel immediately familiar — think Victoria, Alexandra, Samantha, Caroline, Natalie, Stephanie, Christina, Melissa, Jennifer, Valerie for girls; Michael, Christopher, Nicholas, Alexander, Jonathan, Matthew, Daniel, Andrew for boys. These should feel like names of real people you've actually met. Avoid anything obscure, foreign-sounding, or hard to pronounce for a Western family.
+- Birth season: ${answers.season || 'not specified'}
 
-NEVER use a word from the inputs as a name. "Grace" as a meaning input means elegance and ease — not the name Grace. "Joy" means radiance — not the name Joy. "Light" means luminous energy — not Luna, Luz, or Claire. Treat every input as a feeling to evoke, not a word to echo.
+Respond ONLY with valid JSON in this exact format, no markdown, no explanation:
+{ "free": [ {"name": "...", "origin": "...", "meaning": "...", "tags": ["...", "..."]} ], "premium": [ {"name": "...", "origin": "...", "meaning": "...", "tags": ["...", "..."]} ] }
 
-THE BRIEF:
-Style: ${answers.style}
-Culture: ${answers.culture}
-Vibe: ${answers.vibe}
-Meaning resonance: ${answers.meaning}
-Sound: ${answers.sound || 'none specified'}
-Season: ${answers.season}
+Make names feel warm, considered, and beautifully matched to the preferences. Vary the origins and styles. Tags should be 2-3 short descriptors like "timeless", "soft sound", "nature-rooted", etc.`;
 
-STYLE:
-- Classic/timeless: well-loved for decades, immediately recognizable — Elizabeth, James, Catherine, Henry, Margaret, Thomas
-- Modern/fresh: feels current, popular in last 10–15 years — Isla, Finn, Nova, Declan, Aria
-- Rare/unique: genuinely uncommon, not invented — real names with history that are underused
-- Vintage revival: peaked 80–120 years ago, feels fresh again — Mabel, Harriet, Archie, Walter
-- Nature-inspired: plants, landscape, weather, celestial bodies
-- Short/strong: 1–2 syllables, punchy and confident
-
-CULTURE:
-- European/Western: cast genuinely wide — draw equally from English, French, Italian, Latin, Biblical/Hebrew-via-Christianity, Scandinavian, German, Irish, and Scottish traditions. Italian and Biblical names are underrepresented and should appear regularly: think Marco, Luca, Giovanni, Elena, Chiara, Sofia on the Italian side; and Matthew, Luke, Anna, Maria, Miriam, Sebastian, Gabriel, Raphael on the Biblical side. Do not cluster around French or English. A good European/Western list should feel like it could belong to a family from Rome, Milan, Oslo, or Dublin equally.
-- Latin/Spanish: Spanish, Portuguese, Latin American names
-- Asian/East Asian: Japanese, Chinese, Korean names
-- South Asian: Sanskrit, Hindi, Tamil names
-- Middle Eastern: Arabic, Persian, Turkish names
-- African/African-American: pan-African and African-American names
-- Indigenous: Indigenous names with traceable cultural heritage
-
-DIVERSITY RULES — all must be met:
-- No two names from the same language family
-- No two names starting with the same letter
-- No name variations of each other (Kate and Katherine cannot both appear)
-- Zero overlap between free and premium lists
-- No thematic clusters — do not give 3 virtue names, 3 flower names, 3 celestial names etc.
-
-FREE LIST (5): Your 5 most confident recommendations. Should feel immediately, obviously right for this brief.
-PREMIUM LIST (20): Go deeper. Rarer finds, more culturally specific, hidden gems, overlooked classics. Names the parent would not discover on their own. Hold the same diversity rules.
-
-Respond ONLY with valid JSON, no markdown, no explanation:
-{"free": [...], "premium": [...]}
-Each object: {"name": "...", "origin": "...", "meaning": "...", "tags": ["...", "..."]}
-Tags: 2–3 short feel descriptors — capture emotional texture, not category (e.g. "quietly confident", "ancient warmth", "modern clarity")`;
 
   // Fetch with 529 retry logic
   async function fetchWithRetry(body, retries = 3) {
@@ -1277,8 +1257,8 @@ Tags: 2–3 short feel descriptors — capture emotional texture, not category (
           const parsed = parseMainResponse(text);
           free = parsed.free;
           premium = parsed.premium;
-          storeCacheResult(cacheKey, free, premium); // fire and forget
-          console.log('🌐 Served from API — stored in cache');
+          // storeCacheResult disabled
+          console.log('🌐 Served from API');
         } catch (parseErr) {
           console.error('Main parse error:', parseErr, 'Raw:', text);
         }
@@ -1362,6 +1342,7 @@ function showResults(free, premium) {
       <button class="save-btn" onclick="saveName(window._freeNames[${i}], this)" title="Save to dashboard">♡</button>
     </div>
   `).join('');
+  gtag('event', 'quiz_completed', {gender: answers.gender, style: answers.style, culture: answers.culture});
 
   // Blurred locked previews
   const lockedSection = document.getElementById('locked-section');
@@ -1379,12 +1360,10 @@ function showResults(free, premium) {
     </div>
   `).join('');
 
-  // Email capture card (skip if already stored)
+  // Email capture card — always shown
+  console.log('rendering email capture');
   const captureSection = document.getElementById('email-capture-section');
-  if (localStorage.getItem('nomia_user_email')) {
-    captureSection.innerHTML = '';
-  } else {
-    captureSection.innerHTML = `
+  captureSection.innerHTML = `
       <div class="email-capture-card">
         <div class="email-capture-eyebrow">SAVE YOUR RESULTS</div>
         <div class="email-capture-heading">Get your names sent to your inbox</div>
@@ -1397,7 +1376,6 @@ function showResults(free, premium) {
           </div>
         </div>
       </div>`;
-  }
 
   window._premiumNames = premium;
 
@@ -1464,6 +1442,9 @@ function showResults(free, premium) {
 // Per-tier handler
 function handleStripeTier(tier) {
   window._selectedTier = tier;
+  const cfg = TIER_CONFIG[tier];
+  gtag('event', 'payment_initiated', {tier: tier, price: cfg.price});
+  gtag('event', 'upsell_clicked', {tier: tier});
   handleStripe();
 }
 
@@ -1487,6 +1468,7 @@ function selectTier(tier) {
       el.style.background = 'rgba(247,243,238,0.08)';
     }
   });
+  gtag('event', 'tier_selected', {tier: tier});
   const cfg = TIER_CONFIG[tier];
   const stripeBtn = document.getElementById('stripe-btn-text');
   const paypalBtn = document.getElementById('paypal-btn-text');
@@ -1549,14 +1531,9 @@ async function handleEmailCapture() {
   const form = document.getElementById('email-capture-form');
 
   if (isExistingUser) {
+    gtag('event', 'returning_user_detected');
     localStorage.setItem('nomia_user_email', email);
-    if (form) {
-      form.innerHTML = `
-        <div class="email-capture-confirm" style="display:flex; flex-direction:column; align-items:center; gap:12px;">
-          <div>Welcome back! Log in to save these names to your dashboard.</div>
-          <a href="dashboard.html" style="display:inline-block; padding:10px 24px; background:var(--dusty-rose); color:#fff; border-radius:10px; font-family:'DM Sans',sans-serif; font-size:13px; text-decoration:none; letter-spacing:0.03em;">Go to dashboard →</a>
-        </div>`;
-    }
+    window.location.href = `dashboard.html?email=${encodeURIComponent(email)}`;
     return;
   }
 
@@ -1578,6 +1555,7 @@ async function handleEmailCapture() {
   }
 
   localStorage.setItem('nomia_user_email', email);
+  gtag('event', 'email_captured');
 
   if (form) {
     form.innerHTML = '<div class="email-capture-confirm">✦ Names saved — check your inbox</div>';
@@ -1585,6 +1563,7 @@ async function handleEmailCapture() {
 }
 
 function handleSkip() {
+  gtag('event', 'skip_clicked');
   document.getElementById('upsell-section').style.display = 'none';
 }
 
