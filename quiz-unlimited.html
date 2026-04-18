@@ -481,6 +481,38 @@
 </head>
 <body>
 
+<div id="nomia-account-widget" style="position:fixed;top:16px;right:20px;font-size:10px;color:rgba(139,158,176,0.7);letter-spacing:0.04em;text-align:right;line-height:1.5;z-index:9999;background:rgba(28,43,58,0.75);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:6px 12px;border-radius:99px;border:0.5px solid rgba(139,158,176,0.2);display:none;font-family:'DM Sans',sans-serif;">
+  <span id="nomia-account-email"></span>
+  <a href="#" id="nomia-switch-account" style="color:#C9737A;text-decoration:none;margin-left:8px;">switch</a>
+</div>
+<script>
+(function() {
+  function initNomiaAccountWidget() {
+    var widget = document.getElementById('nomia-account-widget');
+    var emailSpan = document.getElementById('nomia-account-email');
+    var switchLink = document.getElementById('nomia-switch-account');
+    if (!widget || !emailSpan || !switchLink) return;
+    var email = localStorage.getItem('nomia_user_email');
+    if (!email) return;
+    emailSpan.textContent = email;
+    widget.style.display = 'block';
+    switchLink.addEventListener('click', function(e) {
+      e.preventDefault();
+      if (!confirm('Switch account? This will sign you out on this device.')) return;
+      localStorage.removeItem('nomia_user_email');
+      localStorage.removeItem('nomia_seen_names');
+      localStorage.removeItem('nomia_discarded_names');
+      window.location.href = 'index.html';
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initNomiaAccountWidget);
+  } else {
+    initNomiaAccountWidget();
+  }
+})();
+</script>
+
 <div class="container">
 
   <!-- QUIZ SCREEN -->
