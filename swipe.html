@@ -757,29 +757,36 @@ function buildPrompt(savedNames, excludeSet) {
   const excludeLine = exclude ? `\n- Do NOT suggest any of these already-seen names: ${exclude}` : '';
 
   if (savedNames.length > 0) {
-    return `You are a baby name expert. A parent has saved the following names and you must use only these as your signal.
+    const savedDetailed = savedNames.map(n =>
+      `- ${n.name} (${n.origin || 'unknown origin'}) — tagged: ${(Array.isArray(n.tags) && n.tags.length) ? n.tags.join(', ') : 'none'}`
+    ).join('\n');
 
-SAVED NAMES: ${savedNames.map(n => n.name).join(', ')}
+    return `You are a baby name expert. A parent has saved these names and you must use only these as your signal for their taste.
 
-Analyze these names carefully. Look for patterns in their origin, sound, length, syllable structure, cultural roots, and emotional feel. Do not ask what style they said they wanted — derive everything purely from what they actually saved.
+SAVED NAMES (with metadata):
+${savedDetailed}
 
-GENDER RULE (hard): Only suggest names that match the gender of the saved names. If all saved names are girl names, suggest girl names only. If all are boy names, suggest boy names only. If the saved names are a mix, prioritize genuinely androgynous names.
+Your job: identify the TONAL SIGNATURE of this saved list — the shared aesthetic across origin, sound, length, syllable structure, cultural roots, and emotional register. Then generate 20 names that land squarely inside that signature.
 
-YOUR TASK: Suggest 20 names that share the same DNA as the saved list. Each name should feel like a natural discovery — something the parent would have saved if they had seen it.
+GENDER RULE (hard): Only suggest names matching the gender of the saved names. If all saved are girl names, suggest girl only. If all boy, suggest boy only. If mixed, prioritize genuinely androgynous names.
 
-DIVERSITY RULES — all must be met:
-- No name already in the saved list
-- No two names from the same language family
-- No two names starting with the same letter
-- No name variations of each other
-- No thematic clusters${excludeLine}
+SIGNATURE MATCHING (most important rule, overrides everything below):
+- If the saved names are classic, suggest classic names. Do NOT avoid familiar, popular, or top-100 names because they're "obvious" — a classic signature SHOULD include names like Eleanor, Caroline, Victoria, Catherine, James, Henry, Nicholas, Alexander. Widely-known does not mean wrong.
+- If the saved names are vintage, match vintage. If nature-rooted, match nature. If lyrical/flowing, match lyrical/flowing. If short and crisp, match short and crisp.
+- Match the register first. Always. Any other rule is subordinate to this one.
 
-VARIATION RULE: This is batch ${Date.now().toString(36).slice(-5)}. Deliberately pull from a fresh corner of the stylistic space — do not default to the obvious 20 names that fit. Dig for names the parent would love but might not have thought of. Surprise them.
+SOFT DIVERSITY (only where they don't fight the signature):
+- Prefer varying starting letters, but don't sacrifice signature fit to do so.
+- Some origin overlap with the saved list is fine and expected — a classic American signature will legitimately be mostly English, Latin, and Greek.
+- No direct variants of saved names (don't suggest Oliver if they saved Olivia, or Catherine if they saved Kathryn).
+${excludeLine}
+
+EXPLORATION (batch ${Date.now().toString(36).slice(-5)}): Within the signature, lean toward names the parent would love but might not have thought of yet. Never step outside the signature to find novelty.
 
 Respond ONLY with valid JSON, no markdown, no explanation:
 {"names": [...]}
 Each object: {"name": "...", "origin": "...", "meaning": "...", "tags": ["...", "..."]}
-Tags: 2–3 short feel descriptors that capture why this name matches the saved list's energy.`;
+Tags: 2–3 descriptors that capture why this name fits the saved signature.`;
   } else {
     const excludePart = excludeLine ? `\nDIVERSITY RULES:${excludeLine}` : '';
     return `You are a baby name expert. Generate 20 beautiful, considered baby names across varied origins and cultures. Each should feel intentional — real names with history, not invented.${excludePart}
