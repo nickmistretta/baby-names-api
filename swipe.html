@@ -553,14 +553,21 @@ async function init() {
     userSavedNames = [];
   }
 
-  // Fetch ALL previously-generated names from Supabase (cross-device persistence)
+  // Fetch ALL previously-generated names from Supabase (paginated — no 1000-row ceiling)
   try {
-    const { data } = await db
-      .from('generated_names')
-      .select('name')
-      .eq('email', userEmail);
-    if (Array.isArray(data)) {
+    const PAGE = 1000;
+    let from = 0;
+    while (true) {
+      const { data, error } = await db
+        .from('generated_names')
+        .select('name')
+        .eq('email', userEmail)
+        .range(from, from + PAGE - 1);
+      if (error) throw error;
+      if (!Array.isArray(data) || data.length === 0) break;
       data.forEach(row => { if (row.name) seenNames.add(row.name.toLowerCase()); });
+      if (data.length < PAGE) break;
+      from += PAGE;
     }
   } catch (e) {
     console.warn('Could not fetch generated_names history:', e);
@@ -637,6 +644,16 @@ async function fetchBatch() {
       n.name && !exclusionSet.has(n.name.toLowerCase())
     );
     nameQueue.push(...fresh);
+
+    // If Claude gave us too few fresh names (likely because the exclusion
+    // list got long and it ignored it), fire one more fetch in the background
+    // to keep the queue healthy. Marker flag prevents infinite recursion.
+    if (fresh.length < 10 && !fetchBatch._retrying) {
+      fetchBatch._retrying = true;
+      isFetching = false;
+      fetchBatch().finally(() => { fetchBatch._retrying = false; });
+      return;
+    }
 
     // Persist fresh batch to Supabase so future sessions know about them
     if (fresh.length > 0 && userEmail) {
