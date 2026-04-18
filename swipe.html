@@ -517,6 +517,11 @@ const toastEl       = document.getElementById('toast');
 const btnDiscard    = document.getElementById('btn-discard');
 const btnSave       = document.getElementById('btn-save');
 
+// Normalize names for comparison: trim, lowercase, strip accents
+const normalizeName = (s) =>
+  (s || '').toString().trim().toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
 // Supabase client
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -595,10 +600,10 @@ async function fetchBatch() {
   isFetching = true;
 
   const exclusionSet = new Set([
-    ...seenNames,
-    ...discardedNames,
-    ...userSavedNames.map(n => n.name.toLowerCase()),
-    ...nameQueue.map(n => n.name ? n.name.toLowerCase() : '').filter(Boolean)
+    ...Array.from(seenNames).map(normalizeName),
+    ...Array.from(discardedNames).map(normalizeName),
+    ...userSavedNames.map(n => normalizeName(n.name)),
+    ...nameQueue.map(n => normalizeName(n.name)).filter(Boolean)
   ]);
 
   const prompt = buildPrompt(userSavedNames, exclusionSet);
@@ -643,14 +648,21 @@ async function fetchBatch() {
     const parsed = JSON.parse(text.slice(objStart, objEnd + 1));
     const names = parsed.names || parsed;
 
-    // Filter out anything already seen or discarded
-    const fresh = names.filter(n =>
-      n.name && !exclusionSet.has(n.name.toLowerCase())
-    );
+    // Filter out anything already seen, discarded, or duplicated within this batch
+    const seenInBatch = new Set();
+    const fresh = names.filter(n => {
+      if (!n.name) return false;
+      const key = normalizeName(n.name);
+      if (!key) return false;
+      if (exclusionSet.has(key)) return false;
+      if (seenInBatch.has(key)) return false;
+      seenInBatch.add(key);
+      return true;
+    });
     nameQueue.push(...fresh);
 
     // Claim these names for seenNames immediately so concurrent fetches exclude them
-    fresh.forEach(n => seenNames.add(n.name.toLowerCase()));
+    fresh.forEach(n => seenNames.add(normalizeName(n.name)));
     try {
       localStorage.setItem('nomia_seen_names', JSON.stringify(Array.from(seenNames)));
     } catch (e) {}
@@ -1021,7 +1033,7 @@ async function saveName(nameObj) {
 
 function discardName(nameObj) {
   gtag('event', 'name_swiped_left', {name: nameObj.name});
-  const key = nameObj.name.toLowerCase();
+  const key = normalizeName(nameObj.name);
   discardedNames.add(key);
   // Persist to localStorage
   try {
