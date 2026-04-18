@@ -1321,9 +1321,19 @@ async function generateNames() {
     msgEl.textContent = loadingMessages[msgIdx];
   }, 1800);
 
-  // cache disabled
   const cacheKey = buildCacheKey(answers);
   console.log('Cache key:', cacheKey);
+
+  // Check cache first — if we've generated names for these exact inputs before, use them
+  const cached = await checkCache(cacheKey);
+  if (cached && Array.isArray(cached.free_names) && cached.free_names.length > 0) {
+    console.log('💾 Cache hit — serving stored names');
+    incrementCacheHit(cacheKey, cached.hit_count || 0); // fire and forget
+    clearInterval(msgInterval);
+    showResults(cached.free_names, cached.premium_names || fallbackPremium());
+    return;
+  }
+  console.log('🌐 Cache miss — generating fresh');
 
   const prompt = `You are a baby name expert. Based on these preferences, suggest exactly 5 baby names for the FREE list and 20 additional names for the PREMIUM list.
 
@@ -1394,8 +1404,8 @@ Make names feel warm, considered, and beautifully matched to the preferences. Va
           const parsed = parseMainResponse(text);
           free = parsed.free;
           premium = parsed.premium;
-          // storeCacheResult disabled
-          console.log('🌐 Served from API');
+          storeCacheResult(cacheKey, free, premium); // fire and forget
+          console.log('🌐 Served from API, cached for next time');
         } catch (parseErr) {
           console.error('Main parse error:', parseErr, 'Raw:', text);
         }
