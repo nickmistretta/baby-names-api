@@ -535,6 +535,12 @@ async function init() {
     discardedNames = new Set(stored.map(n => n.toLowerCase()));
   } catch (e) { discardedNames = new Set(); }
 
+  // Load previously-seen names from localStorage (persists across sessions)
+  try {
+    const storedSeen = JSON.parse(localStorage.getItem('nomia_seen_names') || '[]');
+    seenNames = new Set(storedSeen.map(n => n.toLowerCase()));
+  } catch (e) { seenNames = new Set(); }
+
   // Fetch user's saved names from Supabase
   try {
     const { data } = await db
@@ -545,6 +551,19 @@ async function init() {
   } catch (e) {
     console.warn('Could not fetch saved names:', e);
     userSavedNames = [];
+  }
+
+  // Fetch ALL previously-generated names from Supabase (cross-device persistence)
+  try {
+    const { data } = await db
+      .from('generated_names')
+      .select('name')
+      .eq('email', userEmail);
+    if (Array.isArray(data)) {
+      data.forEach(row => { if (row.name) seenNames.add(row.name.toLowerCase()); });
+    }
+  } catch (e) {
+    console.warn('Could not fetch generated_names history:', e);
   }
 
   // Fetch first batch
@@ -618,6 +637,22 @@ async function fetchBatch() {
       n.name && !exclusionSet.has(n.name.toLowerCase())
     );
     nameQueue.push(...fresh);
+
+    // Persist fresh batch to Supabase so future sessions know about them
+    if (fresh.length > 0 && userEmail) {
+      const rows = fresh.map(n => ({
+        email: userEmail,
+        name: n.name || '',
+        origin: n.origin || '',
+        meaning: n.meaning || '',
+        tags: Array.isArray(n.tags) ? n.tags : [],
+        quiz_answers: { source: 'swipe' }
+      }));
+      db.from('generated_names').insert(rows).then(
+        () => {},
+        (err) => console.warn('Could not persist generated_names:', err)
+      );
+    }
   } catch (err) {
     console.error('fetchBatch error:', err);
     if (nameQueue.length === 0) {
@@ -737,6 +772,8 @@ DIVERSITY RULES — all must be met:
 - No name variations of each other
 - No thematic clusters${excludeLine}
 
+VARIATION RULE: This is batch ${Date.now().toString(36).slice(-5)}. Deliberately pull from a fresh corner of the stylistic space — do not default to the obvious 20 names that fit. Dig for names the parent would love but might not have thought of. Surprise them.
+
 Respond ONLY with valid JSON, no markdown, no explanation:
 {"names": [...]}
 Each object: {"name": "...", "origin": "...", "meaning": "...", "tags": ["...", "..."]}
@@ -768,6 +805,9 @@ function renderCurrentCard() {
 
   const current = nameQueue[0];
   seenNames.add(current.name.toLowerCase());
+  try {
+    localStorage.setItem('nomia_seen_names', JSON.stringify(Array.from(seenNames)));
+  } catch (e) {}
 
   // Update top card content
   setCardContent(topCard, current);
