@@ -782,51 +782,66 @@ async function fetchBatch() {
 }
 
 function buildPrompt(savedNames, excludeSet) {
-  // Cap at the 50 most-recent exclusions to keep prompt size bounded.
-  // Client-side filtering still uses the FULL excludeSet — this is only what we tell Claude.
-  const recentExclusions = Array.from(excludeSet).slice(-50);
-  const exclude = recentExclusions.join(', ');
-  const excludeLine = exclude ? `\n- Do NOT suggest any of these recently-seen names: ${exclude}` : '';
+  // Exploration axes — rotate per batch so consecutive fetches land in different corners
+  const axes = [
+    'lean slightly shorter — 2-syllable names rather than 3+ syllable',
+    'lean slightly longer — 3-syllable names with flowing cadence',
+    'lean toward less-common origins within the signature (e.g. if the signature is Western, pull from French, Italian, Scandinavian before English)',
+    'lean toward early-1900s revival names that feel vintage but not dated',
+    'lean toward crisp, modern-feeling names that still fit the signature',
+    'lean toward names with nature or celestial meanings that fit the signature',
+    'lean toward names starting with less-common letters (prefer H, I, E, N, V, T over common letters)'
+  ];
+  const axis = axes[Math.floor(Math.random() * axes.length)];
+
+  // Cap exclusion list at 15 most-recent — enough to block the obvious repeats, small enough that Claude pays attention
+  const recentExclusions = Array.from(excludeSet).slice(-15);
+  const excludeLine = recentExclusions.length
+    ? `\n- Do NOT suggest any of these recently-seen names: ${recentExclusions.join(', ')}`
+    : '';
+
+  // Discarded-names signal: tells Claude what the user moved AWAY from (capped at 10 most-recent)
+  const recentDiscards = Array.from(discardedNames).slice(-10);
+  const discardLine = recentDiscards.length
+    ? `\nRECENTLY REJECTED (the parent swiped left on these — avoid names with similar energy): ${recentDiscards.join(', ')}`
+    : '';
 
   if (savedNames.length > 0) {
-    const savedDetailed = savedNames.map(n =>
-      `- ${n.name} (${n.origin || 'unknown origin'}) — tagged: ${(Array.isArray(n.tags) && n.tags.length) ? n.tags.join(', ') : 'none'}`
+    // Cap saved names sent to prompt at 15 most recent — enough to read signature
+    const signatureSample = savedNames.slice(-15);
+    const savedDetailed = signatureSample.map(n =>
+      `- ${n.name} (${n.origin || 'unknown'})${Array.isArray(n.tags) && n.tags.length ? ` — ${n.tags.join(', ')}` : ''}`
     ).join('\n');
 
-    return `You are a baby name expert. A parent has saved these names and you must use only these as your signal for their taste.
+    return `You are a baby name expert. Generate 20 fresh baby names for a parent based on their taste signal.
 
-SAVED NAMES (with metadata):
+SAVED NAMES (the parent loved these — read their shared tonal signature):
 ${savedDetailed}
+${discardLine}
 
-Your job: identify the TONAL SIGNATURE of this saved list — the shared aesthetic across origin, sound, length, syllable structure, cultural roots, and emotional register. Then generate 20 names that land squarely inside that signature.
+GENDER RULE (hard): Match the gender of the saved names. All-girl saves → girl names only. All-boy → boy only. Mixed → genuinely androgynous.
 
-GENDER RULE (hard): Only suggest names matching the gender of the saved names. If all saved are girl names, suggest girl only. If all boy, suggest boy only. If mixed, prioritize genuinely androgynous names.
+SIGNATURE MATCH (the most important rule): Generate names that land squarely inside the aesthetic register of the saved list. If the saved names are classic, suggest classic — do NOT avoid familiar or top-100 names for being "obvious." Widely-known does not mean wrong. Match the register before anything else.
 
-SIGNATURE MATCHING (most important rule, overrides everything below):
-- If the saved names are classic, suggest classic names. Do NOT avoid familiar, popular, or top-100 names because they're "obvious" — a classic signature SHOULD include names like Eleanor, Caroline, Victoria, Catherine, James, Henry, Nicholas, Alexander. Widely-known does not mean wrong.
-- If the saved names are vintage, match vintage. If nature-rooted, match nature. If lyrical/flowing, match lyrical/flowing. If short and crisp, match short and crisp.
-- Match the register first. Always. Any other rule is subordinate to this one.
+EXPLORATION (batch ${Date.now().toString(36).slice(-5)}): Within the signature, ${axis}. This is how we serve fresh names across sessions — the signature stays constant, the angle rotates.
 
-SOFT DIVERSITY (only where they don't fight the signature):
-- Prefer varying starting letters, but don't sacrifice signature fit to do so.
-- Some origin overlap with the saved list is fine and expected — a classic American signature will legitimately be mostly English, Latin, and Greek.
-- No direct variants of saved names (don't suggest Oliver if they saved Olivia, or Catherine if they saved Kathryn).
-${excludeLine}
+CONSTRAINTS:
+- No direct variants of saved names (don't suggest Oliver if they saved Olivia)${excludeLine}
+- Within this batch of 20: no two names starting with the same letter, no direct duplicates
 
-EXPLORATION (batch ${Date.now().toString(36).slice(-5)}): Within the signature, lean toward names the parent would love but might not have thought of yet. Never step outside the signature to find novelty.
-
-Respond ONLY with valid JSON, no markdown, no explanation:
+Respond ONLY with valid JSON, no markdown:
 {"names": [...]}
 Each object: {"name": "...", "origin": "...", "meaning": "...", "tags": ["...", "..."]}
-Tags: 2–3 descriptors that capture why this name fits the saved signature.`;
+Tags: 2-3 descriptors that capture why the name fits the signature.`;
   } else {
-    const excludePart = excludeLine ? `\nDIVERSITY RULES:${excludeLine}` : '';
-    return `You are a baby name expert. Generate 20 beautiful, considered baby names across varied origins and cultures. Each should feel intentional — real names with history, not invented.${excludePart}
+    return `You are a baby name expert. Generate 20 beautiful, considered baby names across varied origins. Each should feel intentional — real names with history, not invented.${excludeLine}
 
-Respond ONLY with valid JSON, no markdown, no explanation:
+This is batch ${Date.now().toString(36).slice(-5)} — ${axis}.
+
+Respond ONLY with valid JSON, no markdown:
 {"names": [...]}
 Each object: {"name": "...", "origin": "...", "meaning": "...", "tags": ["...", "..."]}
-Tags: 2–3 short feel descriptors.`;
+Tags: 2-3 short feel descriptors.`;
   }
 }
 
