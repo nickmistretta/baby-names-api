@@ -437,6 +437,67 @@
     min-height: 24px;
   }
 
+  .loading-steps {
+    width: 100%;
+    max-width: 300px;
+    margin-top: 36px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    animation: fadeUp 0.8s 0.4s ease both;
+  }
+
+  .loading-step {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .loading-step-label {
+    font-size: 12px;
+    color: rgba(253,250,247,0.3);
+    letter-spacing: 0.04em;
+    width: 170px;
+    flex-shrink: 0;
+    text-align: left;
+    transition: color 0.3s;
+  }
+
+  .loading-step.active .loading-step-label,
+  .loading-step.done .loading-step-label {
+    color: rgba(253,250,247,0.75);
+  }
+
+  .loading-step-track {
+    flex: 1;
+    height: 3px;
+    background: rgba(253,250,247,0.07);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .loading-step-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--dusty-rose);
+    border-radius: 2px;
+    transition: width 1.5s linear;
+  }
+
+  .loading-step.active .loading-step-fill { width: 100%; }
+
+  .loading-step-check {
+    font-size: 11px;
+    color: var(--dusty-rose);
+    width: 14px;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.3s;
+    flex-shrink: 0;
+  }
+
+  .loading-step.done .loading-step-check { opacity: 1; }
+
   /* Results screen */
   .results-header {
     text-align: center;
@@ -894,6 +955,28 @@
       </div>
       <div class="loading-text">Finding your names…</div>
       <div class="loading-sub" id="loading-msg">Weaving together your preferences</div>
+      <div class="loading-steps">
+        <div class="loading-step" id="lstep-0">
+          <div class="loading-step-label">Analyzing your preferences</div>
+          <div class="loading-step-track"><div class="loading-step-fill"></div></div>
+          <div class="loading-step-check">✓</div>
+        </div>
+        <div class="loading-step" id="lstep-1">
+          <div class="loading-step-label">Exploring name origins</div>
+          <div class="loading-step-track"><div class="loading-step-fill"></div></div>
+          <div class="loading-step-check">✓</div>
+        </div>
+        <div class="loading-step" id="lstep-2">
+          <div class="loading-step-label">Matching your vibe</div>
+          <div class="loading-step-track"><div class="loading-step-fill"></div></div>
+          <div class="loading-step-check">✓</div>
+        </div>
+        <div class="loading-step" id="lstep-3">
+          <div class="loading-step-label">Curating your list</div>
+          <div class="loading-step-track"><div class="loading-step-fill"></div></div>
+          <div class="loading-step-check">✓</div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1168,6 +1251,25 @@ function prevQ() {
   if (current > 0) { current--; renderQ(); }
 }
 
+function startLoadingSteps() {
+  const steps = document.querySelectorAll('.loading-step');
+  steps.forEach(s => {
+    s.classList.remove('active', 'done');
+    s.querySelector('.loading-step-fill').style.width = '0%';
+  });
+  function run(i) {
+    if (i >= steps.length) return;
+    steps[i].getBoundingClientRect(); // force reflow so transition fires
+    steps[i].classList.add('active');
+    setTimeout(() => {
+      steps[i].classList.remove('active');
+      steps[i].classList.add('done');
+      run(i + 1);
+    }, 1550);
+  }
+  requestAnimationFrame(() => run(0));
+}
+
 const loadingMessages = [
   'Weaving together your preferences…',
   'Exploring name origins and meanings…',
@@ -1178,6 +1280,7 @@ const loadingMessages = [
 async function generateNames() {
   document.getElementById('screen-quiz').classList.remove('active');
   document.getElementById('screen-loading').classList.add('active');
+  startLoadingSteps();
 
   let msgIdx = 0;
   const msgEl = document.getElementById('loading-msg');
