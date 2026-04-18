@@ -1514,16 +1514,19 @@ async function handleEmailCapture() {
   const btn = document.querySelector('.email-capture-btn');
   if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
 
-  // Check if this email is already a user in Supabase
+  // Check if this email is already a user in Supabase (any of three tables)
   let isExistingUser = false;
   try {
-    const checkRes = await fetch(
-      `${SUPABASE_URL}/rest/v1/user_status?email=eq.${encodeURIComponent(email)}&select=email`,
-      { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
-    );
-    const checkData = await checkRes.json();
-    console.log('User status check — HTTP:', checkRes.status, '| data:', JSON.stringify(checkData));
-    isExistingUser = Array.isArray(checkData) && checkData.length > 0;
+    const headers = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` };
+    const enc = encodeURIComponent(email);
+    const [r1, r2, r3] = await Promise.all([
+      fetch(`${SUPABASE_URL}/rest/v1/generated_names?email=eq.${enc}&select=email&limit=1`, { headers }),
+      fetch(`${SUPABASE_URL}/rest/v1/saved_names?email=eq.${enc}&select=email&limit=1`, { headers }),
+      fetch(`${SUPABASE_URL}/rest/v1/user_status?email=eq.${enc}&select=email&limit=1`, { headers }),
+    ]);
+    const [d1, d2, d3] = await Promise.all([r1.json(), r2.json(), r3.json()]);
+    console.log('Returning user check — generated_names:', JSON.stringify(d1), '| saved_names:', JSON.stringify(d2), '| user_status:', JSON.stringify(d3));
+    isExistingUser = [d1, d2, d3].some(d => Array.isArray(d) && d.length > 0);
   } catch (e) {
     console.error('User status check failed:', e);
   }

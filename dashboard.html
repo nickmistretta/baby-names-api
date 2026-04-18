@@ -452,6 +452,15 @@
       <div id="auth-success" class="auth-success"></div>
       <input type="email" class="auth-input" id="login-email" placeholder="Your email address" onkeydown="if(event.key==='Enter')handleLogin()" />
       <input type="password" class="auth-input" id="login-password" placeholder="Password" onkeydown="if(event.key==='Enter')handleLogin()" />
+      <div style="text-align:right; margin-top:4px; margin-bottom:2px;">
+        <a href="#" style="font-size:12px; color:rgba(253,250,247,0.45); letter-spacing:0.03em; text-decoration:none;" onclick="event.preventDefault(); document.getElementById('forgot-password-section').style.display='block'; this.parentElement.style.display='none';">Forgot password?</a>
+      </div>
+      <div id="forgot-password-section" style="display:none; margin-bottom:10px;">
+        <div id="forgot-error" class="auth-error"></div>
+        <div id="forgot-success" class="auth-success"></div>
+        <input type="email" class="auth-input" id="forgot-email" placeholder="Your email address" style="margin-bottom:8px;" onkeydown="if(event.key==='Enter')handleForgotPassword()" />
+        <button class="auth-btn" style="margin-bottom:0;" onclick="handleForgotPassword()">Send reset link</button>
+      </div>
       <div style="display:flex; flex-direction:column; gap:10px; margin-top:4px;">
         <button class="auth-btn" style="margin-bottom:0;" onclick="handleLogin()">Sign In</button>
         <button class="auth-btn" style="margin-bottom:0; background:transparent; border:0.5px solid rgba(253,250,247,0.2); color:rgba(253,250,247,0.7);" onclick="showSignup()">Set Up Your Account</button>
@@ -592,6 +601,33 @@
     if (error) { errEl.textContent = error.message; errEl.style.display = 'block'; return; }
     currentUser = data.user;
     showDashboard();
+  }
+
+  async function handleForgotPassword() {
+    const email = document.getElementById('forgot-email').value.trim();
+    const errEl = document.getElementById('forgot-error');
+    const sucEl = document.getElementById('forgot-success');
+    errEl.style.display = 'none'; sucEl.style.display = 'none';
+    if (!email || !email.includes('@')) { errEl.textContent = 'Please enter a valid email.'; errEl.style.display = 'block'; return; }
+    try {
+      const res = await fetch(`${SUPABASE_URL}/auth/v1/recover`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+        body: JSON.stringify({ email })
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        errEl.textContent = err.msg || err.message || 'Something went wrong. Please try again.';
+        errEl.style.display = 'block';
+      } else {
+        sucEl.textContent = 'Reset link sent — check your inbox.';
+        sucEl.style.display = 'block';
+        document.getElementById('forgot-email').value = '';
+      }
+    } catch (e) {
+      errEl.textContent = 'Something went wrong. Please try again.';
+      errEl.style.display = 'block';
+    }
   }
 
   async function handleLogout() {
