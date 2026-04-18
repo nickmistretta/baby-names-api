@@ -280,13 +280,22 @@
 
   @media (max-width: 640px) {
     .container {
-      padding-top: 4px;
+      padding-top: 16px;
+      padding-left: 16px;
+      padding-right: 16px;
     }
     .header {
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
     .question-card {
-      padding: 20px 18px;
+      padding: 18px 16px;
+    }
+    .header h1 {
+      font-size: 28px;
+      line-height: 1.2;
+    }
+    .progress-wrap {
+      margin-bottom: 14px;
     }
   }
 
@@ -911,7 +920,7 @@
 </head>
 <body>
 
-<div id="nomia-account-widget" style="position:fixed;top:16px;right:20px;font-size:10px;color:rgba(139,158,176,0.7);letter-spacing:0.04em;text-align:right;line-height:1.5;z-index:9999;background:rgba(28,43,58,0.75);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:6px 12px;border-radius:99px;border:0.5px solid rgba(139,158,176,0.2);display:none;font-family:'DM Sans',sans-serif;">
+<div id="nomia-account-widget" style="position:fixed;top:12px;right:12px;font-size:9px;color:rgba(139,158,176,0.7);letter-spacing:0.04em;text-align:right;line-height:1.4;z-index:9999;background:rgba(28,43,58,0.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:5px 10px;border-radius:99px;border:0.5px solid rgba(139,158,176,0.2);display:none;font-family:'DM Sans',sans-serif;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
   <span id="nomia-account-email"></span>
   <a href="#" id="nomia-switch-account" style="color:#C9737A;text-decoration:none;margin-left:8px;">switch</a>
 </div>
@@ -948,7 +957,7 @@
   <!-- QUIZ SCREEN -->
   <div class="screen active" id="screen-quiz">
     <div class="header">
-      <div style="text-align:center; margin-bottom:16px;"><a href="index.html" style="display:inline-block; text-decoration:none;"><svg style="height:64px;width:auto;" viewBox="20 18 400 148" xmlns="http://www.w3.org/2000/svg"><defs>
+      <div style="text-align:left; margin-bottom:12px;"><a href="index.html" style="display:inline-block; text-decoration:none;"><svg style="height:32px;width:auto;" viewBox="20 18 400 148" xmlns="http://www.w3.org/2000/svg"><defs>
     <style>@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,300&amp;family=DM+Sans:wght@200&amp;display=swap');</style>
   </defs>
   <g transform="translate(28, 62) scale(0.095)">
@@ -956,8 +965,10 @@
   </g>
   <text x="108" y="108" font-family="Cormorant Garamond, Georgia, serif" font-size="88" font-weight="300" font-style="italic" fill="#FDFAF7" letter-spacing="4">nomia</text>
   <text x="110" y="140" font-family="DM Sans, sans-serif" font-size="14" font-weight="400" fill="#FDFAF7" letter-spacing="4">FIND THE PERFECT BABY NAME</text></svg></a></div>
-      <h1>Find the <em>perfect</em> name for your little one</h1>
-      <p>Answer a few thoughtful questions and we'll suggest names that feel just right.</p>
+      <div id="header-hero">
+        <h1>Find the <em>perfect</em> name for your little one</h1>
+        <p>Answer a few thoughtful questions and we'll suggest names that feel just right.</p>
+      </div>
     </div>
 
     <div class="progress-wrap">
@@ -1206,6 +1217,10 @@ function renderQ() {
   const q = questions[current];
   const card = document.getElementById('question-card');
   const pct = Math.round(((current + 1) / questions.length) * 100);
+
+  // Only show the big hero headline on question 1
+  const hero = document.getElementById('header-hero');
+  if (hero) hero.style.display = current === 0 ? 'block' : 'none';
 
   document.getElementById('progress-label').textContent = `Question ${current + 1} of ${questions.length}`;
   document.getElementById('progress-pct').textContent = pct + '%';
