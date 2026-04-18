@@ -1984,9 +1984,7 @@ renderQ();
 <script>
 (function() {
   var SHOWN_KEY = 'nomia_exit_intent_shown';
-  var IDLE_MS = 60000; // 60 seconds idle on mobile before triggering
   var shown = false;
-  var idleTimer = null;
 
   function alreadyCaptured() {
     return !!localStorage.getItem('nomia_user_email');
@@ -2015,22 +2013,36 @@ renderQ();
     if (overlay) overlay.classList.remove('visible');
   }
 
-  // Desktop: mouse leaves the top of the viewport
+  // Fire 10 seconds after the results screen becomes active
+  var RESULTS_DELAY_MS = 10000;
+  var resultsTimer = null;
+
+  function watchForResultsScreen() {
+    var resultsScreen = document.getElementById('screen-results');
+    if (!resultsScreen) return;
+    var observer = new MutationObserver(function() {
+      if (resultsScreen.classList.contains('active') && !resultsTimer) {
+        resultsTimer = setTimeout(showModal, RESULTS_DELAY_MS);
+      }
+    });
+    observer.observe(resultsScreen, { attributes: true, attributeFilter: ['class'] });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', watchForResultsScreen);
+  } else {
+    watchForResultsScreen();
+  }
+
+  // Desktop bonus: also fire on actual mouse exit toward the top
   document.addEventListener('mouseout', function(e) {
     if (e.clientY <= 0 && !e.relatedTarget && !e.toElement) {
-      showModal();
+      var resultsScreen = document.getElementById('screen-results');
+      if (resultsScreen && resultsScreen.classList.contains('active')) {
+        showModal();
+      }
     }
   });
-
-  // Mobile: after 60 seconds of no interaction, show modal
-  function resetIdleTimer() {
-    if (idleTimer) clearTimeout(idleTimer);
-    idleTimer = setTimeout(showModal, IDLE_MS);
-  }
-  ['touchstart','scroll','click','keydown'].forEach(function(ev) {
-    document.addEventListener(ev, resetIdleTimer, { passive: true });
-  });
-  resetIdleTimer();
 
   // Close button and overlay click
   document.getElementById('exit-intent-close').addEventListener('click', hideModal);
