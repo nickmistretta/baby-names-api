@@ -17,7 +17,7 @@
   gtag('config', 'G-9NY2BYWG2B');
 </script>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta property="og:title" content="Nomia — Find the Perfect Baby Name">
 <meta property="og:description" content="Answer 7 questions. Our AI searches 3 million names across 190 cultures to find the one that's truly yours. Free to start.">
 <meta property="og:image" content="https://raw.githubusercontent.com/nickmistretta/baby-names-api/main/og-image.png">
@@ -47,6 +47,7 @@
     background: var(--navy);
     color: var(--cream);
     min-height: 100vh;
+    min-height: 100dvh;
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -119,7 +120,8 @@
     flex-direction: column;
     align-items: center;
     height: 100vh;
-    padding: 0 16px 24px;
+    height: 100dvh;
+    padding: 0 16px max(24px, env(safe-area-inset-bottom));
   }
   #swipe-view.visible { display: flex; }
 
@@ -357,7 +359,8 @@
     align-items: center;
     justify-content: center;
     height: 100vh;
-    padding: 40px 24px;
+    height: 100dvh;
+    padding: 40px 24px max(40px, env(safe-area-inset-bottom));
     text-align: center;
   }
   #empty-state.visible { display: flex; }
