@@ -739,21 +739,29 @@ async function generateNames(bypassCache = false) {
 
   // Cache disabled — every user gets a fresh Claude call for unique results
 
-  const prompt = `You are a baby name expert. Based on these preferences, suggest exactly 25 beautifully curated baby names.
+  const prompt = `You are a baby-name curator with strong, modern taste. Generate exactly 25 baby names for this parent.
 
-Preferences:
-- Gender: ${answers.gender || 'neutral'}
-- Style: ${answers.style || 'classic'}
-- Cultural background: ${answers.culture || 'no preference'}
-- Name vibe: ${answers.vibe || 'warm'}
-- Sound preferences: ${answers.sound || 'none specified'}
-- Meaning themes: ${answers.meaning || 'no preference'}
-- Birth season: ${answers.season || 'not specified'}
+# INPUTS
+Gender: ${answers.gender || 'neutral'}
+Style: ${answers.style || 'classic'}
+Culture: ${answers.culture || 'no preference'}
+Vibe: ${answers.vibe || 'warm'}
+Sound: ${answers.sound || 'none'}
+Meaning theme: ${answers.meaning || 'none'}
+Season: ${answers.season || 'none'}
 
-Respond ONLY with a valid JSON array, no markdown, no explanation:
-[{"name": "...", "origin": "...", "meaning": "...", "tags": ["...", "..."]}]
+# HARD RULES (non-negotiable)
+1. INPUT-BLINDNESS: Never suggest a name that IS or SOUNDS LIKE one of the parent's input words. If meaning is "Love & grace" — no Grace, no Love. If meaning is "Light & radiance" — no Luna, Lucia, Claire. Treat inputs as feelings to evoke, not names to copy.
+2. CULTURE FIT: Match the chosen cultural background in a way modern American/British parents would actually recognize. If "European / Western," stay mostly English, Latin, Italian, French, Greek — go Celtic/Norse/Slavic only for widely familiar names (Rowan, Astrid, yes; Bronwen, Brynhild, Svetlana, Aoife, Niamh, no).
+3. GENDER: Match the gender exactly. Neutral means genuinely androgynous.
+4. CLASSIC MEANS FAMILIAR: If style is "Classic & timeless," do NOT dodge popular names. Eleanor, Caroline, James, Henry are CORRECT answers, not too-obvious ones.
 
-Make names feel warm, considered, and beautifully matched to the preferences. Vary the origins and styles. Tags should be 2-3 short descriptors like "timeless", "soft sound", "nature-rooted", etc.`;
+# QUALITY BAR
+Each name should feel like it was picked for this parent, not generated for a list. Tags (2-3 per name) should capture WHY the name fits — not generic filler.
+
+# OUTPUT
+Return ONLY valid JSON, no markdown, no explanation:
+[{"name":"...","origin":"...","meaning":"...","tags":["...","..."]}]`;
 
   try {
     const res = await fetch('https://project-rz9q4.vercel.app/api/generate', {

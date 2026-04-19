@@ -1042,20 +1042,31 @@
       ? `CRITICAL: Gender is a HARD filter — only suggest ${answers.gender} names. Do not suggest names outside this gender regardless of the inspiration names provided.`
       : `Gender preference: ${answers.gender || 'no preference'} — feel free to suggest names across genders.`;
 
-    const prompt = `You are a baby name expert. The user loves these names: ${(answers.names || []).join(', ')}.
+    const prompt = `You are a baby-name curator reading a parent's taste signature from the names they already love.
 
+# THEIR SIGNATURE
+Names they love: ${(answers.names || []).join(', ')}
 ${genderInstruction}
+${originText ? `Preferred origin: ${originText} — lean into this tradition.` : ''}
+${vibesText ? `What they love about their picks: ${vibesText}` : ''}
+${nicknameInstruction ? nicknameInstruction : ''}
+${lastName ? `Last name for flow: ${lastName} — note pairing.` : ''}
 
-${originText ? `Country of origin: ${originText} — prioritise names rooted in this tradition.` : ''}
-${vibesText ? `What they love about their inspiration names: ${vibesText}` : ''}
-${nicknameInstruction ? nicknameInstruction + '\n' : ''}${lastName ? `Last name for flow: ${lastName} — note how each suggested name pairs with this surname` : ''}
+# YOUR JOB
+Read the tonal signature across their loved names — origins, sounds, syllable counts, cultural roots, emotional register. Generate 25 names that share that DNA. Each one should feel like something they would have saved if they'd seen it.
 
-Suggest exactly 25 baby names that feel like a natural extension of what they already love — same energy, roots, sounds, or qualities. Do not repeat any of the inspiration names.
+# HARD RULES (non-negotiable)
+1. GENDER FIT: Match the gender derived from the signature (or stated gender). Don't serve mixed-gender lists unless the signature is genuinely androgynous.
+2. DON'T DODGE THE OBVIOUS: If the signature points to widely-known names (Eleanor, James, Caroline), include them. Familiarity is not a flaw.
+3. NO DIRECT REPEATS: Don't include any of the inspiration names they already gave you.
+4. NO NAME VARIANTS: Don't suggest variant spellings of inspiration names (e.g. if they love Catherine, no Katherine/Kathryn/Kate).
 
-Respond ONLY with a valid JSON array, no markdown, no explanation:
-[{"name": "...", "origin": "...", "meaning": "...", "tags": ["...", "..."]}]
+# QUALITY BAR
+Each name should feel like a natural extension of their signature, not a filler pick. Tags (2-3 per name) should state WHY this name matches their taste — "same Celtic roots," "similar soft ending," "paired nickname potential," etc.
 
-Tags should capture why each name matches their taste, e.g. "same Celtic roots", "similar soft sound", "equally rare", "nickname: Kit", etc.`;
+# OUTPUT
+Return ONLY valid JSON, no markdown, no explanation:
+[{"name":"...","origin":"...","meaning":"...","tags":["...","..."]}]`;
 
     try {
       const res = await fetch('https://project-rz9q4.vercel.app/api/generate', {
