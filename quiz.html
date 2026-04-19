@@ -1340,26 +1340,30 @@ async function generateNames() {
   const cacheKey = buildCacheKey(answers);
   console.log('Cache key (disabled):', cacheKey);
 
-  const prompt = `You are a baby name expert. Based on these preferences, suggest exactly 5 baby names for the FREE list and 20 additional names for the PREMIUM list.
+  const prompt = `You are a baby-name curator with strong, modern taste. Generate 5 FREE names + 20 PREMIUM names for a parent with these preferences.
 
-Preferences:
-- Gender: ${answers.gender || 'neutral'}
-- Style: ${answers.style || 'classic'}
-- Cultural background: ${answers.culture || 'no preference'}
-  (Note: "European / Western" should feel like names a modern American or British family would actually use — primarily English, French, Italian, Latin, and Greek roots. Names like Victoria, Caroline, Natalie, Isabelle, Sophia, Marco, Lucas, Julian. Celtic, Norse, and Slavic names should only appear occasionally and only when they are widely familiar in English-speaking countries — Rowan, Bridget, Astrid are fine; Brynhild, Isolde, Svetlana, Bronwen are not.)
-- Name vibe: ${answers.vibe || 'warm'}
-- Sound preferences: ${answers.sound || 'none specified'}
-- Meaning themes: ${answers.meaning || 'no preference'}
-- Style guidance: If style is 'Classic & timeless': use names that have been consistently popular for 50+ years and feel immediately familiar — think Victoria, Alexandra, Samantha, Caroline, Natalie, Stephanie, Christina, Melissa, Jennifer, Valerie for girls; Michael, Christopher, Nicholas, Alexander, Jonathan, Matthew, Daniel, Andrew for boys. These should feel like names of real people you've actually met. Avoid anything obscure, foreign-sounding, or hard to pronounce for a Western family.
-- Birth season: ${answers.season || 'not specified'}
-- Trend awareness: At least 1 name in the FREE list should be a currently popular name that appears in the top 50 most popular baby names in the US right now. For girls this means names like Olivia, Emma, Amelia, Charlotte, Mia, Sophia, Isabella, Evelyn, Ava, Luna, Scarlett, Eleanor, Chloe, Penelope, Layla. For boys: Liam, Noah, Oliver, Theodore, James, Henry, Mateo, Elijah, Lucas, William, Benjamin, Sebastian, Jack, Owen, Aiden. This grounds the list in the real world and makes it feel relevant.
-- Input blindness: NEVER use a word from the user's inputs as a name. If meaning is "Love & grace", do NOT suggest Grace. If meaning is "Joy & laughter", do NOT suggest Joy. If meaning is "Light & radiance", do NOT suggest Luna, Claire, or Lucia. Treat all inputs as feelings to evoke, not names to use.
-- Hard exclusion (absolute, no exceptions): When cultural background is "European / Western", NEVER suggest names that feel overtly Celtic/Welsh/Norse/Slavic or otherwise unfamiliar to American/British parents. Specifically NEVER suggest: Bronwen, Brynhild, Isolde, Svetlana, Aoife, Niamh, Siobhan, Saoirse, Eilidh, Freya (acceptable only if the user chose Scandinavian culture). This rule supersedes all style and vibe considerations. If in doubt, choose a safer Latin, Greek, English, Italian, or French alternative instead.
+# INPUTS
+Gender: ${answers.gender || 'neutral'}
+Style: ${answers.style || 'classic'}
+Culture: ${answers.culture || 'no preference'}
+Vibe: ${answers.vibe || 'warm'}
+Sound: ${answers.sound || 'none'}
+Meaning theme: ${answers.meaning || 'none'}
+Season: ${answers.season || 'none'}
 
-Respond ONLY with valid JSON in this exact format, no markdown, no explanation:
-{ "free": [ {"name": "...", "origin": "...", "meaning": "...", "tags": ["...", "..."]} ], "premium": [ {"name": "...", "origin": "...", "meaning": "...", "tags": ["...", "..."]} ] }
+# HARD RULES (non-negotiable)
+1. INPUT-BLINDNESS: Never suggest a name that IS or SOUNDS LIKE one of the parent's input words. If meaning is "Love & grace" — no Grace, no Love. If meaning is "Light & radiance" — no Luna, Lucia, Claire. Treat inputs as feelings to evoke, not names to copy.
+2. CULTURE FIT: Match the chosen cultural background in a way modern American/British parents would actually recognize. If "European / Western," stay mostly English, Latin, Italian, French, Greek — go Celtic/Norse/Slavic only for widely familiar names (Rowan, Astrid, yes; Bronwen, Brynhild, Svetlana, Aoife, Niamh, no).
+3. GENDER: Match the gender exactly. Neutral means genuinely androgynous.
+4. CLASSIC MEANS FAMILIAR: If style is "Classic & timeless," do NOT dodge popular names. Eleanor, Caroline, James, Henry are CORRECT answers, not too-obvious ones. Widely-known is not wrong.
+5. ANCHOR: Include at least 1 currently-popular US top-50 name in the FREE 5, so the list feels grounded in real life.
 
-Make names feel warm, considered, and beautifully matched to the preferences. Vary the origins and styles. Tags should be 2-3 short descriptors like "timeless", "soft sound", "nature-rooted", etc.`;
+# QUALITY BAR
+Each name should feel like it was picked for this parent, not generated for a list. Tags (2-3 per name) should capture WHY it fits their signature ("soft ending," "turn-of-the-century," "grounded in tradition") — not generic filler ("nice," "pretty").
+
+# OUTPUT
+Return ONLY valid JSON, no markdown, no explanation:
+{"free":[{"name":"...","origin":"...","meaning":"...","tags":["...","..."]}],"premium":[{"name":"...","origin":"...","meaning":"...","tags":["...","..."]}]}`;
 
 
   // Fetch with 529 retry logic
