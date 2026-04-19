@@ -1025,15 +1025,7 @@
     const cacheKey = buildMatchCacheKey(answers);
     console.log('Cache key:', cacheKey);
 
-    const cached = await checkMatchCache(cacheKey);
-    if (cached && Array.isArray(cached.free_names) && cached.free_names.length > 0) {
-      console.log('💾 Cache hit — serving stored names');
-      incrementMatchCacheHit(cacheKey, cached.hit_count || 0); // fire and forget
-      clearInterval(msgInterval);
-      showResults(cached.free_names);
-      return;
-    }
-    console.log('🌐 Cache miss — generating fresh');
+    // Cache disabled — every user gets a fresh Claude call for unique results
 
     const originSelections = (answers.origin || []).filter(o => o !== 'No preference');
     const originText = originSelections.length > 0 ? originSelections.join(', ') : null;
@@ -1082,8 +1074,7 @@ Tags should capture why each name matches their taste, e.g. "same Celtic roots",
       const end = rawText.lastIndexOf(']');
       const names = JSON.parse(rawText.slice(start, end + 1));
 
-      storeMatchCache(cacheKey, names); // fire and forget
-      console.log('🌐 Served from API, cached for next time');
+      console.log('🌐 Served from API');
       clearInterval(msgInterval);
       showResults(names);
     } catch (e) {
@@ -1214,5 +1205,12 @@ Tags should capture why each name matches their taste, e.g. "same Celtic roots",
   // Init
   renderQ();
 </script>
+
+<div style="text-align:center;padding:28px 0 20px;font-size:11px;color:rgba(139,158,176,0.5);letter-spacing:0.04em;font-family:'DM Sans',sans-serif;">
+  <a href="privacy.html" style="color:rgba(139,158,176,0.5);text-decoration:none;">Privacy</a>
+  <span style="margin:0 8px;">·</span>
+  <a href="terms.html" style="color:rgba(139,158,176,0.5);text-decoration:none;">Terms</a>
+</div>
+
 </body>
 </html>
