@@ -1074,6 +1074,15 @@ Tags should capture why each name matches their taste, e.g. "same Celtic roots",
       const end = rawText.lastIndexOf(']');
       const names = JSON.parse(rawText.slice(start, end + 1));
 
+      // Fire-and-forget: record this quiz session for analytics
+      fetch('https://project-rz9q4.vercel.app/api/save-answers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: localStorage.getItem('nomia_user_email') || null,
+          answers: answers
+        })
+      }).catch(err => console.warn('save-answers failed:', err));
       console.log('🌐 Served from API');
       clearInterval(msgInterval);
       showResults(names);

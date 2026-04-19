@@ -7,7 +7,7 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const { email, answers } = req.body;
-  if (!email || !answers) return res.status(400).json({ error: 'Email and answers required' });
+  if (!answers) return res.status(400).json({ error: 'Answers required' });
 
   const supabaseUrl = process.env.SUPABASE_URL;
   const supabaseKey = process.env.SUPABASE_ANON_KEY;

@@ -1410,6 +1410,15 @@ Make names feel warm, considered, and beautifully matched to the preferences. Va
           const parsed = parseMainResponse(text);
           free = parsed.free;
           premium = parsed.premium;
+          // Fire-and-forget: record this quiz session for analytics
+          fetch('https://project-rz9q4.vercel.app/api/save-answers', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: localStorage.getItem('nomia_user_email') || null,
+              answers: answers
+            })
+          }).catch(err => console.warn('save-answers failed:', err));
           console.log('🌐 Served from API');
         } catch (parseErr) {
           console.error('Main parse error:', parseErr, 'Raw:', text);
